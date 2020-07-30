@@ -119,12 +119,15 @@ void addEdge(GMatchSubgraph & g, VertexID id1, VertexID id2)
     AdjItem temp_adj;
 	temp_adj.id = v2->id;
 	temp_adj.l = v2->value.l;
-	v1->value.adj.push_back(temp_adj);
+	v1->value.adj.push_back(temp_adj); // push_back 的时候，会将数据拷贝一份然后保存，因此下面的 temp_adj 在修改值时并不会影响 v1 这里的 Vector
 	temp_adj.id = v1->id;
 	temp_adj.l = v1->value.l;
 	v2->value.adj.push_back(temp_adj);
 }
 
+/**
+ * 相比 addEdge，本函数会在 add 之前检查插入的边是否已经存在，如果已经存在则不会重复插入边
+ */
 void addEdge_safe(GMatchSubgraph & g, VertexID id1, VertexID id2) //avoid redundancy
 {
     GMatchVertex * v1, * v2;
@@ -132,6 +135,7 @@ void addEdge_safe(GMatchSubgraph & g, VertexID id1, VertexID id2) //avoid redund
     v2 = g.getVertex(id2);
     int i = 0;
     vector<AdjItem> & adj = v2->value.adj;
+    // 遍历 v2 的邻接表检查是否含有顶点 v1，如果含有的话 i < adj.size()；如果含有的话 i = adj.size()
     for(; i<adj.size(); i++)
     	if(adj[i].id == id1) break;
     if(i == adj.size())
@@ -146,6 +150,13 @@ void addEdge_safe(GMatchSubgraph & g, VertexID id1, VertexID id2) //avoid redund
     }
 }
 
+/**
+ * 聚合器，用于聚合结果。
+ * 聚合器需要指定三个泛型参数，分别为：<ValueT>, <PartialT> and <FinalT>，其含义如下：
+ * <ValueT>：聚合到本地聚合器的数据类型
+ * <PartialT>：本地聚合器的数据类型
+ * <FinalT>：最终的数据类型（全局数据类型）
+ */
 class GMatchAgg:public Aggregator<size_t, size_t, size_t>  //all args are counts
 {
 private:
@@ -186,6 +197,9 @@ public:
     }
 };
 
+/**
+ *	裁剪器，可以对顶点的邻接表进行预处理（一般是用于去除一些无用的顶点）
+ */
 class GMatchTrimmer:public Trimmer<GMatchVertex>
 {
     virtual void trim(GMatchVertex & v) {
@@ -303,6 +317,9 @@ public:
     	}
     }
 
+    /**
+     * frontier 是 task 中上一步拉取的顶点
+     */
     virtual bool compute(SubgraphT & g, ContextT & context, vector<VertexT *> & frontier)
     {
     	//match c
@@ -310,8 +327,9 @@ public:
     	{
     		VertexID rootID = g.vertexes[0].id; //root = a-matched vertex
 			//cout<<rootID<<": in compute"<<endl;//@@@@@@@@@@@@@
-			hash_set<VertexID> label_b; //Vb (set of IDs)
-			vector<VertexT *> label_c; //Vc
+    		// 从当前 task 的顶点集中取出所有的顶点 b、c
+			hash_set<VertexID> label_b; //Vb (set of IDs) 当前 task 顶点 b 的集合（这些顶点 b 与顶点 a 是邻居）
+			vector<VertexT *> label_c; //Vc 当前 task 顶点 c 的集合（这些顶点 c 与顶点 a 是邻居）
 			for(int i = 0; i < frontier.size(); i++) {//set Vb and Vc from frontier
 				if(frontier[i]->value.l == 'b')
 					label_b.insert(frontier[i]->id);
@@ -319,12 +337,15 @@ public:
 					label_c.push_back(frontier[i]);
 			}
 			//------
-			hash_set<VertexID> bList; //vertices to pull
+			hash_set<VertexID> bList; //vertices to pull 待拉取的 b 顶点
+			// 遍历顶点 c 集合中的所有顶点的邻接表，
 			for(int i = 0 ; i < label_c.size(); i++)
 			{
 				VertexT * node_c = label_c[i]; //get v_c
 				vector<AdjItem> & c_nbs = node_c->value.adj; //get v_c's adj-list
+				// U1 中存储既出现在 c 邻接表中又出现在顶点 b 集合中 （label_b）的顶点 b ，即 U1 中的顶点既是 c 的邻居同时又是 a 的邻居。U2 中存储出现在 c 邻接表但是不出现在 label_b 中的顶点 b，即 U2 中的顶点只是 c 的邻居但不是 a 的邻居
 				vector<VertexID> U1, U2;
+				// 遍历当前顶点 c 的邻接表
 				for(int j = 0; j < c_nbs.size(); j++) //set U1 & U2
 				{
 					AdjItem & nb_c = c_nbs[j];
@@ -332,13 +353,13 @@ public:
 					{
 						VertexID b_id = nb_c.id;
 						if(label_b.find(b_id) != label_b.end())
-							U1.push_back(b_id);
+							U1.push_back(b_id); // 当前顶点 c 的邻接表中含有顶点 b 集合（label_b） 中的顶点
 						else
 							U2.push_back(b_id);
 					}
 				}
 				//------
-				if(U1.empty())
+				if(U1.empty()) // 不存在满足条件的顶点 b（即同时是顶点 a、c 的邻居点），则当前顶点 c 不满足条件，继续匹配下一个顶点 c
 					continue;
 				else if(U1.size() == 1)
 				{
@@ -352,6 +373,7 @@ public:
 					bList.insert(U2.begin(), U2.end());
 				}
 				//------
+				// 当前顶点 c 满足条件，则将当前顶点加入到图中
 				//add v_c and edges (v_a, v_c)
 				addNode(g, *node_c);
 				addEdge(g, rootID, node_c->id);
@@ -386,7 +408,7 @@ public:
     		for(int i=0; i<frontier.size(); i++)
     		{
     			VertexT* v_b = frontier[i];
-    			vector<AdjItem> & adj_b = v_b->value.adj;
+    			vector<AdjItem> & adj_b = v_b->value.adj; // 顶点 b 的邻接表
     			//construct Vd
     			vector<VertexID> Vd;
     			for(int j=0; j<adj_b.size(); j++)
@@ -405,7 +427,7 @@ public:
 						if(Vc.find(b_id) != Vc.end())
 						{
 							//add edge v_b, v_c
-							addEdge_safe(g, b_id, v_b->id);
+							addEdge_safe(g, b_id, v_b->id); // 边 b-c 为什么在这里加
 						}
 					}
     				//add v_d and (v_b, v_d)
