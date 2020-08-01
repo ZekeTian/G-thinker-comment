@@ -79,8 +79,9 @@ public:
     //if it tries to steal from all workers but failed to get any job, this should be set
     //after master's idle-condition sync, if job does not terminate, should steal for another round
     //ToDo："local_idle" may need to change to "one per thread", or aggregated over threads
+    // worker 空闲状态标志位
 
-    Comper* compers; //dynamic array of compers
+    Comper* compers; //dynamic array of compers 当前 worker 含有的 comper （线程）
 
     //=======================================================
     //Trimmer
@@ -177,13 +178,15 @@ public:
 	{
 		//ResetTimer(4);
 		//set send buffer
-		vector<VertexVec> _loaded_parts(_num_workers);
+        // vector<VertexT*> VertexVec ，顶点向量，在这里即为一个 worker 的顶点集（或者说是一个分区）
+		vector<VertexVec> _loaded_parts(_num_workers); // 分区表，二维向量，一个元素即为一个 worker 的顶点集（即一个分区）
+        // 根据顶点 id 的哈希值将顶点放在相应分区内
 		for (int i = 0; i < vVec.size(); i++) {
 			VertexT* v = vVec[i];
 			_loaded_parts[hash(v->id)].push_back(v);
 		}
 		//exchange vertices to add
-		all_to_all(_loaded_parts, GRAPH_LOAD_CHANNEL);
+		all_to_all(_loaded_parts, GRAPH_LOAD_CHANNEL); // ？
 
 		vVec.clear();
 		//collect vertices to add
@@ -545,9 +548,12 @@ public:
 			masterScatter(*arrangement);
 			vector<string>& assignedSplits = (*arrangement)[0];
 			//reading assigned splits (map)
+            // 在读取数据时，不同 worker 负责读取不同区域的数据
+            // assignedSplits 是当前 worker 需要负责读取的部分数据
 			for (vector<string>::iterator it = assignedSplits.begin();
 				 it != assignedSplits.end(); it++)
-				load_graph(it->c_str(), vertexes);
+                // 正式导入图。在 load_graph 函数内部，先调用 Worker 的 toVertex 函数（需要重写）将输入数据转换成顶点，如果设置了 trimer 则还会进行剪枝
+                load_graph(it->c_str(), vertexes); 
 			delete arrangement;
 		} else {
 			vector<string> assignedSplits;
@@ -559,13 +565,14 @@ public:
 		}
 
 		//send vertices according to hash_id (reduce)
-		sync_graph(vertexes);
+        // vertexes 是当前 worker 读取的顶点，将该顶点发送给相应的 worker
+		sync_graph(vertexes); // 作用，顶点聚合，将根据顶点 id 的哈希值，将顶点数据发给其真正应该所处的 worker
 
 		//init global_vertex_pos
 		global_vertex_pos = 0;
 
 		//use "vertexes" to set local_table
-		set_local_table(vertexes);
+		set_local_table(vertexes); // 将顶点向量转换成顶点 Map
 
 		//barrier for data loading
 		worker_barrier();
@@ -587,7 +594,7 @@ public:
 		//set up vcache GC
 		GCT gc(*cache_table);
 
-		//set up AggSync
+		//set up AggSync 聚合器线程
 		AggSync<AggregatorT> * agg_thread; //the thread that runs agg_sync()
 		if(global_aggregator != NULL) agg_thread = new AggSync<AggregatorT>;
 

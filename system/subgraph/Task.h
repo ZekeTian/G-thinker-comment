@@ -115,7 +115,7 @@ public:
 					if(frontier_vertexes[i] != NULL) met_counter++;
 					else //add2map(.) is called
 					{
-						remote_detected = true;
+						remote_detected = true; // 本地的 local 和 cache 中都无法找到相应的顶点，则需要去远程 worker 中拉取顶点
 					}
 				}
 			}
@@ -124,24 +124,24 @@ public:
 		{
 			//so far, all pull reqs are processed, and pending resps could've arrived (not wakening the task)
 			//------
-			conmap2t_bucket<long long, TaskT *> & bucket = taskmap.task_map.get_bucket(task_id);
+			conmap2t_bucket<long long, TaskT *> & bucket = taskmap.task_map.get_bucket(task_id); // 挂起的 task
 			bucket.lock();
 			hash_map<long long, TaskT *> & kvmap = bucket.get_map();
 			auto it = kvmap.find(task_id);
 			if(it != kvmap.end())
 			{
-				if(met_counter == req_size())
+				if(met_counter == req_size()) // 所有需要的顶点都已拉取到
 				{//ready for task move, delete
-					kvmap.erase(it);
-					taskmap.task_buf.enqueue(this);
+					kvmap.erase(it); // 将 task 从挂起任务列表中删除，并加入到就绪任务列表中
+					taskmap.task_buf.enqueue(this); 
 				}
-				//else, RespServer will do the move
+				//else, RespServer will do the move 所需要的顶点未拉取完，RespServer 负责摘取远程顶点
 			}
 			//else, RespServer has already did the move
 			bucket.unlock();
-			return false;//either has pending resps, or all resps are received but the task is now in task_buf (to be processed, but not this time)
+			return false;//either has pending resps, or all resps are received but the task is now in task_buf (to be processed, but not this time) 远程请求未返回 或 远程请求已经返回但是当前任务不在 task 中
 		}
-		else return true; //all v-local, continue to run the task for another iteration
+		else return true; //all v-local, continue to run the task for another iteration 所有顶点数据已全部拉取本地，可以继续下一轮迭代
 	}
 
 	void unlock_all()

@@ -28,6 +28,7 @@ using namespace std;
 template <class TaskT>
 class TaskMap {
 public:
+    // ¾ÍÐ÷ task ÁÐ±í
 	conque_p<TaskT> task_buf; //for keeping ready tasks
 	//- pushed by Comper
 	//- popped by RespServer
