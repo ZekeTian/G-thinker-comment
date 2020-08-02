@@ -14,6 +14,10 @@
 //## limitations under the License.
 //########################################################################
 
+/**
+ * ×ÓÍ¼·â×°Í¼
+ */
+
 #ifndef SUBGRAPH_H_
 #define SUBGRAPH_H_
 

@@ -14,6 +14,10 @@
 //## limitations under the License.
 //########################################################################
 
+/**
+ *  线程封装类
+ */
+
 #ifndef COMPER_H_
 #define COMPER_H_
 

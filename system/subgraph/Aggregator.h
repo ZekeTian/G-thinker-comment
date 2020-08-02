@@ -14,6 +14,13 @@
 //## limitations under the License.
 //########################################################################
 
+/**
+ *   聚合器，需要指定三个模板参数：<ValueT>, <PartialT> and <FinalT
+ *      <ValueT>：聚合到本地聚合器的数据类型
+ *      <PartialT>：本地聚合器的数据类型
+ *      <FinalT>：最终的数据类型（全局数据类型）
+ */
+
 #ifndef AGGREGATOR_H_
 #define AGGREGATOR_H_
 

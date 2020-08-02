@@ -14,6 +14,10 @@
 //## limitations under the License.
 //########################################################################
 
+/**
+ *  任务，一个 Comper 会处理多个 task 
+ */
+
 #ifndef TASK_H_
 #define TASK_H_
 

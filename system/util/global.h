@@ -66,8 +66,8 @@ static clock_t polling_ticks; // = POLLING_TIME * CLOCKS_PER_SEC / 1000000;
 #define VCACHE_OVERSIZE_FACTOR 0.2
 #define VCACHE_OVERSIZE_LIMIT VCACHE_LIMIT * VCACHE_OVERSIZE_FACTOR
 
-#define MAX_STEAL_TASK_NUM 10*TASK_BATCH_NUM //how many tasks to steal at a time at most
-#define MIN_TASK_NUM_BEFORE_STEALING 10*TASK_BATCH_NUM //how many tasks should be remaining (or task stealing is triggered)
+#define MAX_STEAL_TASK_NUM 10*TASK_BATCH_NUM //how many tasks to steal at a time at most 一次最多可以窃取的任务数量
+#define MIN_TASK_NUM_BEFORE_STEALING 10*TASK_BATCH_NUM //how many tasks should be remaining (or task stealing is triggered) 各个 worker 中应该保留的最小任务数量，如果低于这个值，则该 worker 的负载较轻，则需要从负载较重的 worker 中窃取任务执行
 
 #define MINI_BATCH_NUM 10 //used by spawning from local
 #define REQUEST_BOUND 50000 //the maximal number of requests could be sent between each two workers //tuned on GigE
@@ -84,10 +84,10 @@ void* global_taskmap_vec; //set by Worker using its compers, used by RespServer
 void* global_vcache;
 void* global_local_table;
 
-atomic<int> global_num_idle(0);
+atomic<int> global_num_idle(0); // 当前 worker 中空闲 comper 的数量
 
-conque<string> global_file_list; //tasks buffered on local disk; each element is a file name
-atomic<int> global_file_num; //number of files in global_file_list
+conque<string> global_file_list; //tasks buffered on local disk; each element is a file name 磁盘中保存的 task 文件名
+atomic<int> global_file_num; //number of files in global_file_list 磁盘中保存的 task 文件数量
 
 void* global_vertexes;
 int global_vertex_pos; //next vertex position in global_vertexes to spawn a task
@@ -104,7 +104,7 @@ mutex global_vertex_pos_lock; //lock for global_vertex_pos
 
 using namespace std;
 
-atomic<bool> global_end_label(false);
+atomic<bool> global_end_label(false); // 标记所有 worker 是否都已经处理完任务，如果已经处理完所有任务，则为 true，结束迭代计算
 
 //============================
 ///worker info
@@ -124,7 +124,7 @@ inline int get_num_workers()
 void init_worker(int * argc, char*** argv)
 {
 	int provided;
-	MPI_Init_thread(argc, argv, MPI_THREAD_MULTIPLE, &provided);
+	MPI_Init_thread(argc, argv, MPI_THREAD_MULTIPLE, &provided); // 在一个进程中开启多个线程，进程中开启的所有线程都是可以进行MPI Call
 	if(provided != MPI_THREAD_MULTIPLE)
 	{
 	    printf("MPI do not Support Multiple thread\n");
@@ -165,7 +165,7 @@ struct WorkerParams {
 //general types
 typedef int VertexID;
 
-void* global_aggregator = NULL;
+void* global_aggregator = NULL; // worker 的聚合器
 
 void* global_agg = NULL; //for aggregator, FinalT of previous round
 rwlock agg_rwlock;
@@ -207,17 +207,17 @@ void _rmdir(string path){
     }
 }
 
-atomic<bool>* idle_set; //to indicate whether a comper has notified worker of its idleness
-mutex mtx_go;
-condition_variable cv_go;
+atomic<bool>* idle_set; //to indicate whether a comper has notified worker of its idleness 当前 worker 中所有 comper 的工作状态，在 comper 中设置为 true，在 worker 中设置为 false
+mutex mtx_go; // 全局互斥锁，在 Worker 和 Comper 中使用
+condition_variable cv_go; // 全局条件变量，在 Worker 和 Comper 中使用
 
 //used by profiler
 atomic<size_t>* global_tasknum_vec; //set by Worker using its compers, updated by comper, read by profiler
-atomic<size_t> num_stolen(0); //number of tasks stolen by the current worker since previous profiling barrier
+atomic<size_t> num_stolen(0); //number of tasks stolen by the current worker since previous profiling barrier 当前 worker 窃取到任务总数
 
-atomic<size_t>* req_counter; //to count how many requests were sent to each worker
+atomic<size_t>* req_counter; //to count how many requests were sent to each worker 存储向其它 worker 发送的请求次数
 
-int num_compers;
+int num_compers; // 一个 worker 所拥有的 comper 数量
 
 //============= to allow long long to be ID =============
 namespace __gnu_cxx {

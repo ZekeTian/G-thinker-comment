@@ -14,6 +14,10 @@
 //## limitations under the License.
 //########################################################################
 
+/**
+ *  垃圾回收器，负责顶点缓存的垃圾回收
+ */
+
 //this is the garbage collector of vcache:
 //- erase unlocked vertices from vcache when vcache overflows
 #ifndef GC_H_
