@@ -14,6 +14,10 @@
 //## limitations under the License.
 //########################################################################
 
+/**
+ * 并发队列 
+ */
+
 #ifndef CONQUE_P_H
 #define CONQUE_P_H
 

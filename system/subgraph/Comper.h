@@ -77,6 +77,9 @@ public:
     	cur_task->to_pull.push_back(id);
 	}
 
+    /**
+     * 如果任务未结束，则返回 true，表示在下一轮迭代中仍然需要进行计算；否则，返回 false
+     */
     //UDF2 wrapper
     bool compute(TaskT* task)
     {
@@ -87,10 +90,14 @@ public:
 
     ofstream fout;
 
+    /**
+     * Comper 线程启动
+     */
     void start(int thread_id)
     {
     	thread_rank= map_task.thread_rank = thread_id;
     	//------
+        // 生成一个文件，文件名格式为：目录/worker的id_线程id
 		char file[1000], no[40];
 		long long fileSeqNo = 1;
 		strcpy(file, REPORT_DIR.c_str());
@@ -107,6 +114,9 @@ public:
     	fout.close();
     }
 
+    /**
+     * 从磁盘文件中加载任务，并将任务加入到任务队列中。如果没有磁盘文件，则返回 false；否则，返回 true
+     */
     //load tasks from a file (from "global_file_list" to the task queue)
     //returns false if "global_file_list" is empty
     bool file2queue()
@@ -122,7 +132,7 @@ public:
     		{
     			TaskT* task;
     			in >> task;
-    			add_task(task);
+    			add_task(task); // 从文件中反序列化出 task 对象后，将其加入到任务队列中
     		}
     		in.close();
 
@@ -134,6 +144,9 @@ public:
     	}
     }
 
+    /**
+     * 根据本地顶点列表中的顶点生成任务。本地顶点列表能再生成新的任务，则返回 true；否则，返回 false
+     */
     //load tasks from local-table
 	//returns false if local-table is exhausted
     bool locTable2queue()
@@ -141,28 +154,30 @@ public:
 		size_t begin, end; //[begin, end) are the assigned vertices (their positions in local-table)
 		//note that "end" is exclusive
 		VTable & ltable = *(VTable *)global_local_table;
-		int size = ltable.size();
+		int size = ltable.size(); // 本地顶点列表的大小
 		//======== critical section on "global_vertex_pos"
+        // 防止多个线程同时对全局本地顶点列表（global_local_table）进行访问，因此先加锁进行同步
 		global_vertex_pos_lock.lock();
-		if(global_vertex_pos < size)
+		if(global_vertex_pos < size) // 还能继续从本地顶点列表中生成任务
 		{
 			begin = global_vertex_pos; //starting element
-			end = begin + TASK_BATCH_NUM;
+			end = begin + TASK_BATCH_NUM; // 一次取出一个批次的任务
 			if(end > size) end = size;
 			global_vertex_pos = end; //next position to spawn
 		}
-		else begin = -1; //meaning that local-table is exhausted
+		else begin = -1; //meaning that local-table is exhausted 本地顶点列表中不能再生成新的任务
 		global_vertex_pos_lock.unlock();
 		//======== spawn tasks from local-table[begin, end)
-		if(begin == -1) return false;
+        // 从本地顶点列表的 [begin, end) 区间内取出顶点生成任务
+		if(begin == -1) return false; // 本地顶点列表中不能再生成新的任务，则返回 false
 		else
 		{
-            VertexVec & gb_vertexes = *(VertexVec*) global_vertexes;
+            VertexVec & gb_vertexes = *(VertexVec*) global_vertexes; // 取出当前 worker 的本地顶点列表
 			for(int i=begin; i<end; i++)
 			{//call UDF to spawn tasks
-				task_spawn(gb_vertexes[i]);
+				task_spawn(gb_vertexes[i]); // 逐个顶点生成任务
 			}
-			return true;
+			return true; // 能生成新的任务，则返回 true
 		}
 	}
 
@@ -172,6 +187,11 @@ public:
     	return (AggregatorT*)global_aggregator;
     }
 
+
+    /**
+     * 弹出一个任务并处理它，如果有必要则会加入 task_map 中。
+     * 如果队列为空，并且本地顶点列表中不需要处理顶点
+     */
     //part 2's logic: get a task, process it, and add to task-map if necessary
     //- returns false if (a) q_task is empty and
     // *** (b) locTable2queue() did not process a vertex (may process vertices but tasks are pruned)
@@ -183,19 +203,21 @@ public:
     	bool task_spawn_called = false;
     	bool push_called = false;
     	//fill the queue when there is space
-    	if(q_task.size() <= TASK_BATCH_NUM)
+    	if(q_task.size() <= TASK_BATCH_NUM) // 任务队列中还可以继续存入任务，则向任务队列中继续添加任务
     	{
+            // 先从磁盘文件加载任务，如果磁盘文件为空，则从 task-map 中生成任务
     		if(!file2queue()) //priority <1>: fill from file on local disk
     		{//"global_file_list" is empty
     			if(!push_task_from_taskmap()) //priority <2>: fetch a task from task-map
-    			{//CASE 1: task-map's "task_buf" is empty
+    			{//CASE 1: task-map's "task_buf" is empty // task_buf 为空，则从本地顶点列表中生成新的任务
     				task_spawn_called = locTable2queue();
     			}
     			else
     			{//CASE 2: try to move TASK_BATCH_NUM tasks from task-map to the queue
+                    // task_buf 不为空，则从 task_map 中取出 TASK_BATCH_NUM 个任务，放进队列中
     				push_called = true;
     				while(q_task.size() < 2 * TASK_BATCH_NUM)
-    				{//i starts from 1 since push_task_from_taskmap() has been called once
+    				{//i starts from 1 since push_task_from_taskmap() has been called once 
     					if(!push_task_from_taskmap()) break; //task-map's "task_buf" is empty, no more try
     				}
     			}
@@ -247,12 +269,16 @@ public:
     	fileSeqNo++;
     }
 
+    /**
+     * 添加 task
+     */
     //tasks are added to q_task only through this function !!!
     //it flushes tasks as a file to disk when q_task's size goes beyond 3 * TASK_BATCH_NUM
     void add_task(TaskT * task)
     {
     	if(q_task.size() == 3 * TASK_BATCH_NUM)
     	{
+            // 当队列中的任务数量等于 3 * TASK_BATCH_NUM 时，则从队列中取出 TASK_BATCH_NUM 个任务保存到文件中
     		set_fname();
     		ifbinstream out(fname);
     		//------
@@ -278,18 +304,21 @@ public:
     	q_task.push_back(task);
     }
 
+    /**
+     * 从 task_map 中取任务，如果能取出任务，则返回 true；否则，返回 false
+     */
     //part 1's logic: fetch a task from task-map's "task_buf", process it, and add to q_task (flush to disk if necessary)
     bool push_task_from_taskmap() //returns whether a task is fetched from taskmap
     {
-    	TaskT * task = map_task.get();
+    	TaskT * task = map_task.get(); // 实际从 task_buf 中取出任务
     	if(task == NULL) return false; //no task to fetch from q_task
     	task->set_pulled(); //reset task's frontier_vertexes (to replace NULL entries)
-    	bool go = compute(task); //set new "to_pull"
+    	bool go = compute(task); //set new "to_pull" 执行该任务的计算
     	task->unlock_all();
-    	if(go != false) add_task(task); //add task to queue
+    	if(go != false) add_task(task); //add task to queue 任务还需要继续在下一轮迭代中执行，因此仍然需要将任务加入到队列中
         else
         {
-        	global_tasknum_vec[thread_rank]++;
+        	global_tasknum_vec[thread_rank]++; // 任务结束，相应 comper 的任务数量加 1
         	delete task;
         }
 		return true;
@@ -302,10 +331,11 @@ public:
 	{
     	while(global_end_label == false) //otherwise, thread terminates
 		{
+            // 任务没有结束，则继续处理
     		bool nothing_processed_by_pop; //called pop_task(), but cannot get a task to process, and not called a task_spawn(v)
     		bool blocked; //blocked from calling pop_task()
     		bool nothing_to_push; //nothing to fetch from taskmap's buf (but taskmap's map may not be empty)
-			for(int i=0; i<TASK_GET_NUM; i++)
+			for(int i=0; i<TASK_GET_NUM; i++) // TASK_GET_NUM 默认为 1
 			{
 				nothing_processed_by_pop = false;
 				blocked = false;

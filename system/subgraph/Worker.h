@@ -71,21 +71,46 @@ public:
 
     //=======================================================
     //worker's data structures
-    HashT hash;
-    VTable local_table; //key-value store of my vertex portion 当前 worker 存储的本地顶点
-    CTable * cache_table; //cached remote vertices, it creates ReqQueue for appeding reqs 远程顶点的缓存
 
+    /**
+     * 顶点的哈希函数类
+     */
+    HashT hash;
+
+    /**
+     * local_table 是当前 worker 存储的本地顶点，存储的顶点和 vertexes 一样，只不过用 Map 存储。
+     * 用 Map 存储的原因，是为了在处理其它 worker 的顶点拉取请求时，可以通过顶点 id 快速查找相应顶点
+     */
+    VTable local_table; //key-value store of my vertex 
+
+    /**
+     * 远程顶点的缓存
+     */
+    CTable * cache_table; //cached remote vertices, it creates ReqQueue for appeding reqs 
+
+    /**
+     * 存储本地顶点，与 local_table 中数据一样，只不过使用的数据结构不同
+     */
 	VertexVec vertexes;
+
+    /**
+     * 存储各个 comper 的 task
+     */
     TaskMapT** taskmap_vec;
 
-    bool local_idle; //indicate whether the current worker is idle
+    /**
+     * worker 空闲状态标志位
+     */
+    bool local_idle; //indicate whether the current worker is idle  
     //logic with work stealing:
     //if it tries to steal from all workers but failed to get any job, this should be set
     //after master's idle-condition sync, if job does not terminate, should steal for another round
-    //ToDo："local_idle" may need to change to "one per thread", or aggregated over threads
-    // worker 空闲状态标志位
+    //ToDo："local_idle" may need to change to "one per thread", or aggregated over 
 
-    Comper* compers; //dynamic array of compers 当前 worker 含有的 comper （线程）
+    /**
+     * 当前 worker 含有的 comper （线程）
+     */
+    Comper* compers; //dynamic array of compers 
 
     //=======================================================
     //Trimmer
@@ -114,7 +139,7 @@ public:
     	for(int i=0; i<_num_workers; i++) req_counter[i] = 0; //must be before the next line
     	global_vcache = cache_table = new CTable;
     	global_local_table = &local_table;
-		global_vertexes = &vertexes;
+		global_vertexes = &vertexes; // 将本地顶点列表引用保存到 global_vertexes 中，从而扩大作用域，确保顶点列表在当前 worker 中全局可用
 		idle_set = new atomic<bool>[comper_num]; // 当前 worker 中各个 comper 的状态，true 表示线程处于空闲状态
 		for(int i=0; i<comper_num; i++) idle_set[i] = false;
     }
@@ -261,14 +286,14 @@ public:
 
 	//=======================================================
     /**
-     * 获取当前 worker 中剩余的任务数量
+     * 获取当前 worker 中剩余的任务数量，剩余数量 = 本地顶点列表中剩余的顶点数量 + 文件中的顶点数量
      */
 	//task stealing
 	size_t get_remaining_task_num()
 	//not counting number of active tasks in memory (for simplicity)
 	{
 		global_vertex_pos_lock.lock();
-		int table_remain = local_table.size() - global_vertex_pos;
+		int table_remain = local_table.size() - global_vertex_pos; // 本地顶点列表中的剩余的顶点数量
 		global_vertex_pos_lock.unlock();
 		return table_remain + global_file_num * TASK_BATCH_NUM;
 	}
@@ -367,22 +392,26 @@ public:
 				if(end > size) end = size;
 				global_vertex_pos = end; //next position to spawn
 			}
-			else begin = -1; //meaning that local-table is exhausted
+			else begin = -1; //meaning that local-table is exhausted 本地顶点已经用完
 			global_vertex_pos_lock.unlock();
 			//======== spawn tasks from local-table[begin, end)
-			if(begin == -1) return false;
+			if(begin == -1) return false; // 本地顶点已经用完，返回 false
 			else
 			{
-				VertexVec & gb_vertexes = *(VertexVec*) global_vertexes;
+                // 从当前 worker 的顶点列表中取出 [begin, end) 区间的顶点
+				VertexVec & gb_vertexes = *(VertexVec*) global_vertexes; // 获取当前 worker 的顶点列表
 				for(int i=begin; i<end; i++)
 				{//call UDF to spawn tasks
-					task_spawn(gb_vertexes[i], tvec);
+					task_spawn(gb_vertexes[i], tvec); // 通过顶点生成的任务存储在 tvec 列表中
 				}
 			}
 		}
 		return true;
 	}
 
+    /**
+     * 从文件中获取任务，如果文件列表为空，则返回 false，否则返回 true
+     */
 	//get tasks from disk files
 	//returns false if "global_file_list" is empty
 	bool file2vec(vector<TaskT> & tvec)
@@ -553,13 +582,13 @@ public:
 			}
 			else
 			{
-				vector<TaskT> tvec;
+				vector<TaskT> tvec; // 当前 worker 被窃取的任务列表
                 // 在生成工作窃取计划时，当前 worker 完成了一部分任务，那么其任务数量会减少，负载减轻，因此需要再次判断其剩余的任务数量
-                // 如果任务数量依然大于阈值，并且
+                // 如果剩余的任务数量依然大于阈值，则需要进行任务窃取
 				if(get_remaining_task_num() > MIN_TASK_NUM_BEFORE_STEALING)
 				//check this since time has passed, and more tasks may have been processed
 				//send empty task-vec if no longer a task heavy-hitter
-					if(locTable2vec(tvec) == false) file2vec(tvec);
+					if(locTable2vec(tvec) == false) file2vec(tvec); // 先从本地顶点中获取任务，如果从本地无法生成任务，则从文件中生成任务
 				send_data(tvec, other, STATUS_CHANNEL); //send even if it's empty
 			}
 		}
@@ -621,14 +650,14 @@ public:
 		//ReqQueue already set, by Worker::cache_table
 		//>> by this time, ReqQueue occupies about 0.3% CPU
 
-        // 创建一个 ReqServer 线程，负责接收请求和处理请求
+        // 创建并启动一个 ReqServer 线程，负责接收请求和处理请求
 		//set up ReqServer (containing RespQueue), let it know local_table for responding reqs
 		ReqServer<VertexT> server_req(local_table);
 
 		//set up computing threads
 		create_compers(); //side effect: set global_comper_vec
 
-        // 创建一个 RespServer 线程，负责接收其它线程的响应
+        // 创建并启动一个 RespServer 线程，负责接收其它线程的响应
 		//set up RespServer, let it know cache_table so that it can update it when getting resps
 		RespServer<Comper> server_resp(*cache_table); //it would read global_comper_vec
 

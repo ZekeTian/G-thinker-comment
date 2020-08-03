@@ -14,6 +14,10 @@
 //## limitations under the License.
 //########################################################################
 
+/**
+ * 响应服务器，负责接收请求处理后返回的响应结果（即负责接收响应结果）。
+ */
+
 //this is the server of managing vcache
 #ifndef RESPSERVER_H_
 #define RESPSERVER_H_
@@ -51,6 +55,9 @@ public:
 	//thread_counter counter; //used for trim-to-vcache-limit
 	thread main_thread;
 
+    /**
+     * 读取响应结果返回的消息数据，并将消息反序列化为对象
+     */
 	void thread_func(char * buf, int size, int mpi_src)
 	{
 		//get Comper objects of all threads
@@ -60,7 +67,7 @@ public:
 		VertexT* v;
 		while(m.end() == false)
 		{
-			m >> v;
+			m >> v; // 反序列化为顶点
 			//step 1: move vertex from pcache to vcache
 			vector<long long> tid_collector;
 			cache_table.insert(v->id, v, tid_collector);
@@ -91,16 +98,18 @@ public:
     void run()
     {
     	bool first = true;
-    	thread t;
+    	thread t; // 用于读取返回的响应结果
     	//------
     	while(global_end_label == false) //otherwise, thread terminates
     	{
+            // 不断地探测消息，即不断地检测是否有响应结果返回给当前 worker
     		int has_msg;
     		MPI_Status status;
     		MPI_Iprobe(MPI_ANY_SOURCE, RESP_CHANNEL, MPI_COMM_WORLD, &has_msg, &status);
     		if(!has_msg) usleep(WAIT_TIME_WHEN_IDLE);
     		else
     		{
+                // 有响应结果返回给当前 worker，则接收响应结果
     			int size;
     			MPI_Get_count(&status, MPI_CHAR, &size); // get size of the msg-batch (# of bytes)
     			char * buf = new char[size]; //space for receiving this msg-batch, space will be released by obinstream in thread_func(.)

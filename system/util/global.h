@@ -14,6 +14,13 @@
 //## limitations under the License.
 //########################################################################
 
+/**
+ * 全局文件，本文件主要有如下的功能：
+ *    （1）存储一些全局使用的变量，通常是 worker 变量的全局化（即将 Worker 类中的属性定义域扩大到全局），从而 worker 中任何地方都可以使用
+ *    （2）定义全局使用的函数
+ *    （3）设置系统的配置参数
+ */
+
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
@@ -69,7 +76,7 @@ static clock_t polling_ticks; // = POLLING_TIME * CLOCKS_PER_SEC / 1000000;
 #define MAX_STEAL_TASK_NUM 10*TASK_BATCH_NUM //how many tasks to steal at a time at most 一次最多可以窃取的任务数量
 #define MIN_TASK_NUM_BEFORE_STEALING 10*TASK_BATCH_NUM //how many tasks should be remaining (or task stealing is triggered) 各个 worker 中应该保留的最小任务数量，如果低于这个值，则该 worker 的负载较轻，则需要从负载较重的 worker 中窃取任务执行
 
-#define MINI_BATCH_NUM 10 //used by spawning from local
+#define MINI_BATCH_NUM 10 //used by spawning from local 从本地顶点中一次生成的最小任务数量
 #define REQUEST_BOUND 50000 //the maximal number of requests could be sent between each two workers //tuned on GigE
 
 #define GRAPH_LOAD_CHANNEL 200
@@ -80,17 +87,17 @@ static clock_t polling_ticks; // = POLLING_TIME * CLOCKS_PER_SEC / 1000000;
 #define PROGRESS_CHANNEL 205
 
 void* global_trimmer = NULL;
-void* global_taskmap_vec; //set by Worker using its compers, used by RespServer
+void* global_taskmap_vec; //set by Worker using its compers, used by RespServer 当前 worker 中各个 Comper 的任务列表（对应 worker 中的 taskmap_vec，是其的全局化变量）
 void* global_vcache;
-void* global_local_table;
+void* global_local_table; // worker 中存储本地顶点的 map（对应 worker 中 local_table）
 
 atomic<int> global_num_idle(0); // 当前 worker 中空闲 comper 的数量
 
 conque<string> global_file_list; //tasks buffered on local disk; each element is a file name 磁盘中保存的 task 文件名
 atomic<int> global_file_num; //number of files in global_file_list 磁盘中保存的 task 文件数量
 
-void* global_vertexes;
-int global_vertex_pos; //next vertex position in global_vertexes to spawn a task
+void* global_vertexes; // 当前 worker 存储的顶点列表（对应 worker 的 vertexes），是为了将顶点列表的作用域扩大到全局，在 worker 的构造方法中初始化，在 worker 和  comper 中均有使用。
+int global_vertex_pos; //next vertex position in global_vertexes to spawn a task 顶点列表中下一个用来生成任务的顶点位置
 mutex global_vertex_pos_lock; //lock for global_vertex_pos
 
 #define TASK_GET_NUM 1
@@ -212,7 +219,7 @@ mutex mtx_go; // 全局互斥锁，在 Worker 和 Comper 中使用
 condition_variable cv_go; // 全局条件变量，在 Worker 和 Comper 中使用
 
 //used by profiler
-atomic<size_t>* global_tasknum_vec; //set by Worker using its compers, updated by comper, read by profiler
+atomic<size_t>* global_tasknum_vec; //set by Worker using its compers, updated by comper, read by profiler 各个 Comper 的任务数量
 atomic<size_t> num_stolen(0); //number of tasks stolen by the current worker since previous profiling barrier 当前 worker 窃取到任务总数
 
 atomic<size_t>* req_counter; //to count how many requests were sent to each worker 存储向其它 worker 发送的请求次数
