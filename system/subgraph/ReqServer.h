@@ -56,7 +56,7 @@ public:
 
 
     /**
-     * 读取消息 buf 中的顶点 id ，获取相应的顶点，并将顶点放进响应队列中
+     * 读取消息 buf 中的顶点 id（即从流中反序列化得到顶点的 id），获取相应的顶点，并将顶点放进响应队列中
      * @param buf   消息数据
      * @param size  消息大小
      * @param src   消息源（即请求源，向当前 worker 发送请求的 worker 的 id， src-wroker --发送请求--> 当前 worker，src-worker 为请求源，src 为 src-worker 的 id）
@@ -69,7 +69,7 @@ public:
 		KeyT vid;
 		while(m.end() == false)
 		{
-			m >> vid; // 读取消息中顶点的 id ，从而在顶点 map 中通过 id 获取对应的顶点
+			m >> vid; // 读取消息中顶点的 id（即从流中反序列化得到顶点的 id） ，从而在顶点 map 中通过 id 获取对应的顶点
 			VertexT * v = local_table[vid];
 			q_resp.add(local_table[vid], src); // 将对应顶点加入到 RespQueue 中的请求 worker 响应队列中，从而最终返回给请求的 worker
 		}

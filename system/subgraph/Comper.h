@@ -55,13 +55,26 @@ public:
     typedef vector<VertexT*> VertexVec;
 
     typedef deque<TaskT *> TaskQueue;
-    typedef TaskMap<TaskT> TaskMapT;
+    typedef TaskMap<TaskT> TaskMapT; // 任务 Map 类型
     typedef hash_map<KeyT, VertexT*> VTable;
     typedef typename VTable::iterator TableIter;
 
-    TaskQueue q_task; //written only by the thread itself, no need to be conque
-    int thread_rank;
+    /**
+     * 当前线程的任务队列 
+     */
+    TaskQueue q_task; //written only by the thread itself, no need to be conque 当前线程的任务队列
+    
+    /**
+     * 当前线程的 id
+     */
+    int thread_rank; // 线程 id
+
+    /**
+     * 存放任务的 map
+     */
     TaskMapT map_task;
+    
+    
     thread_counter counter;
 
     thread main_thread;
@@ -78,7 +91,8 @@ public:
 	}
 
     /**
-     * 如果任务未结束，则返回 true，表示在下一轮迭代中仍然需要进行计算；否则，返回 false
+     * 如果任务未结束，则返回 true，表示在下一轮迭代中仍然需要进行计算；否则，返回 false（即任务在此轮迭代中结束）。
+     * 该函数会在 comper 的 push_task_from_taskmap 和 pop_task 中调用
      */
     //UDF2 wrapper
     bool compute(TaskT* task)
@@ -190,7 +204,7 @@ public:
 
     /**
      * 弹出一个任务并处理它，如果有必要则会加入 task_map 中。
-     * 如果队列为空，并且本地顶点列表中不需要处理顶点
+     * 如果队列为空，并且本地顶点列表中不需要处理顶点，则返回 false
      */
     //part 2's logic: get a task, process it, and add to task-map if necessary
     //- returns false if (a) q_task is empty and
@@ -210,12 +224,12 @@ public:
     		{//"global_file_list" is empty
     			if(!push_task_from_taskmap()) //priority <2>: fetch a task from task-map
     			{//CASE 1: task-map's "task_buf" is empty // task_buf 为空，则从本地顶点列表中生成新的任务
-    				task_spawn_called = locTable2queue();
+    				task_spawn_called = locTable2queue(); // 从本地顶点列表中生成任务
     			}
     			else
     			{//CASE 2: try to move TASK_BATCH_NUM tasks from task-map to the queue
                     // task_buf 不为空，则从 task_map 中取出 TASK_BATCH_NUM 个任务，放进队列中
-    				push_called = true;
+    				push_called = true; // 从 task_buf 中取出任务并压入到队列中
     				while(q_task.size() < 2 * TASK_BATCH_NUM)
     				{//i starts from 1 since push_task_from_taskmap() has been called once 
     					if(!push_task_from_taskmap()) break; //task-map's "task_buf" is empty, no more try
@@ -227,31 +241,31 @@ public:
     	if(q_task.size() == 0){
 			if(task_spawn_called) return true;
 			else if(push_called) return true;
-			else return false;
+			else return false; // 没有顶点需要继续处理，且队列为空，则返回 false
 		}
-    	//fetch task from Comper's task queue head
+    	//fetch task from Comper's task queue head 从任务队列中取出任务
     	TaskT * task = q_task.front();
     	q_task.pop_front();
     	//task.to_pull should've been set
     	//[*] process "to_pull" to get "frontier_vertexes" and return "how many" vertices to pull
     	//if "how many" = 0, call task.compute(.) to set task.to_pull (and unlock old "to_pull") and go to [*]
-    	bool go = true; //whether to continue another round of task.compute()
-    	//init-ed to be true since:
+    	bool go = true; //whether to continue another round of task.compute() 标记任务是否需要另外一轮计算
+    	//init-ed to be true since:  初始为 true 有如下两个原因：
     	//1. if it is newly spawned, should allow it to run
     	//2. if compute(.) returns false, should be filtered already, won't be popped
-    	while(task->pull_all(counter, map_task)) //may call add2map(.)
+    	while(task->pull_all(counter, map_task)) //may call add2map(.) task 拉取顶点，如果该任务需要的顶点已经全部拉取到本地，则返回 true，可以继续下一轮迭代；否则，拉取远程顶点，返回 false
     	{
     		go = compute(task);
     		task->unlock_all();
-    		if(go == false)
+    		if(go == false) // 任务在当前迭代中结束
     		{
     			global_tasknum_vec[thread_rank]++;
 				delete task;
-    			break;
+    			break; // 任务结束，退出循环
     		}
     	}
     	//now task is waiting for resps (task_map => task_buf => push_task_from_taskmap()), or finished
-		return true;
+		return true; // （1）任务在拉取远程顶点，等待响应结果。（2）任务已经结束
     }
 
     //=== for handling task streaming on disk ===
@@ -305,7 +319,7 @@ public:
     }
 
     /**
-     * 从 task_map 中取任务，如果能取出任务，则返回 true；否则，返回 false
+     * 从 task_map 中取任务，压入到队列中。如果能取出任务，则返回 true；否则，返回 false
      */
     //part 1's logic: fetch a task from task-map's "task_buf", process it, and add to q_task (flush to disk if necessary)
     bool push_task_from_taskmap() //returns whether a task is fetched from taskmap
@@ -335,14 +349,14 @@ public:
     		bool nothing_processed_by_pop; //called pop_task(), but cannot get a task to process, and not called a task_spawn(v)
     		bool blocked; //blocked from calling pop_task()
     		bool nothing_to_push; //nothing to fetch from taskmap's buf (but taskmap's map may not be empty)
-			for(int i=0; i<TASK_GET_NUM; i++) // TASK_GET_NUM 默认为 1
+			for(int i=0; i<TASK_GET_NUM; i++) // TASK_GET_NUM 表示一次取出的任务数量，默认为 1
 			{
 				nothing_processed_by_pop = false;
 				blocked = false;
 				//check whether we can continue to pop a task (may add things to vcache)
 				if(global_cache_size < VCACHE_LIMIT + VCACHE_OVERSIZE_LIMIT) //(1 + alpha) * vcache_limit
 				{
-					if(map_task.size < TASKMAP_LIMIT)
+					if(map_task.size < TASKMAP_LIMIT) // 
 					{
 						if(!pop_task()) nothing_processed_by_pop = true; //only the last iteration is useful, others will be set back to false
 					}

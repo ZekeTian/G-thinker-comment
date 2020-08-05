@@ -15,7 +15,7 @@
 //########################################################################
 
 /**
- * 响应服务器，负责接收请求处理后返回的响应结果（即负责接收响应结果）。
+ * 响应服务器，负责接收请求处理后返回的响应结果（即负责接收响应结果），其逻辑与 ReqServer 类似。
  */
 
 //this is the server of managing vcache
@@ -49,9 +49,9 @@ public:
 	typedef typename VertexT::KeyType KeyT;
 	typedef typename VertexT::ValueType ValueT;
 	typedef typename VertexT::HashType HashT;
-	typedef AdjCache<TaskT> CTable;
+	typedef AdjCache<TaskT> CTable; // 缓存表数据类型
 
-	CTable & cache_table;
+	CTable & cache_table; // 缓存表，对应论文中的 Γ-tables、R-tables、Z-table
 	//thread_counter counter; //used for trim-to-vcache-limit
 	thread main_thread;
 
@@ -98,7 +98,7 @@ public:
     void run()
     {
     	bool first = true;
-    	thread t; // 用于读取返回的响应结果
+    	thread t; // 用于读取返回的响应结果，限将消息数据反序列化为顶点
     	//------
     	while(global_end_label == false) //otherwise, thread terminates
     	{

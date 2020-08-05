@@ -14,6 +14,10 @@
 //## limitations under the License.
 //########################################################################
 
+/**
+ * 并发的 map ，设计思路与 conmap 一样，其封装的是论文中的 R-table，即顶点请求缓存列表
+ */
+
 #ifndef CONMAP0_H
 #define CONMAP0_H
 
@@ -30,7 +34,7 @@ using namespace std;
 template <typename K, typename V> struct conmap0_bucket
 {
 	typedef hash_map<K, V> KVMap;
-	KVMap bucket;
+	KVMap bucket; // R-table，存储顶点请求缓存列表，数据类型：<KeyType, TaskIDVec>，key 为被请求顶点的 id，value 为请求 key 顶点的任务列表
 
 	KVMap & get_map()
 	{

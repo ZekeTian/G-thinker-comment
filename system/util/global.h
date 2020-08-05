@@ -56,7 +56,7 @@ static clock_t polling_ticks; // = POLLING_TIME * CLOCKS_PER_SEC / 1000000;
 //if too small, communication is unbalanced and congestion happens
 //if too big, low bandwidth utilization
 
-#define MAX_BATCH_SIZE 1000 //number of bytes sent in a batch
+#define MAX_BATCH_SIZE 1000 //number of bytes sent in a batch 每次请求的最大顶点数量
 
 #define WAIT_TIME_WHEN_IDLE 100 //unit: usec, user-configurable, used by recv-er
 
@@ -67,7 +67,7 @@ static clock_t polling_ticks; // = POLLING_TIME * CLOCKS_PER_SEC / 1000000;
 #define PROGRESS_SYNC_TIME_GAP 1000000 //unit: usec, used by Profiler main-thread
 
 #define TASK_BATCH_NUM 150 //minimal number of tasks processed as a unit
-#define TASKMAP_LIMIT 8 * TASK_BATCH_NUM //number of tasks allowed in a task map
+#define TASKMAP_LIMIT 8 * TASK_BATCH_NUM //number of tasks allowed in a task map （task map 中存放任务数的上限）
 
 #define VCACHE_LIMIT 2000000 //how many vertices allowed in vcache (pull-cache + adj-cache)
 #define VCACHE_OVERSIZE_FACTOR 0.2
@@ -222,7 +222,7 @@ condition_variable cv_go; // 全局条件变量，在 Worker 和 Comper 中使用
 atomic<size_t>* global_tasknum_vec; //set by Worker using its compers, updated by comper, read by profiler 各个 Comper 的任务数量
 atomic<size_t> num_stolen(0); //number of tasks stolen by the current worker since previous profiling barrier 当前 worker 窃取到任务总数
 
-atomic<size_t>* req_counter; //to count how many requests were sent to each worker 存储向其它 worker 发送的请求次数
+atomic<size_t>* req_counter; //to count how many requests were sent to each worker 请求次数列表，统计当前 worker 向其它 worker 发送的请求次数。如：其中第 1 个值表示当前 wroker 向第 1 号 worker 发送的请求总次数
 
 int num_compers; // 一个 worker 所拥有的 comper 数量
 

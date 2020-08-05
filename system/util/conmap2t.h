@@ -14,6 +14,10 @@
 //## limitations under the License.
 //########################################################################
 
+/**
+ * 用于两个线程的并发 map
+ */
+
 #ifndef CONMAP2T_H
 #define CONMAP2T_H
 

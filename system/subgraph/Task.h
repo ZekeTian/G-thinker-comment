@@ -53,11 +53,21 @@ public:
 	HashT hash;
 
 	//internally used:
-	vector<KeyT> to_pull; //vertices to be pulled for use in next round
+    /**
+     * 下一轮迭代中需要拉取的顶点的 id
+     */
+	vector<KeyT> to_pull; //vertices to be pulled for use in next round 下一轮迭代中需要拉取的顶点的 id
 	//- to_pull needs to be swapped to old_to_pull, before calling compute(.) that writes to_pull
 	//- unlock vertices in old_to_pull
+
+    /**
+     * 存储拉取到的顶点，这些顶点在下轮迭代中使用。如果其中第 i 个顶点是远程顶点，需要通过发送消息拉取，则在 frontier_vertexes 中第 i 个位置为 NULL
+     */
 	vector<VertexT *> frontier_vertexes; //remote vertices are replaced with NULL
 
+    /**
+     * 已经拉取到本地的顶点数量（即在待拉取的顶点中，有 met_counter 个顶点已经拉取到本地）
+     */
 	atomic<int> met_counter; //how many requested vertices are at local, updated by comper/RespServer, not for use by users (system only)
 
 	Task(){}
@@ -86,6 +96,11 @@ public:
 		to_pull.push_back(id);
 	}
 
+    /**
+     * 拉取顶点。
+     * 如果该任务需要从远程 worker 中拉取顶点（或已经从响应中获取到了顶点数据，但是该任务当前迭代不能继续处理），则返回 false；
+     * 如果该任务需要的顶点已经全部拉取到本地，则返回 true，可以继续下一轮迭代。
+     */
 	//after task.compute(.) returns, process "to_pull" to:
 	//set "frontier_vertexes"
 	bool pull_all(thread_counter & counter, TaskMapT & taskmap) //returns whether "no need to wait for remote-pulling"
@@ -100,17 +115,17 @@ public:
 		for(int i=0; i<size; i++)
 		{
 			KeyT key= to_pull[i];
-			if(hash(key) == _my_rank) //in local-table
+			if(hash(key) == _my_rank) //in local-table 在本地顶点列表中
 			{
 				frontier_vertexes[i] = ltable[key];
 				met_counter++;
 			}
-			else //remote
+			else //remote 在远程 worker 中
 			{
-				if(remote_detected) //no need to call add2map(.) again
+				if(remote_detected) //no need to call add2map(.) again 
 				{
 					frontier_vertexes[i] = vcache.lock_and_get(key, counter, task_id);
-					if(frontier_vertexes[i] != NULL) met_counter++;
+					if(frontier_vertexes[i] != NULL) met_counter++; // 第 i 个顶点已经拉取到本地，则 met_counter 加 1
 				}
 				else
 				{
@@ -143,7 +158,7 @@ public:
 			}
 			//else, RespServer has already did the move
 			bucket.unlock();
-			return false;//either has pending resps, or all resps are received but the task is now in task_buf (to be processed, but not this time) 远程请求未返回 或 远程请求已经返回但是当前任务不在 task 中
+			return false;//either has pending resps, or all resps are received but the task is now in task_buf (to be processed, but not this time) 远程请求未返回 或 远程请求已经返回但是当前任务不在 task_buf 中
 		}
 		else return true; //all v-local, continue to run the task for another iteration 所有顶点数据已全部拉取本地，可以继续下一轮迭代
 	}

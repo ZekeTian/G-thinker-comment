@@ -27,6 +27,9 @@
 
 using namespace std;
 
+/**
+ * 哈希函数，用于分区，在 Worker.sync_graph() 、Task.pull_all()、ReqQueue.add() 中均有使用
+ */
 //Default Hash Function =====================
 template <class KeyT>
 class DefaultHash {

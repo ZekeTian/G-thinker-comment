@@ -55,7 +55,7 @@ public:
 	typedef typename VertexT::ValueType ValueT;
 	typedef typename VertexT::HashType HashT;
 
-    typedef vector<VertexT*> VertexVec;
+    typedef vector<VertexT*> VertexVec; // 顶点列表数据类型
 
     typedef hash_map<KeyT, VertexT*> VTable;
     typedef typename VTable::iterator TableIter;
@@ -179,6 +179,11 @@ public:
 	//user-defined loading function
 	virtual VertexT* toVertex(char* line) = 0;
 
+    /**
+     * 加载数据图
+     * @param inpath 输入文件路径
+     * @param vVec   存储读入的顶点数据
+     */
 	void load_graph(const char* inpath, VertexVec & vVec)
 	{
 		TrimmerT* trimmer = NULL;
@@ -192,9 +197,9 @@ public:
 			reader.readLine();
 			if (!reader.eof())
 			{
-				VertexT * v = toVertex(reader.getLine());
+				VertexT * v = toVertex(reader.getLine()); // 将行内容转换成顶点数据类型
 				if(trimmer) trimmer->trim(*v);
-				vVec.push_back(v);
+				vVec.push_back(v); // 将顶点放入顶点列表中
 			}
 			else
 				break;
@@ -203,6 +208,13 @@ public:
 		hdfsDisconnect(fs);
 	}
 
+    /**
+     * 同步图，即对读入的顶点数据进入分区，然后将其放入到分区表中相应的分区内，之后再将分区表中的数据发给相应的 worker。
+     * 同时，当前 worker 也会接收其它 worker 发过来的分区数据（其它 worker 发过来的数据就是当前 worker 分区需要保存的数据）。
+     * 简而言之，同步图的过程就是数据归位的过程，即对读入的顶点数据进行分区后，让这些数据回归到各自应该所在的分区内（即 worker）。
+     *
+     * @param vVec 本地的顶点数据，在分区之前，保存的是当前 worker 读取的顶点数据（作为输入参数）；分区后，保存的是当前 worker 所对应分区的数据（作为输出参数）
+     */
 	void sync_graph(VertexVec & vVec)
 	{
 		//ResetTimer(4);
@@ -215,10 +227,12 @@ public:
 			_loaded_parts[hash(v->id)].push_back(v);
 		}
 		//exchange vertices to add
-		all_to_all(_loaded_parts, GRAPH_LOAD_CHANNEL); // ？
+		all_to_all(_loaded_parts, GRAPH_LOAD_CHANNEL); // 将分区中的顶点数据发给相应的 worker，同时也接收其它 worker 发过来的数据（_loaded_parts 在发数据前是保存发送的数据，在发完数据后其用来保存接收的数据）
 
 		vVec.clear();
-		//collect vertices to add
+        // 在 all_to_all 接收完当前 worker 的分区顶点数据后，__loaded_parts 存储的是其它 worker 发送给当前 worker 的分区顶点数据（简而言之，即 __loaded_parts 保存当前 worker 的分区数据）
+        // 注意：all_to_all 调用前，_loaded_parts 保存发送的数据；调用后，保存接收的分区数据
+		//collect vertices to add 将 _loaded_parts 二维向量的数据全部放入到一维向量 vVec （即本地顶点列表）中
 		for (int i = 0; i < _num_workers; i++) {
 			vVec.insert(vVec.end(), _loaded_parts[i].begin(), _loaded_parts[i].end());
 		}
@@ -457,7 +471,12 @@ public:
 	}
 
     /**
-     * 确定是否需要工作窃取，如果当前 worker 需要从其它 worker 中窃取任务，则返回 true；否则返回 false
+     * 确定是否需要工作窃取，如果当前 worker 需要从其它 worker 中窃取任务，则返回 true；否则返回 false。
+     *
+     * 工作窃取的思路：根据 worker 剩余的任务数量，将 worker 放进最大堆或最小堆。
+     * 如果 worker 剩余的任务数量大于阈值，则放进最大堆（此时，该 worker 负载较重）；否则，放进最小堆（此时，该 worker 负载较轻）。
+     * 然后不断循环地从最大堆、最小堆中取出堆顶元素，然后将负载最重的 worker （最大堆的堆顶元素）的负载转移给负载最轻的 worker（最小堆的堆顶元素）。
+     * 直到负载最重、最轻的两个 worker 剩余的任务数量相差较小，此时可以认为所有 worker 的负载较均衡，因此停止工作窃取。
      **/
 	bool steal_planning() //whether there's something to steal from/to others
 	{
@@ -631,10 +650,11 @@ public:
 				 it != assignedSplits.end(); it++)
 				load_graph(it->c_str(), vertexes);
 		}
-
+       
+        // 各个 worker 读完数据后再对数据进行分区
 		//send vertices according to hash_id (reduce)
-        // vertexes 是当前 worker 读取的顶点，将该顶点发送给相应的 worker
-		sync_graph(vertexes); // 作用，顶点聚合，将根据顶点 id 的哈希值，将顶点数据发给其真正应该所处的 worker
+        // vertexes 是当前 worker 读取的顶点，因为读取到的顶点不一定是分区到当前 worker ，因此通过 sync_graph 操作将顶点进行分区并发送给相应的分区（即 worker）
+		sync_graph(vertexes); // 作用，数据归位，将根据顶点 id 的哈希值进行分区，然后将顶点数据发给其真正应该所处的 worker
 
 		//init global_vertex_pos
 		global_vertex_pos = 0;
