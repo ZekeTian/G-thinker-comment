@@ -15,7 +15,7 @@
 //########################################################################
 
 /**
- * 用于两个线程的并发 map
+ * 用于两个线程的并发 map，挂起任务 map
  */
 
 #ifndef CONMAP2T_H
@@ -35,6 +35,9 @@
 #include <vector>
 using namespace std;
 
+/**
+ * 数据类型 <long long, TaskT *>
+ */
 template <typename K, typename V> struct conmap2t_bucket
 {
 	typedef hash_map<K, V> KVMap;
@@ -52,11 +55,18 @@ template <typename K, typename V> struct conmap2t_bucket
 		mtx.unlock();
 	}
 
+    /**
+     * 获取当前 bucket 中存储的任务 map
+     */
 	KVMap & get_map()
 	{
 		return bucket;
 	}
 
+    /**
+     * 向当前 bucket 中插入一个新的任务，如果插入成功（该任务不在 map 中），则返回 true；否则，返回 false（该任务在 map 中）
+     * 
+     */
 	//returns true if inserted
 	//false if an entry with this key alreqdy exists
 	bool insert(K key, V & val)
@@ -67,6 +77,9 @@ template <typename K, typename V> struct conmap2t_bucket
 		return ret.second;
 	}
 
+    /**
+     * 在当前 bucket 中删除 key 任务，删除成功，返回 true；否则，返回 false
+     */
 	//returns whether deletion is successful
 	bool erase(K key)
 	{

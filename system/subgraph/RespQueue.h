@@ -41,7 +41,7 @@ public:
     typedef vector<Buffer> Queue; // 队列列表，其长度等于 worker 的数量（从而保证一个 worker 拥有一个响应队列）
 
     /**
-     * 队列列表，含有 nums_worker 个队列，通过 add 对里面的队列进行赋值
+     * 队列列表，含有 nums_worker 个队列，通过 RespQueue.add() 对里面的队列进行赋值
      */
     Queue q;
 

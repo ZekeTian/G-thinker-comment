@@ -72,7 +72,7 @@ public:
         while(req_counter[i] < REQUEST_BOUND && buf.dequeue(temp))
         { //fetching till reach list-head
             m << temp;
-            req_counter[i]++; // 第 i 号 worker 的请求次数自增
+            req_counter[i]++; // 向第 i 号 worker 发送的请求次数自增
             if(m.size() > MAX_BATCH_SIZE) break; //cut at batch size boundary 一旦达到一次请求的顶点数量的上限，则此次请求不会再继续发送 buf 中的数据（会在下次循环到 i 号 worker 时继续发送 buf 中剩余的数据）
         }
 	}

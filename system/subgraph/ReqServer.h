@@ -103,7 +103,7 @@ public:
     	bool first = true; // 标记是否是第一次进入 while 循环中
     	thread t;
     	//------
-        // 不断地探测消息，即不断地检测是否发给当前 worker 的请求，如果有则需要处理相应的 worker
+        // 不断地探测消息，即不断地检测是否有发给当前 worker 的请求，如果有则需要处理相应的 worker
     	while(global_end_label == false) //otherwise, thread terminates 还需要 worker 继续处理任务，因此需要继续运行
     	{
     		int has_msg;

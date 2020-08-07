@@ -72,7 +72,7 @@ public:
 	//> -- by get(.)
 
     /**
-     * 取出下一个任务的 id ，但是任务的顺序号 seqno 不会新增。
+     * 取出下一个任务的 id ，但是任务的顺序号 seqno 不会新增，在 Task.pull_all() 中使用。
      */
 	long long peek_next_taskID() //not take it
 	{
@@ -80,6 +80,8 @@ public:
 		id = (id << 48); //first 16-bit is thread_id 前 16 位作为线程号，后 48 位作为任务号。线程号左移 48 位，相当于是：线程号 * (2^48)，然后在这个结果上加上任务的顺序号即可得到任务的 id。
         // 第 i 号线程的线程号左移 48 位后的结果与第 i+1 号线程左移的结果之间会相差 2^48 ，因此相邻线程之间会有足够的容量存储任务号。
         // 实际上，线程最多可以有 2^16 个，而每个线程又可以有 2^48 个任务，容量足够。
+        // 即：任务的 id 总共有 64 位，前 16 位是线程号，后 48 位是该任务在当前线程内部的一个顺序号（seqno），最后这两部分作为整体形成该任务的任务号
+        // 这种设计可以很方便地从任务号中获取该任务对应的线程号，即只需要将任务号右移 48 位便可得到线程号
 		return (id + seqno);
 	}
 
@@ -127,10 +129,10 @@ public:
 	}//no need to add "v -> tasks" track, should've been handled by lock&get(tid) -> request(tid) 在 adjCache.lock_and_get 函数中，pcache.request 会将任务与顶点关联
 
     /**
-     * 被 RespServer 调用，用于更新 task 的 counter（可能会更新挂起任务 map）。
+     * 被 RespServer （RespServer.thread_func）调用，用于更新 task 的 counter（可能会更新挂起任务 map）。
      * 因为 RespServer 已经接收到了该任务需要的一个远程顶点数据，那么任务的 counter 应该自增（即该任务已经拉取到本地的顶点数量加 1）。
      * 当该任务所需要的远程顶点已经全部获取到，那么就会该任务从 task_map（挂起任务 Map）中移动 task_buf（就绪任务队列）中。因为此时该任务已经满足条件，不需要再被挂起。
-     * 
+     *
      * @param task_id   任务 id
      */
 	//called by RespServer

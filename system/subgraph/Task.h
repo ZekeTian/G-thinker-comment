@@ -105,13 +105,16 @@ public:
 	//set "frontier_vertexes"
 	bool pull_all(thread_counter & counter, TaskMapT & taskmap) //returns whether "no need to wait for remote-pulling"
 	{//called by Comper, giving its thread_counter and thread_id
-		long long task_id = taskmap.peek_next_taskID();
-		CTable & vcache = *(CTable *)global_vcache;
-		VTable & ltable = *(VTable *)global_local_table;
+		long long task_id = taskmap.peek_next_taskID(); 
+		CTable & vcache = *(CTable *)global_vcache; // 本地缓存表
+		VTable & ltable = *(VTable *)global_local_table; // 本地顶点表
 		met_counter = 0;
-		bool remote_detected = false; //two cases: whether add2map(.) has been called or not
+		bool remote_detected = false; //two cases: whether add2map(.) has been called or not 标记 task_id 任务是否已经被挂起，true 表示该任务已经挂起，false 表示未挂起（同时也可以表示是否需要发送远程请求）
+        // 如果需要将 task_id 任务挂起，则会调用 add2map，将其放入挂起任务 map 中；如果 task_id 任务在之前请求远程顶点时已经被挂起，则不需要调用 
 		int size = to_pull.size();
 		frontier_vertexes.resize(size);
+
+        // 逐一获取顶点
 		for(int i=0; i<size; i++)
 		{
 			KeyT key= to_pull[i];
@@ -120,63 +123,88 @@ public:
 				frontier_vertexes[i] = ltable[key];
 				met_counter++;
 			}
-			else //remote 在远程 worker 中
+			else //remote 远程顶点（有两种情况：一种是，该远程顶点已经被拉取过，并放入到缓存表中；另外一种是，该远程顶点未被拉取过，需要进行远程拉取）
 			{
-				if(remote_detected) //no need to call add2map(.) again 
+                // 拉取远程顶点时，先判断该任务是否需要挂起，如果该任务已经挂起，则不需要再将其挂起
+				if(remote_detected) //no need to call add2map(.) again 不需要再次调用 add2map（即不需要再次将 task_id 任务挂起）
 				{
-					frontier_vertexes[i] = vcache.lock_and_get(key, counter, task_id);
+                    // task_id 任务已经挂起
+					frontier_vertexes[i] = vcache.lock_and_get(key, counter, task_id); // 这里的 lock_and_get 函数中不会调用 add2map 
 					if(frontier_vertexes[i] != NULL) met_counter++; // 第 i 个顶点已经拉取到本地，则 met_counter 加 1
 				}
 				else
 				{
+                    // task_id 任务未被挂起
 					frontier_vertexes[i] = vcache.lock_and_get(key, counter, task_id,
-											taskmap, this);
+											taskmap, this); // 如果在缓存中找到对应顶点，则直接返回顶点；否则，需要向远程 worker 拉取顶点，会调用 add2map
 					if(frontier_vertexes[i] != NULL) met_counter++;
 					else //add2map(.) is called
 					{
-						remote_detected = true; // 本地的 local 和 cache 中都无法找到相应的顶点，则需要去远程 worker 中拉取顶点
+                        // 调用了 add2map()，将 task_id 任务挂起，需要将 remote_detected 设为 true，标记该任务被挂起
+                        // 这样在下次拉取远程顶点时，先判断该任务是否已经被挂起，如果该任务已经处于挂起状态，则不需要调用 add2map 
+						remote_detected = true;
 					}
 				}
 			}
 		}
+
+        // 判断是否需要远程请求，如果需要远程请求，则还需要判断是否需要更新任务的状态
 		if(remote_detected)
 		{
+            // 需要发送远程请求获取数据
 			//so far, all pull reqs are processed, and pending resps could've arrived (not wakening the task)
 			//------
-			conmap2t_bucket<long long, TaskT *> & bucket = taskmap.task_map.get_bucket(task_id); // 挂起的 task
+            // 从挂起任务 map 中获取 task_id 任务，判断是否成功获取到
+			conmap2t_bucket<long long, TaskT *> & bucket = taskmap.task_map.get_bucket(task_id); // 挂起任务 map
 			bucket.lock();
 			hash_map<long long, TaskT *> & kvmap = bucket.get_map();
 			auto it = kvmap.find(task_id);
+
 			if(it != kvmap.end())
 			{
-				if(met_counter == req_size()) // 所有需要的顶点都已拉取到
+                // 挂起任务 map 中存在 task_id 任务，
+				if(met_counter == req_size())  // 如果所有顶点都已经拉取到，则该任务需要从挂起状态转换成就绪状态
 				{//ready for task move, delete
-					kvmap.erase(it); // 将 task 从挂起任务列表中删除，并加入到就绪任务列表中
+					kvmap.erase(it); // 将 task 从挂起任务列表中删除，并加入到就绪任务队列中
 					taskmap.task_buf.enqueue(this); 
 				}
 				//else, RespServer will do the move 所需要的顶点未拉取完，RespServer 负责摘取远程顶点
 			}
-			//else, RespServer has already did the move
+			//else, RespServer has already did the move 在挂起任务 map 中未获取到 task_id 任务，则有可能 RespServer 中已经接收完 task_id 任务所需要的远程顶点数据，然后将该任务从挂起任务 map 中移到就绪任务队列中（因此，在挂起任务 map 中未找到该任务）
 			bucket.unlock();
-			return false;//either has pending resps, or all resps are received but the task is now in task_buf (to be processed, but not this time) 远程请求未返回 或 远程请求已经返回但是当前任务不在 task_buf 中
+			return false;//either has pending resps, or all resps are received but the task is now in task_buf (to be processed, but not this time) 
+            // 远程请求未返回 或 远程请求已经返回但是当前任务在就绪任务队列中（不能立马执行）
 		}
 		else return true; //all v-local, continue to run the task for another iteration 所有顶点数据已全部拉取本地，可以继续下一轮迭代
 	}
 
+    /**
+     * 任务结束时调用此函数，解锁本任务所使用的远程顶点（更新缓存表中这些顶点的状态）
+     */
 	void unlock_all()
 	{
+        // 获取当前 worker 的缓存表，更新缓存表中的顶点状态，主要是顶点的计数器（即使用顶点的任务数量）
 		CTable & vcache = *(CTable *)global_vcache;
+
+        // 遍历当前任务所使用的所有顶点，判断是否是远程顶点，如果是远程顶点，则在缓存表中更新其状态
 		for(int i=0; i<frontier_vertexes.size(); i++)
 		{
 			VertexT * v = frontier_vertexes[i];
-			if(hash(v->id) != _my_rank) vcache.unlock(v->id);
+            // 因为是更新缓存表中顶点的状态，而缓存表中是缓存的远程顶点，因此需要先判断顶点是否为远程顶点
+            // 即 hash(v->id) != _my_rank 通过判断是否为远程顶点
+			if(hash(v->id) != _my_rank) vcache.unlock(v->id); // 如果是远程顶点，则需要在缓存表中更新相应的状态，即：将使用该顶点的任务数量减 1，如果减到 0，是该顶点会从 Γ-tables 移到 Z-tables 中
 		}
 	}
 
+    /**
+     * 远程顶点数据返回后，将远程顶点设置到拉取顶点列表（frontier_vertexes）中
+     * 在 Comper.push_task_from_taskmap() 中调用
+     */
 	//task_map => task_buf => push_task_from_taskmap() (where it is called)
 	void set_pulled() //called after vertex-pull, to replace NULL's in "frontier_vertexes"
 	{
-		CTable & vcache = *(CTable *)global_vcache;
+        // 遍历拉取顶点列表（frontier_vertexes），如果是远程顶点，则从缓存表中取出该远程顶点，然后放进拉取顶点列表（frontier_vertexes）中
+		CTable & vcache = *(CTable *)global_vcache; 
 		for(int i=0; i<to_pull.size(); i++)
 		{
 			if(frontier_vertexes[i] == NULL)

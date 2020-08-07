@@ -283,7 +283,7 @@ public:
 		}
 		else
 		{
-            // Master Worker 负责接收所有非 
+            // Master Worker 负责接收所有工作 worker 的状态
 			bool all_idle = worker_idle;
 			for(int i=0; i<_num_workers; i++)
 			{

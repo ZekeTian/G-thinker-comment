@@ -44,6 +44,7 @@ public:
     {
     	while(global_end_label == false) //otherwise, thread terminates
     	{
+            // 判断缓存表的大小是否超过缓存数量的最大值，如果超过，则需要进行缓存数据的回收
     		int oversize = global_cache_size - VCACHE_LIMIT;
     		if(oversize > 0) cache_table.shrink(oversize, counter);
     		usleep(WAIT_TIME_WHEN_IDLE); //polling frequency

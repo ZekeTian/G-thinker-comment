@@ -15,7 +15,10 @@
 //########################################################################
 
 /**
- * 封装缓存表，主要对应论文中的 Γ-tables、R-tables、Z-table
+ * 缓存表封装类，用来缓存远程顶点，主要对应论文中如下的三个表：
+ * Γ-tables：已拉取到的远程顶点缓存表，记录已拉取到本地的远程顶点，即这里面的顶点已经从远程 worker 中拉取到本地（实际上也是线程正在使用的远程顶点 map）
+ * R-tables：正在请求的远程顶点缓存表，记录的是那些正在请求的远程顶点，即：这些顶点正在向远程 worker 请求，但是还没有返回。
+ * Z-tables：无任务使用的远程顶点缓存表，记录目前没有任务使用的远程顶点
  */
 
 #ifndef ADJCACHE_H_
@@ -40,7 +43,7 @@ Two sub-structures:
 using namespace std;
 
 //====== global counter ======
-atomic<int> global_cache_size(0); //cache size: "already-in" + "to-pull"
+atomic<int> global_cache_size(0); //cache size: "already-in" + "to-pull" 缓存表中已缓存的数量（即论文中 Γ-table 和 R-table 缓存的数据量）
 int COMMIT_FREQ = 10; //delta that needs to be committed from each local counter to "global_cache_size"
 //parameter to fine-tune !!!
 
@@ -193,8 +196,8 @@ public:
     };
     
     //internal conmap for cached objects
-    typedef conmap<KeyType, AdjValue> ValCache; // 并发 map 类型，是一个两级哈希 map，里面包含Γ-tables、Z-table
-    ValCache vcache; // 保存缓存对象，封装了论文中的 Γ-tables（线程正在使用的顶点 map）、 Z-table（记录目前没有任务使用的顶点的 id）
+    typedef conmap<KeyType, AdjValue> ValCache; // 并发 map 类型，是一个两级哈希 map，里面包含 Γ-tables、Z-table
+    ValCache vcache; // 保存缓存对象，封装了论文中的 Γ-tables（已拉取到的远程顶点缓存表，即线程正在使用的顶点 map）、 Z-table（记录目前没有任务使用的顶点的 id）
     PullCache<KeyType> pcache; // 顶点拉取请求缓存表，封装了论文中的 R-table
     
     ~AdjCache()
@@ -213,11 +216,15 @@ public:
     }
     
     /**
-     * 被 comper（即计算线程）调用，用于获取 key 对应的顶点。在此函数中，会调用 add2map ，即会将任务放进挂起任务 map 中。在 Task.pull_all 中被调用。
-     * 如果没有找到 key 对应的顶点，返回 NULL，并且会向远程 worker 发送请求，获取顶点。
+     * 被 comper（即计算线程）调用，用于获取 key 对应的远程顶点。在此函数中，会调用 add2map ，即会将任务放进挂起任务 map 中。在 Task.pull_all 中被调用。
+     * 如果在本地缓存中没有找到 key 对应的顶点，返回 NULL，并且会向远程 worker 发送请求，获取顶点。
      * 如果找到，则返回该顶点。
      *
      * 注意：此函数中会调用 add2map
+     *
+     * 此函数在 Task.pull_all 中被调用，调用场景：
+     * task_id 任务在请求远程顶点时，本地缓存中没有相应的远程顶点，需要向远程 worker 发送请求，从而获取顶点数据。
+     * 如果 task_id 任务是第一次向远程 worker 发送顶点请求，该任务需要更改状态，即需要调用本函数，将该任务挂起。
      *
      * @param key       待获取的顶点 key
      * @param counter   
@@ -229,7 +236,7 @@ public:
     //1. NULL, if not found; but req will be posed
     //2. vcache[key].value, if found; vcache[counter] is incremented by 1
     ValType * lock_and_get(KeyType & key, thread_counter & counter, long long task_id,
-    		TaskMapT & taskmap, TaskT* task) //used when vcache miss happens, for adding the task to task_map
+    		TaskMapT & taskmap, TaskT* task) //used when vcache miss happens, for adding the task to task_map 会调用 add2map ，即会将任务放进挂起任务 map 中
     {
     	ValType * ret; // 返回值
     	conmap_bucket<KeyType, AdjValue> & bucket = vcache.get_bucket(key); // 获取顶点所在的 bucket 
@@ -250,7 +257,7 @@ public:
 			ret = NULL;
 		}
     	else
-    	{   // 本地顶点
+    	{   // 在本地缓存中找到远程顶点
             // 在 vcache 中能取出 key 对应的顶点数据
         	AdjValue & vpair = it->second;
         	if(vpair.counter == 0) bucket.zeros.erase(key); //zero-cache.remove 当前顶点之前在 zeros 中（即之前没有被任务使用过），则需要将其从 zeros 中删除（因为该顶点会在本次任务中使用）
@@ -262,16 +269,19 @@ public:
     }
     
     /**
-     * 被 comper（即计算线程）调用，用于获取 key 对应的顶点。在此函数中，不会调用 add2map ，即不会将任务放进挂起任务 map 中。在 Task.pull_all 中被调用。
+     * 被 comper（即计算线程）调用，用于获取 key 对应的远程顶点。在此函数中，不会调用 add2map ，即不会将任务放进挂起任务 map 中。在 Task.pull_all 中被调用。
      * 如果没有找到 key 对应的顶点，返回 NULL，并且会向远程 worker 发送请求，获取顶点。
      * 如果找到，则返回该顶点。
      * 
      * 注意：此函数中不调用 add2map
+     * 
+     * 此函数在 Task.pull_all 中被调用，调用场景：
+     * task_id 任务在之前请求远程顶点时，已经被放进挂起任务 map 中，则后面该任务在请求远程顶点时，不必再将其放入挂起任务 map 中
      */
     //to be called by computing threads, returns:
 	//1. NULL, if not found; but req will be posed
 	//2. vcache[key].value, if found; vcache[counter] is incremented by 1
-	ValType * lock_and_get(KeyType & key, thread_counter & counter, long long task_id)
+	ValType * lock_and_get(KeyType & key, thread_counter & counter, long long task_id) // 不调用 add2map ，即不会将任务放进挂起任务 map 中
 	{
 		ValType * ret;
 		conmap_bucket<KeyType, AdjValue> & bucket = vcache.get_bucket(key);
@@ -332,10 +342,14 @@ public:
     }
 
     /**
-     * 将 id 为 key，值为 value 的顶点从请求缓存列表中删除，然后插入到线程正在使用的顶点 map 中（即 Γ-tables）。
-     * 该函数被通信线程调用，即当通信线程接收到返回的远程顶点数据后，调用该函数。
+     * 将 id 为 key，值为 value 的顶点从请求缓存列表中删除，然后插入到已拉取到的远程顶点缓存表 中（即 Γ-tables）。
+     * 该函数被通信线程 RespServer 调用（RespServer.thread_func() 函数），即当通信线程接收到返回的远程顶点数据后，调用该函数。
      * 
-     * 该函数的过程实质上也就是将 key 顶点从请求缓存列表 pcache（R-table）中移到线程正在使用的顶点 map 中（即代码中的 vcache，论文中的 Γ-table）
+     * 该函数的过程实质上也就是将 key 顶点从请求缓存列表 pcache（R-table）中移到已拉取到的远程顶点缓存表 中（即代码中的 vcache，论文中的 Γ-table）
+     * 
+     * @param key               输入参数类型，顶点 id
+     * @param value             输入参数类型，顶点值     
+     * @param tid_collector     输出参数类型，保存请求过 key 顶点的任务 id
      */
     //to be called by communication threads: pass in "ValType *", "new"-ed outside
     //** obtain lock-counter from pcache
@@ -346,9 +360,9 @@ public:
 		bucket.lock();
 		AdjValue vpair;
 		vpair.value = value;
-		vpair.counter = pcache.erase(key, tid_collector); // 将 key 顶点从请求缓存列表中删除（因为该顶点已经获取到了），同时返回请求过 key 顶点的任务数量
-		bool inserted = bucket.insert(key, vpair); // 将顶点数据插入到线程正在使用的顶点 map 中（即 Γ-tables）
-		assert(inserted);//#DEBUG# to make sure item is not already in vcache 必须要确保插入成功，即确保线程正在使用的顶点 map 中不存在顶点 key。
+		vpair.counter = pcache.erase(key, tid_collector); // 将 key 顶点从请求缓存列表中删除（因为该顶点已经获取到了），同时返回请求过 key 顶点的任务（保存在 tid_collector）及其数量
+		bool inserted = bucket.insert(key, vpair); // 将顶点数据插入到已拉取到的远程顶点缓存表 中（即 Γ-tables）
+		assert(inserted);//#DEBUG# to make sure item is not already in vcache 必须要确保插入成功，即确保已拉取到的远程顶点缓存表 中不存在顶点 key。
         // 因为顶点 key 是通过远程请求获取到的，那说明本地正在使用的顶点 map 中一定不存在该顶点（如果存在的话，那么也不会通过远程请求获取）
 		//#DEBUG# this should be the case if logic is correct:
 		//#DEBUG# not_in_vcache -> pull -> insert
@@ -367,7 +381,7 @@ public:
     //we use the strategy of "batch-insert" + "trim-to-limit" (best-effort)
     //if we fail to trim to capacity limit after checking one round of zero-cache, we just return
     /**
-     * 删除 Z-tables、Γ-tables 中无任务使用的顶点的缓存数据（即在 Z-tables、Γ-tables 中，有些顶点没有被任务使用，则这些顶点的缓存数据可以删除掉，从而释放内存空间）。
+     * 根据 Z-tables 删除 Γ-tables 中无任务使用的顶点的缓存数据（即在 Γ-tables 中，有些顶点没有被任务使用，则这些顶点的缓存数据可以删除掉，从而释放内存空间）。
      * 返回的是删除失败的顶点个数
      * 
      * @param num_to_delete     试图删除的顶点个数
@@ -386,7 +400,7 @@ public:
 			while(it != bucket.zeros.end())
 			{
 				KeyType key = *it; // zeros 中顶点的 key
-				hash_map<KeyType, AdjValue> & kvmap = bucket.get_map(); // 线程正在使用的顶点 map，对应论文中的 Γ-tables
+				hash_map<KeyType, AdjValue> & kvmap = bucket.get_map(); // 已拉取到的远程顶点缓存表，对应论文中的 Γ-tables
 				auto it1 = kvmap.find(key);
 				assert(it1 != kvmap.end()); //#DEBUG# to make sure key is found, this is where libcuckoo's bug prompts
 				AdjValue & vpair = it1->second;
