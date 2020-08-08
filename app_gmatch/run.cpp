@@ -135,7 +135,7 @@ void addEdge_safe(GMatchSubgraph & g, VertexID id1, VertexID id2) //avoid redund
     v2 = g.getVertex(id2);
     int i = 0;
     vector<AdjItem> & adj = v2->value.adj;
-    // 遍历 v2 的邻接表检查是否含有顶点 v1，如果含有的话 i < adj.size()；如果含有的话 i = adj.size()
+    // 遍历 v2 的邻接表检查是否含有顶点 v1，如果含有的话 i < adj.size()；如果不含有的话，则 i = adj.size()
     for(; i<adj.size(); i++)
     	if(adj[i].id == id1) break;
     if(i == adj.size())
