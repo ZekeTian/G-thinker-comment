@@ -15,7 +15,7 @@
 //########################################################################
 
 /**
- *  Ïß³Ì·â×°Àà
+ *  çº¿ç¨‹å°è£…ç±»
  */
 
 #ifndef COMPER_H_
@@ -55,25 +55,25 @@ public:
     typedef vector<VertexT*> VertexVec;
 
     typedef deque<TaskT *> TaskQueue;
-    typedef TaskMap<TaskT> TaskMapT; // ÈÎÎñ Map ÀàĞÍ
+    typedef TaskMap<TaskT> TaskMapT; // ä»»åŠ¡ Map ç±»å‹
     typedef hash_map<KeyT, VertexT*> VTable;
     typedef typename VTable::iterator TableIter;
 
     /**
-     * µ±Ç°Ïß³ÌµÄÈÎÎñ¶ÓÁĞ
-     * ¸Ã¶ÓÁĞÊÇÒ»¸öË«¶Ë¶ÓÁĞ£¬¶ÓÍ·¡¢¶ÓÎ²¿ÉÄÜ½øĞĞµÄ²Ù×÷ÈçÏÂ£º
-     * ¶ÓÍ·£º´Ó¶ÓÍ·È¡ÈÎÎñÖ´ĞĞ£»´Ó´ÅÅÌÎÄ¼şÖĞ¶ÁÈ¡ÈÎÎñ£¬È»ºó´Ó¶ÓÍ·Ñ¹Èë
-     * ¶ÓÎ²£º´Ó¾ÍĞ÷ÈÎÎñ¶ÓÁĞÖĞÈ¡³öÈÎÎñ£¬È»ºó´Ó¶ÓÎ²Ñ¹Èë£»´Ó¶ÓÎ²È¡³öÈÎÎñ£¬È»ºóĞ´µ½´ÅÅÌÎÄ¼şÖĞ
+     * å½“å‰çº¿ç¨‹çš„ä»»åŠ¡é˜Ÿåˆ—
+     * è¯¥é˜Ÿåˆ—æ˜¯ä¸€ä¸ªåŒç«¯é˜Ÿåˆ—ï¼Œé˜Ÿå¤´ã€é˜Ÿå°¾å¯èƒ½è¿›è¡Œçš„æ“ä½œå¦‚ä¸‹ï¼š
+     * é˜Ÿå¤´ï¼šä»é˜Ÿå¤´å–ä»»åŠ¡æ‰§è¡Œï¼›ä»ç£ç›˜æ–‡ä»¶ä¸­è¯»å–ä»»åŠ¡ï¼Œç„¶åä»é˜Ÿå¤´å‹å…¥
+     * é˜Ÿå°¾ï¼šä»å°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸­å–å‡ºä»»åŠ¡ï¼Œç„¶åä»é˜Ÿå°¾å‹å…¥ï¼›ä»é˜Ÿå°¾å–å‡ºä»»åŠ¡ï¼Œç„¶åå†™åˆ°ç£ç›˜æ–‡ä»¶ä¸­
      */
-    TaskQueue q_task; //written only by the thread itself, no need to be conque µ±Ç°Ïß³ÌµÄÈÎÎñ¶ÓÁĞ
+    TaskQueue q_task; //written only by the thread itself, no need to be conque å½“å‰çº¿ç¨‹çš„ä»»åŠ¡é˜Ÿåˆ—
     
     /**
-     * µ±Ç°Ïß³ÌµÄ id
+     * å½“å‰çº¿ç¨‹çš„ id
      */
-    int thread_rank; // Ïß³Ì id
+    int thread_rank; // çº¿ç¨‹ id
 
     /**
-     * ´æ·ÅÈÎÎñµÄ map
+     * å­˜æ”¾ä»»åŠ¡çš„ map
      */
     TaskMapT map_task;
     
@@ -83,10 +83,10 @@ public:
     thread main_thread;
 
     /**
-     * ÓÃ»§×Ô¶¨Òåº¯Êı£¬ÓÃÓÚÉú³ÉÈÎÎñ¡£ÔÚÊµÏÖ¸Ãº¯ÊıÊ±£¬ÄÚ²¿Òªµ÷ÓÃ add_task()£¬´Ó¶ø½«Éú³ÉµÄÈÎÎñ¼ÓÈëµ½ÈÎÎñ¶ÓÁĞ q_task ÖĞ
+     * ç”¨æˆ·è‡ªå®šä¹‰å‡½æ•°ï¼Œç”¨äºç”Ÿæˆä»»åŠ¡ã€‚åœ¨å®ç°è¯¥å‡½æ•°æ—¶ï¼Œå†…éƒ¨è¦è°ƒç”¨ add_task()ï¼Œä»è€Œå°†ç”Ÿæˆçš„ä»»åŠ¡åŠ å…¥åˆ°ä»»åŠ¡é˜Ÿåˆ— q_task ä¸­
      */
     //UDF1
-    virtual void task_spawn(VertexT * v) = 0; //call add_task() inside, will flush tasks to disk if queue overflows ÔÚÄÚ²¿Òªµ÷ÓÃ add_task()£¬´Ó¶ø½«Éú³ÉµÄÈÎÎñ¼ÓÈëµ½ÈÎÎñ¶ÓÁĞ q_task ÖĞ
+    virtual void task_spawn(VertexT * v) = 0; //call add_task() inside, will flush tasks to disk if queue overflows åœ¨å†…éƒ¨è¦è°ƒç”¨ add_task()ï¼Œä»è€Œå°†ç”Ÿæˆçš„ä»»åŠ¡åŠ å…¥åˆ°ä»»åŠ¡é˜Ÿåˆ— q_task ä¸­
     //UDF2
     virtual bool compute(SubgraphT & g, ContextT & context, vector<VertexT *> & frontier) = 0;
 
@@ -97,8 +97,8 @@ public:
 	}
 
     /**
-     * Èç¹ûÈÎÎñÎ´½áÊø£¬Ôò·µ»Ø true£¬±íÊ¾ÔÚÏÂÒ»ÂÖµü´úÖĞÈÔÈ»ĞèÒª½øĞĞ¼ÆËã£»·ñÔò£¬·µ»Ø false£¨¼´ÈÎÎñÔÚ´ËÂÖµü´úÖĞ½áÊø£©¡£
-     * ¸Ãº¯Êı»áÔÚ comper µÄ push_task_from_taskmap ºÍ pop_task ÖĞµ÷ÓÃ
+     * å¦‚æœä»»åŠ¡æœªç»“æŸï¼Œåˆ™è¿”å› trueï¼Œè¡¨ç¤ºåœ¨ä¸‹ä¸€è½®è¿­ä»£ä¸­ä»ç„¶éœ€è¦è¿›è¡Œè®¡ç®—ï¼›å¦åˆ™ï¼Œè¿”å› falseï¼ˆå³ä»»åŠ¡åœ¨æ­¤è½®è¿­ä»£ä¸­ç»“æŸï¼‰ã€‚
+     * è¯¥å‡½æ•°ä¼šåœ¨ comper çš„ push_task_from_taskmap å’Œ pop_task ä¸­è°ƒç”¨
      */
     //UDF2 wrapper
     bool compute(TaskT* task)
@@ -111,13 +111,13 @@ public:
     ofstream fout;
 
     /**
-     * Comper Ïß³ÌÆô¶¯
+     * Comper çº¿ç¨‹å¯åŠ¨
      */
     void start(int thread_id)
     {
     	thread_rank= map_task.thread_rank = thread_id;
     	//------
-        // Éú³ÉÒ»¸öÎÄ¼ş£¬ÎÄ¼şÃû¸ñÊ½Îª£ºÄ¿Â¼/workerµÄid_Ïß³Ìid
+        // ç”Ÿæˆä¸€ä¸ªæ–‡ä»¶ï¼Œæ–‡ä»¶åæ ¼å¼ä¸ºï¼šç›®å½•/workerçš„id_çº¿ç¨‹id
 		char file[1000], no[40];
 		long long fileSeqNo = 1;
 		strcpy(file, REPORT_DIR.c_str());
@@ -135,9 +135,9 @@ public:
     }
 
     /**
-     * ¸Ãº¯ÊıÓĞÁ½¸ö¹¦ÄÜ£º
-     * £¨1£©Èç¹û´ÅÅÌÎÄ¼ş²»Îª¿Õ£¬´Ó´ÅÅÌÎÄ¼şÖĞ¼ÓÔØÈÎÎñ£¬²¢½«ÈÎÎñ¼ÓÈëµ½ÈÎÎñ¶ÓÁĞÖĞ¡£
-     * £¨2£©ÅĞ¶Ï´ÅÅÌÎÄ¼şÊÇ·ñÎª¿Õ£¬Èç¹û´ÅÅÌÎÄ¼şÎª¿Õ£¬Ôò·µ»Ø false£»·ñÔò£¬·µ»Ø true
+     * è¯¥å‡½æ•°æœ‰ä¸¤ä¸ªåŠŸèƒ½ï¼š
+     * ï¼ˆ1ï¼‰å¦‚æœç£ç›˜æ–‡ä»¶ä¸ä¸ºç©ºï¼Œä»ç£ç›˜æ–‡ä»¶ä¸­åŠ è½½ä»»åŠ¡ï¼Œå¹¶å°†ä»»åŠ¡åŠ å…¥åˆ°ä»»åŠ¡é˜Ÿåˆ—ä¸­ã€‚
+     * ï¼ˆ2ï¼‰åˆ¤æ–­ç£ç›˜æ–‡ä»¶æ˜¯å¦ä¸ºç©ºï¼Œå¦‚æœç£ç›˜æ–‡ä»¶ä¸ºç©ºï¼Œåˆ™è¿”å› falseï¼›å¦åˆ™ï¼Œè¿”å› true
      */
     //load tasks from a file (from "global_file_list" to the task queue)
     //returns false if "global_file_list" is empty
@@ -154,7 +154,7 @@ public:
     		{
     			TaskT* task;
     			in >> task;
-    			add_task(task); // ´ÓÎÄ¼şÖĞ·´ĞòÁĞ»¯³ö task ¶ÔÏóºó£¬½«Æä¼ÓÈëµ½ÈÎÎñ¶ÓÁĞÖĞ
+    			add_task(task); // ä»æ–‡ä»¶ä¸­ååºåˆ—åŒ–å‡º task å¯¹è±¡åï¼Œå°†å…¶åŠ å…¥åˆ°ä»»åŠ¡é˜Ÿåˆ—ä¸­
     		}
     		in.close();
 
@@ -167,40 +167,40 @@ public:
     }
 
     /**
-     * ¸ù¾İ±¾µØ¶¥µãÁĞ±íÖĞµÄ¶¥µãÉú³ÉÈÎÎñ£¬²¢½«Éú³ÉµÄÈÎÎñ·Å½øÈÎÎñ¶ÓÁĞ q_task ¡£
-     * ±¾µØ¶¥µãÁĞ±íÄÜÔÙÉú³ÉĞÂµÄÈÎÎñ£¬Ôò·µ»Ø true£»·ñÔò£¬·µ»Ø false¡£
+     * æ ¹æ®æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨ä¸­çš„é¡¶ç‚¹ç”Ÿæˆä»»åŠ¡ï¼Œå¹¶å°†ç”Ÿæˆçš„ä»»åŠ¡æ”¾è¿›ä»»åŠ¡é˜Ÿåˆ— q_task ã€‚
+     * æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨èƒ½å†ç”Ÿæˆæ–°çš„ä»»åŠ¡ï¼Œåˆ™è¿”å› trueï¼›å¦åˆ™ï¼Œè¿”å› falseã€‚
      */
     //load tasks from local-table
 	//returns false if local-table is exhausted
-    bool locTable2queue() // Éú³ÉÈÎÎñ³É¹¦£¬Ôò·µ»Ø true£»·ñÔò£¬·µ»Ø false
+    bool locTable2queue() // ç”Ÿæˆä»»åŠ¡æˆåŠŸï¼Œåˆ™è¿”å› trueï¼›å¦åˆ™ï¼Œè¿”å› false
 	{
 		size_t begin, end; //[begin, end) are the assigned vertices (their positions in local-table)
 		//note that "end" is exclusive
 		VTable & ltable = *(VTable *)global_local_table;
-		int size = ltable.size(); // ±¾µØ¶¥µãÁĞ±íµÄ´óĞ¡
+		int size = ltable.size(); // æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨çš„å¤§å°
 		//======== critical section on "global_vertex_pos"
-        // ·ÀÖ¹¶à¸öÏß³ÌÍ¬Ê±¶ÔÈ«¾Ö±¾µØ¶¥µãÁĞ±í£¨global_local_table£©½øĞĞ·ÃÎÊ£¬Òò´ËÏÈ¼ÓËø½øĞĞÍ¬²½
+        // é˜²æ­¢å¤šä¸ªçº¿ç¨‹åŒæ—¶å¯¹å…¨å±€æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨ï¼ˆglobal_local_tableï¼‰è¿›è¡Œè®¿é—®ï¼Œå› æ­¤å…ˆåŠ é”è¿›è¡ŒåŒæ­¥
 		global_vertex_pos_lock.lock();
-		if(global_vertex_pos < size) // »¹ÄÜ¼ÌĞø´Ó±¾µØ¶¥µãÁĞ±íÖĞÉú³ÉÈÎÎñ
+		if(global_vertex_pos < size) // è¿˜èƒ½ç»§ç»­ä»æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨ä¸­ç”Ÿæˆä»»åŠ¡
 		{
 			begin = global_vertex_pos; //starting element
-			end = begin + TASK_BATCH_NUM; // Ò»´ÎÈ¡³öÒ»¸öÅú´ÎµÄÈÎÎñ
+			end = begin + TASK_BATCH_NUM; // ä¸€æ¬¡å–å‡ºä¸€ä¸ªæ‰¹æ¬¡çš„ä»»åŠ¡
 			if(end > size) end = size;
 			global_vertex_pos = end; //next position to spawn
 		}
-		else begin = -1; //meaning that local-table is exhausted ±¾µØ¶¥µãÁĞ±íÖĞ²»ÄÜÔÙÉú³ÉĞÂµÄÈÎÎñ
+		else begin = -1; //meaning that local-table is exhausted æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨ä¸­ä¸èƒ½å†ç”Ÿæˆæ–°çš„ä»»åŠ¡
 		global_vertex_pos_lock.unlock();
 		//======== spawn tasks from local-table[begin, end)
-        // ´Ó±¾µØ¶¥µãÁĞ±íµÄ [begin, end) Çø¼äÄÚÈ¡³ö¶¥µãÉú³ÉÈÎÎñ
-		if(begin == -1) return false; // ±¾µØ¶¥µãÁĞ±íÖĞ²»ÄÜÔÙÉú³ÉĞÂµÄÈÎÎñ£¬Ôò·µ»Ø false
+        // ä»æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨çš„ [begin, end) åŒºé—´å†…å–å‡ºé¡¶ç‚¹ç”Ÿæˆä»»åŠ¡
+		if(begin == -1) return false; // æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨ä¸­ä¸èƒ½å†ç”Ÿæˆæ–°çš„ä»»åŠ¡ï¼Œåˆ™è¿”å› false
 		else
 		{
-            VertexVec & gb_vertexes = *(VertexVec*) global_vertexes; // È¡³öµ±Ç° worker µÄ±¾µØ¶¥µãÁĞ±í
+            VertexVec & gb_vertexes = *(VertexVec*) global_vertexes; // å–å‡ºå½“å‰ worker çš„æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨
 			for(int i=begin; i<end; i++)
 			{//call UDF to spawn tasks
-				task_spawn(gb_vertexes[i]); // Öğ¸ö¶¥µãÉú³ÉÈÎÎñ£¬»áµ÷ÓÃ add_task() £¬½«Éú³ÉµÄÈÎÎñ·Å½øÈÎÎñ¶ÓÁĞ q_task 
+				task_spawn(gb_vertexes[i]); // é€ä¸ªé¡¶ç‚¹ç”Ÿæˆä»»åŠ¡ï¼Œä¼šè°ƒç”¨ add_task() ï¼Œå°†ç”Ÿæˆçš„ä»»åŠ¡æ”¾è¿›ä»»åŠ¡é˜Ÿåˆ— q_task 
 			}
-			return true; // ÄÜÉú³ÉĞÂµÄÈÎÎñ£¬Ôò·µ»Ø true
+			return true; // èƒ½ç”Ÿæˆæ–°çš„ä»»åŠ¡ï¼Œåˆ™è¿”å› true
 		}
 	}
 
@@ -212,23 +212,23 @@ public:
 
 
     /**
-     * µ¯³öÒ»¸öÈÎÎñ²¢´¦ÀíËü£¬Èç¹ûÓĞ±ØÒªÔò»á¼ÓÈë task_map ÖĞ£¨Èç¹ûĞèÒªÀ­È¡Ô¶³Ì¶¥µã£¬Ôò»á½«¸ÃÈÎÎñ¼ÓÈëµ½¹ÒÆğÈÎÎñ map ÖĞ£¬¼´ task-map£©¡£
-     * Èç¹ûÈÎÎñ¶ÓÁĞ q_task Îª¿Õ£¬²¢ÇÒ±¾µØ¶¥µãÁĞ±íÖĞ²»ĞèÒª´¦Àí¶¥µã£¨²»ÄÜÉú³ÉĞÂÈÎÎñ£©£¬Ôò·µ»Ø false£¨¼´Ã»ÓĞÈÎÎñ¿ÉÒÔÖ´ĞĞ£©£» ÓĞÈÎÎñ¿ÉÒÔÖ´ĞĞ£¬
+     * å¼¹å‡ºä¸€ä¸ªä»»åŠ¡å¹¶å¤„ç†å®ƒï¼Œå¦‚æœæœ‰å¿…è¦åˆ™ä¼šåŠ å…¥ task_map ä¸­ï¼ˆå¦‚æœéœ€è¦æ‹‰å–è¿œç¨‹é¡¶ç‚¹ï¼Œåˆ™ä¼šå°†è¯¥ä»»åŠ¡åŠ å…¥åˆ°æŒ‚èµ·ä»»åŠ¡ map ä¸­ï¼Œå³ task-mapï¼‰ã€‚
+     * å¦‚æœä»»åŠ¡é˜Ÿåˆ— q_task ä¸ºç©ºï¼Œå¹¶ä¸”æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨ä¸­ä¸éœ€è¦å¤„ç†é¡¶ç‚¹ï¼ˆä¸èƒ½ç”Ÿæˆæ–°ä»»åŠ¡ï¼‰ï¼Œåˆ™è¿”å› falseï¼ˆå³æ²¡æœ‰ä»»åŠ¡å¯ä»¥æ‰§è¡Œï¼‰ï¼› æœ‰ä»»åŠ¡å¯ä»¥æ‰§è¡Œï¼Œ
      *
-     * ¸Ãº¯ÊıµÄ¾ßÌå¹ı³ÌÈçÏÂ£º
-     * Èç¹ûÈÎÎñ¶ÓÁĞÖĞÈÎÎñÊıÁ¿½ÏÉÙ£¬Ôò£º
-     *    ÏÈ´Ó´ÅÅÌÎÄ¼şÖĞÈ¡³öÈÎÎñ£¬·Å½øÈÎÎñ¶ÓÁĞÖĞ
-     *    Èç¹û´ÅÅÌÎÄ¼şÎª¿Õ£¬Ôò´Ó¾ÍĞ÷ÈÎÎñ¶ÓÁĞÖĞ²»¶ÏÈ¡ÈÎÎñÖ´ĞĞ£¬Ö±µ½¾ÍĞ÷ÈÎÎñ¶ÓÁĞÎª¿Õ»òÕßÈÎÎñ¶ÓÁĞÈÎÎñÊıÁ¿´ïµ½ãĞÖµ
-     *       £¨ÒòÎªÔÚÖ´ĞĞ¾ÍĞ÷ÈÎÎñ¶ÓÁĞÖĞµÄÈÎÎñÊ±£¬²¿·ÖÈÎÎñ¿ÉÄÜĞèÒªÔÚÏÂÂÖµü´úÖĞ¼ÌĞøÖ´ĞĞ£¬¶øÕâĞ©ÈÎÎñ»á±»·Å½øÈÎÎñ¶ÓÁĞÖĞ£¬Òò´ËÈÎÎñ¶ÓÁĞÖĞµÄÈÎÎñÊıÁ¿»áÔö¼Ó£©
-     *    Èç¹û¾ÍĞ÷ÈÎÎñ¶ÓÁĞÎª¿Õ£¬Ôò±¾µØ¶¥µãÁĞ±íÉú³ÉÈÎÎñ
-     * Èç¹ûÈÎÎñ¶ÓÁĞÎª¿Õ£¬ÇÒÎŞ·¨Í¨¹ı´ÅÅÌÎÄ¼ş¡¢±¾µØ¶¥µãÁĞ±íÉú³ÉÈÎÎñ£¬Ôò·µ»Ø false (¼´Ã»ÓĞÈÎÎñ¿ÉÒÔÖ´ĞĞ)
-     * ´ÓÈÎÎñ¶ÓÁĞÖĞµ¯³öÒ»¸öÈÎÎñ t¡£ÔÚ while Ñ­»·ÖĞ£¬²»¶ÏÀ­È¡ÈÎÎñ t ĞèÒªµÄ¶¥µã¡¢Ö´ĞĞÈÎÎñ t £¬Ö±µ½ÈÎÎñ t ½áÊø»òÕßÈÎÎñ t ±»¹ÒÆğ£¨ÇëÇóÔ¶³Ì¶¥µã£©ÎªÖ¹
-     * º¯Êı½áÊø£¬·µ»Ø true 
+     * è¯¥å‡½æ•°çš„å…·ä½“è¿‡ç¨‹å¦‚ä¸‹ï¼š
+     * å¦‚æœä»»åŠ¡é˜Ÿåˆ—ä¸­ä»»åŠ¡æ•°é‡è¾ƒå°‘ï¼Œåˆ™ï¼š
+     *    å…ˆä»ç£ç›˜æ–‡ä»¶ä¸­å–å‡ºä»»åŠ¡ï¼Œæ”¾è¿›ä»»åŠ¡é˜Ÿåˆ—ä¸­
+     *    å¦‚æœç£ç›˜æ–‡ä»¶ä¸ºç©ºï¼Œåˆ™ä»å°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸­ä¸æ–­å–ä»»åŠ¡æ‰§è¡Œï¼Œç›´åˆ°å°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸ºç©ºæˆ–è€…ä»»åŠ¡é˜Ÿåˆ—ä»»åŠ¡æ•°é‡è¾¾åˆ°é˜ˆå€¼
+     *       ï¼ˆå› ä¸ºåœ¨æ‰§è¡Œå°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸­çš„ä»»åŠ¡æ—¶ï¼Œéƒ¨åˆ†ä»»åŠ¡å¯èƒ½éœ€è¦åœ¨ä¸‹è½®è¿­ä»£ä¸­ç»§ç»­æ‰§è¡Œï¼Œè€Œè¿™äº›ä»»åŠ¡ä¼šè¢«æ”¾è¿›ä»»åŠ¡é˜Ÿåˆ—ä¸­ï¼Œå› æ­¤ä»»åŠ¡é˜Ÿåˆ—ä¸­çš„ä»»åŠ¡æ•°é‡ä¼šå¢åŠ ï¼‰
+     *    å¦‚æœå°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸ºç©ºï¼Œåˆ™æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨ç”Ÿæˆä»»åŠ¡
+     * å¦‚æœä»»åŠ¡é˜Ÿåˆ—ä¸ºç©ºï¼Œä¸”æ— æ³•é€šè¿‡ç£ç›˜æ–‡ä»¶ã€æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨ç”Ÿæˆä»»åŠ¡ï¼Œåˆ™è¿”å› false (å³æ²¡æœ‰ä»»åŠ¡å¯ä»¥æ‰§è¡Œ)
+     * ä»ä»»åŠ¡é˜Ÿåˆ—ä¸­å¼¹å‡ºä¸€ä¸ªä»»åŠ¡ tã€‚åœ¨ while å¾ªç¯ä¸­ï¼Œä¸æ–­æ‹‰å–ä»»åŠ¡ t éœ€è¦çš„é¡¶ç‚¹ã€æ‰§è¡Œä»»åŠ¡ t ï¼Œç›´åˆ°ä»»åŠ¡ t ç»“æŸæˆ–è€…ä»»åŠ¡ t è¢«æŒ‚èµ·ï¼ˆè¯·æ±‚è¿œç¨‹é¡¶ç‚¹ï¼‰ä¸ºæ­¢
+     * å‡½æ•°ç»“æŸï¼Œè¿”å› true 
      */
     //part 2's logic: get a task, process it, and add to task-map if necessary
     //- returns false if (a) q_task is empty and
     // *** (b) locTable2queue() did not process a vertex (may process vertices but tasks are pruned)
-    //condition to call: µ÷ÓÃµÄÁ½ÖÖÇé¿ö
+    //condition to call: è°ƒç”¨çš„ä¸¤ç§æƒ…å†µ
     //1. map_task has space 
     //2. vcache has space
     bool pop_task()
@@ -236,58 +236,58 @@ public:
     	bool task_spawn_called = false;
     	bool push_called = false;
     	//fill the queue when there is space
-    	if(q_task.size() <= TASK_BATCH_NUM) // ÈÎÎñ¶ÓÁĞÖĞµÄÈÎÎñÊıÁ¿½ÏÉÙ£¬ĞèÒªÏòÈÎÎñ¶ÓÁĞÖĞÌí¼ÓÈÎÎñ£¬´Ó¶ø±£³ÖÈÎÎñ¶ÓÁĞÖĞÓĞ×ã¹»µÄÈÎÎñ£¬±£Ö¤Ïß³Ì¾¡¿ÉÄÜµØ´¦ÓÚ¹¤×÷×´Ì¬
+    	if(q_task.size() <= TASK_BATCH_NUM) // ä»»åŠ¡é˜Ÿåˆ—ä¸­çš„ä»»åŠ¡æ•°é‡è¾ƒå°‘ï¼Œéœ€è¦å‘ä»»åŠ¡é˜Ÿåˆ—ä¸­æ·»åŠ ä»»åŠ¡ï¼Œä»è€Œä¿æŒä»»åŠ¡é˜Ÿåˆ—ä¸­æœ‰è¶³å¤Ÿçš„ä»»åŠ¡ï¼Œä¿è¯çº¿ç¨‹å°½å¯èƒ½åœ°å¤„äºå·¥ä½œçŠ¶æ€
     	{
-            // Ìí¼ÓÈÎÎñµÄÓÅÏÈ¼¶£º´ÅÅÌÎÄ¼ş > ¾ÍĞ÷ÈÎÎñ¶ÓÁĞÖĞ > ±¾µØ¶¥µãÁĞ±í
-            // ÏÈ´Ó´ÅÅÌÎÄ¼ş¼ÓÔØÈÎÎñ£¬Èç¹û´ÅÅÌÎÄ¼şÎª¿Õ£¬Ôò´Ó task-map ÖĞÉú³ÉÈÎÎñ
-    		if(!file2queue()) //priority <1>: fill from file on local disk Èç¹ûÄÜ´Ó´ÅÅÌÎÄ¼şÖĞ¼ÓÔØÈÎÎñ£¬·µ»Ø true£»·ñÔò£¬·µ»Ø false
-    		{//"global_file_list" is empty ´ÅÅÌÎÄ¼şÎª¿Õ
+            // æ·»åŠ ä»»åŠ¡çš„ä¼˜å…ˆçº§ï¼šç£ç›˜æ–‡ä»¶ > å°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸­ > æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨
+            // å…ˆä»ç£ç›˜æ–‡ä»¶åŠ è½½ä»»åŠ¡ï¼Œå¦‚æœç£ç›˜æ–‡ä»¶ä¸ºç©ºï¼Œåˆ™ä» task-map ä¸­ç”Ÿæˆä»»åŠ¡
+    		if(!file2queue()) //priority <1>: fill from file on local disk å¦‚æœèƒ½ä»ç£ç›˜æ–‡ä»¶ä¸­åŠ è½½ä»»åŠ¡ï¼Œè¿”å› trueï¼›å¦åˆ™ï¼Œè¿”å› false
+    		{//"global_file_list" is empty ç£ç›˜æ–‡ä»¶ä¸ºç©º
     			if(!push_task_from_taskmap()) //priority <2>: fetch a task from task-map
-    			{//CASE 1: task-map's "task_buf" is empty // ¾ÍĞ÷ÈÎÎñ¶ÓÁĞÎª¿Õ£¬Ôò´Ó±¾µØ¶¥µãÁĞ±íÖĞÉú³ÉĞÂµÄÈÎÎñ
-    				task_spawn_called = locTable2queue(); // ´Ó±¾µØ¶¥µãÁĞ±íÖĞÉú³ÉÈÎÎñ£¬Éú³ÉµÄÈÎÎñ»á¼ÓÈëµ½ q_task ÖĞ£¬Èç¹ûÄÜÉú³ÉÈÎÎñ£¬Ôò·µ»Ø true
+    			{//CASE 1: task-map's "task_buf" is empty // å°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸ºç©ºï¼Œåˆ™ä»æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨ä¸­ç”Ÿæˆæ–°çš„ä»»åŠ¡
+    				task_spawn_called = locTable2queue(); // ä»æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨ä¸­ç”Ÿæˆä»»åŠ¡ï¼Œç”Ÿæˆçš„ä»»åŠ¡ä¼šåŠ å…¥åˆ° q_task ä¸­ï¼Œå¦‚æœèƒ½ç”Ÿæˆä»»åŠ¡ï¼Œåˆ™è¿”å› true
     			}
     			else
     			{//CASE 2: try to move TASK_BATCH_NUM tasks from task-map to the queue
-                    // ¾ÍĞ÷ÈÎÎñ¶ÓÁĞ²»Îª¿Õ£¬Ôò´Ó task_map ÖĞÈ¡³ö TASK_BATCH_NUM ¸öÈÎÎñ£¬·Å½øµ±Ç°µÄÈÎÎñ¶ÓÁĞ q_task ÖĞ
-                    // ÉÏÃæ if(!push_task_from_taskmap()) ÖĞµÄ push_task_from_taskmap() º¯ÊıÖĞÖ´ĞĞÁË compute ¼ÆËãÈÎÎñ
-    				push_called = true; // ´Ó¾ÍĞ÷¶ÓÁĞÖĞÈ¡³öÈÎÎñ²¢Ñ¹Èëµ½¶ÓÁĞ q_task ÖĞ
+                    // å°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸ä¸ºç©ºï¼Œåˆ™ä» task_map ä¸­å–å‡º TASK_BATCH_NUM ä¸ªä»»åŠ¡ï¼Œæ”¾è¿›å½“å‰çš„ä»»åŠ¡é˜Ÿåˆ— q_task ä¸­
+                    // ä¸Šé¢ if(!push_task_from_taskmap()) ä¸­çš„ push_task_from_taskmap() å‡½æ•°ä¸­æ‰§è¡Œäº† compute è®¡ç®—ä»»åŠ¡
+    				push_called = true; // ä»å°±ç»ªé˜Ÿåˆ—ä¸­å–å‡ºä»»åŠ¡å¹¶å‹å…¥åˆ°é˜Ÿåˆ— q_task ä¸­
     				while(q_task.size() < 2 * TASK_BATCH_NUM)
     				{//i starts from 1 since push_task_from_taskmap() has been called once 
-    					if(!push_task_from_taskmap()) break; //task-map's "task_buf" is empty, no more try ¾ÍĞ÷¶ÓÁĞÎª¿Õ£¬Ôò²»ÔÙ´ÓÖĞÈ¡ÈÎÎñ
+    					if(!push_task_from_taskmap()) break; //task-map's "task_buf" is empty, no more try å°±ç»ªé˜Ÿåˆ—ä¸ºç©ºï¼Œåˆ™ä¸å†ä»ä¸­å–ä»»åŠ¡
     				}
     			}
-    		} // ·ñÔò£¬´ÅÅÌÎÄ¼ş²»Îª¿Õ£¬ÒÑ¾­Í¨¹ı if(!file2queue()) ÖĞµÄ file2queue() ½«´ÅÅÌÎÄ¼şÖĞµÄÈÎÎñÌí¼Óµ½ÈÎÎñ¶ÓÁĞÖĞ
+    		} // å¦åˆ™ï¼Œç£ç›˜æ–‡ä»¶ä¸ä¸ºç©ºï¼Œå·²ç»é€šè¿‡ if(!file2queue()) ä¸­çš„ file2queue() å°†ç£ç›˜æ–‡ä»¶ä¸­çš„ä»»åŠ¡æ·»åŠ åˆ°ä»»åŠ¡é˜Ÿåˆ—ä¸­
     	}
     	//==================================
     	if(q_task.size() == 0){
 			if(task_spawn_called) return true;
 			else if(push_called) return true;
-			else return false; // ´ÅÅÌÎÄ¼şÎª¿Õ¡¢±¾µØ¶¥µãÁĞ±íÖĞÃ»ÓĞ¶¥µãĞèÒª¼ÌĞø´¦Àí£¨²»ÄÜÉú³ÉĞÂÈÎÎñ£©£¬ÇÒÈÎÎñ¶ÓÁĞÎª¿Õ£¬Ôò·µ»Ø false£¨Êµ¼Ê¾ÍÊÇÃ»ÓĞÈÎÎñ¿ÉÒÔ¼ÌĞøÖ´ĞĞ£©
+			else return false; // ç£ç›˜æ–‡ä»¶ä¸ºç©ºã€æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨ä¸­æ²¡æœ‰é¡¶ç‚¹éœ€è¦ç»§ç»­å¤„ç†ï¼ˆä¸èƒ½ç”Ÿæˆæ–°ä»»åŠ¡ï¼‰ï¼Œä¸”ä»»åŠ¡é˜Ÿåˆ—ä¸ºç©ºï¼Œåˆ™è¿”å› falseï¼ˆå®é™…å°±æ˜¯æ²¡æœ‰ä»»åŠ¡å¯ä»¥ç»§ç»­æ‰§è¡Œï¼‰
 		}
-    	//fetch task from Comper's task queue head ´ÓÈÎÎñ¶ÓÁĞÖĞÈ¡³öÈÎÎñ
+    	//fetch task from Comper's task queue head ä»ä»»åŠ¡é˜Ÿåˆ—ä¸­å–å‡ºä»»åŠ¡
     	TaskT * task = q_task.front();
     	q_task.pop_front();
     	//task.to_pull should've been set
     	//[*] process "to_pull" to get "frontier_vertexes" and return "how many" vertices to pull
     	//if "how many" = 0, call task.compute(.) to set task.to_pull (and unlock old "to_pull") and go to [*]
-    	bool go = true; //whether to continue another round of task.compute() ±ê¼ÇÈÎÎñÊÇ·ñĞèÒªÁíÍâÒ»ÂÖ¼ÆËã
-    	//init-ed to be true since:  ³õÊ¼Îª true ÓĞÈçÏÂÁ½¸öÔ­Òò£º
-    	//1. if it is newly spawned, should allow it to run Èç¹û¸ÃÈÎÎñÊÇ¸ÕÉú³ÉµÄ£¬ÔòÓ¦¸ÃÔÊĞíÆäÔËĞĞ
+    	bool go = true; //whether to continue another round of task.compute() æ ‡è®°ä»»åŠ¡æ˜¯å¦éœ€è¦å¦å¤–ä¸€è½®è®¡ç®—
+    	//init-ed to be true since:  åˆå§‹ä¸º true æœ‰å¦‚ä¸‹ä¸¤ä¸ªåŸå› ï¼š
+    	//1. if it is newly spawned, should allow it to run å¦‚æœè¯¥ä»»åŠ¡æ˜¯åˆšç”Ÿæˆçš„ï¼Œåˆ™åº”è¯¥å…è®¸å…¶è¿è¡Œ
     	//2. if compute(.) returns false, should be filtered already, won't be popped
-        // Ñ­»·ÖĞ²»¶ÏÀ­È¡ÈÎÎñĞèÒªµÄ¶¥µã¡¢Ö´ĞĞ task ÈÎÎñ£¬Ö±µ½ÈÎÎñ½áÊø»òÕßÈÎÎñ±»¹ÒÆğ£¨ÇëÇóÔ¶³Ì¶¥µã£©ÎªÖ¹
-    	while(task->pull_all(counter, map_task)) //may call add2map(.) task À­È¡¶¥µã£¬Èç¹û¸ÃÈÎÎñĞèÒªµÄ¶¥µãÒÑ¾­È«²¿À­È¡µ½±¾µØ£¬Ôò·µ»Ø true£¬¿ÉÒÔ¼ÌĞøÏÂÒ»ÂÖµü´ú£»·ñÔò£¬À­È¡Ô¶³Ì¶¥µã£¬·µ»Ø false
+        // å¾ªç¯ä¸­ä¸æ–­æ‹‰å–ä»»åŠ¡éœ€è¦çš„é¡¶ç‚¹ã€æ‰§è¡Œ task ä»»åŠ¡ï¼Œç›´åˆ°ä»»åŠ¡ç»“æŸæˆ–è€…ä»»åŠ¡è¢«æŒ‚èµ·ï¼ˆè¯·æ±‚è¿œç¨‹é¡¶ç‚¹ï¼‰ä¸ºæ­¢
+    	while(task->pull_all(counter, map_task)) //may call add2map(.) task æ‹‰å–é¡¶ç‚¹ï¼Œå¦‚æœè¯¥ä»»åŠ¡éœ€è¦çš„é¡¶ç‚¹å·²ç»å…¨éƒ¨æ‹‰å–åˆ°æœ¬åœ°ï¼Œåˆ™è¿”å› trueï¼Œå¯ä»¥ç»§ç»­ä¸‹ä¸€è½®è¿­ä»£ï¼›å¦åˆ™ï¼Œæ‹‰å–è¿œç¨‹é¡¶ç‚¹ï¼Œè¿”å› false
     	{
     		go = compute(task);
     		task->unlock_all();
-    		if(go == false) // ÈÎÎñÔÚµ±Ç°µü´úÖĞ½áÊø
+    		if(go == false) // ä»»åŠ¡åœ¨å½“å‰è¿­ä»£ä¸­ç»“æŸ
     		{
     			global_tasknum_vec[thread_rank]++;
 				delete task;
-    			break; // ÈÎÎñ½áÊø£¬ÍË³öÑ­»·
+    			break; // ä»»åŠ¡ç»“æŸï¼Œé€€å‡ºå¾ªç¯
     		}
     	}
     	//now task is waiting for resps (task_map => task_buf => push_task_from_taskmap()), or finished
-		return true; // £¨1£©ÈÎÎñÔÚÀ­È¡Ô¶³Ì¶¥µã£¬µÈ´ıÏìÓ¦½á¹û¡££¨2£©ÈÎÎñÒÑ¾­½áÊø
+		return true; // ï¼ˆ1ï¼‰ä»»åŠ¡åœ¨æ‹‰å–è¿œç¨‹é¡¶ç‚¹ï¼Œç­‰å¾…å“åº”ç»“æœã€‚ï¼ˆ2ï¼‰ä»»åŠ¡å·²ç»ç»“æŸ
     }
 
     //=== for handling task streaming on disk ===
@@ -306,7 +306,7 @@ public:
     }
 
     /**
-     * ½« task ·Å½øµ±Ç°Ïß³ÌµÄÈÎÎñ¶ÓÁĞÖĞ£¬Èç¹ûÏß³Ì¶ÓÁĞÈÎÎñ´ïµ½ÉÏÏŞ£¬Ôò½«¸ÃÈÎÎñ´æ´¢µ½´ÅÅÌÎÄ¼şÖĞ
+     * å°† task æ”¾è¿›å½“å‰çº¿ç¨‹çš„ä»»åŠ¡é˜Ÿåˆ—ä¸­ï¼Œå¦‚æœçº¿ç¨‹é˜Ÿåˆ—ä»»åŠ¡è¾¾åˆ°ä¸Šé™ï¼Œåˆ™å°†è¯¥ä»»åŠ¡å­˜å‚¨åˆ°ç£ç›˜æ–‡ä»¶ä¸­
      */
     //tasks are added to q_task only through this function !!!
     //it flushes tasks as a file to disk when q_task's size goes beyond 3 * TASK_BATCH_NUM
@@ -314,7 +314,7 @@ public:
     {
     	if(q_task.size() == 3 * TASK_BATCH_NUM)
     	{
-            // µ±¶ÓÁĞÖĞµÄÈÎÎñÊıÁ¿µÈÓÚ 3 * TASK_BATCH_NUM Ê±£¬Ôò´Ó¶ÓÁĞÖĞÈ¡³ö TASK_BATCH_NUM ¸öÈÎÎñ±£´æµ½ÎÄ¼şÖĞ
+            // å½“é˜Ÿåˆ—ä¸­çš„ä»»åŠ¡æ•°é‡ç­‰äº 3 * TASK_BATCH_NUM æ—¶ï¼Œåˆ™ä»é˜Ÿåˆ—ä¸­å–å‡º TASK_BATCH_NUM ä¸ªä»»åŠ¡ä¿å­˜åˆ°æ–‡ä»¶ä¸­
     		set_fname();
     		ifbinstream out(fname);
     		//------
@@ -341,21 +341,21 @@ public:
     }
 
     /**
-     * ´Ó¾ÍĞ÷ÈÎÎñ¶ÓÁĞÖĞÈ¡³öÈÎÎñ£¬²¢ÇÒÖ´ĞĞ¡£Èç¹ûÈÎÎñĞèÒªÔÚÏÂÒ»ÂÖµü´úÖĞ¼ÌĞøÖ´ĞĞ£¬ÔòÑ¹Èëµ½µ±Ç°Ïß³ÌµÄÈÎÎñ¶ÓÁĞ q_task ÖĞ¡£
-     * Èç¹ûÄÜÈ¡³öÈÎÎñ£¬Ôò·µ»Ø true£»·ñÔò£¬·µ»Ø false
+     * ä»å°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸­å–å‡ºä»»åŠ¡ï¼Œå¹¶ä¸”æ‰§è¡Œã€‚å¦‚æœä»»åŠ¡éœ€è¦åœ¨ä¸‹ä¸€è½®è¿­ä»£ä¸­ç»§ç»­æ‰§è¡Œï¼Œåˆ™å‹å…¥åˆ°å½“å‰çº¿ç¨‹çš„ä»»åŠ¡é˜Ÿåˆ— q_task ä¸­ã€‚
+     * å¦‚æœèƒ½å–å‡ºä»»åŠ¡ï¼Œåˆ™è¿”å› trueï¼›å¦åˆ™ï¼Œè¿”å› false
      */
     //part 1's logic: fetch a task from task-map's "task_buf", process it, and add to q_task (flush to disk if necessary)
     bool push_task_from_taskmap() //returns whether a task is fetched from taskmap
     {
-    	TaskT * task = map_task.get(); // Êµ¼Ê´Ó task_buf ÖĞÈ¡³öÈÎÎñ
+    	TaskT * task = map_task.get(); // å®é™…ä» task_buf ä¸­å–å‡ºä»»åŠ¡
     	if(task == NULL) return false; //no task to fetch from q_task
     	task->set_pulled(); //reset task's frontier_vertexes (to replace NULL entries)
-    	bool go = compute(task); //set new "to_pull" Ö´ĞĞ¸ÃÈÎÎñµÄ¼ÆËã
+    	bool go = compute(task); //set new "to_pull" æ‰§è¡Œè¯¥ä»»åŠ¡çš„è®¡ç®—
     	task->unlock_all();
-    	if(go != false) add_task(task); //add task to queue ÈÎÎñĞèÒªÔÚÏÂÒ»ÂÖµü´úÖĞ¼ÌĞøÖ´ĞĞ£¬Òò´ËÈÔÈ»ĞèÒª½«ÈÎÎñ¼ÓÈëµ½¶ÓÁĞÖĞ
+    	if(go != false) add_task(task); //add task to queue ä»»åŠ¡éœ€è¦åœ¨ä¸‹ä¸€è½®è¿­ä»£ä¸­ç»§ç»­æ‰§è¡Œï¼Œå› æ­¤ä»ç„¶éœ€è¦å°†ä»»åŠ¡åŠ å…¥åˆ°é˜Ÿåˆ—ä¸­
         else
         {
-        	global_tasknum_vec[thread_rank]++; // ÈÎÎñ½áÊø£¬ÏàÓ¦ comper µÄÈÎÎñÊıÁ¿¼Ó 1
+        	global_tasknum_vec[thread_rank]++; // ä»»åŠ¡ç»“æŸï¼Œç›¸åº” comper çš„ä»»åŠ¡æ•°é‡åŠ  1
         	delete task;
         }
 		return true;
@@ -368,42 +368,42 @@ public:
 	{
     	while(global_end_label == false) //otherwise, thread terminates
 		{
-            // ÈÎÎñÃ»ÓĞ½áÊø£¬Ôò¼ÌĞø´¦Àí
+            // ä»»åŠ¡æ²¡æœ‰ç»“æŸï¼Œåˆ™ç»§ç»­å¤„ç†
     		bool nothing_processed_by_pop; //called pop_task(), but cannot get a task to process, and not called a task_spawn(v)
     		bool blocked; //blocked from calling pop_task()
-    		bool nothing_to_push; //nothing to fetch from taskmap's buf (but taskmap's map may not be empty) ±ê¼Ç¾ÍĞ÷ÈÎÎñ¶ÓÁĞÊÇ·ñÎª¿Õ£¬Èç¹ûÎª¿Õ£¬ÔòÎª true£»·ñÔò£¬Îª false£¨×¢Òâ£¬¹ÒÆğÈÎÎñ map ¿ÉÄÜ²»Îª¿Õ£©
-			for(int i=0; i<TASK_GET_NUM; i++) // TASK_GET_NUM ±íÊ¾Ò»´ÎÈ¡³öµÄÈÎÎñÊıÁ¿£¬Ä¬ÈÏÎª 1
+    		bool nothing_to_push; //nothing to fetch from taskmap's buf (but taskmap's map may not be empty) æ ‡è®°å°±ç»ªä»»åŠ¡é˜Ÿåˆ—æ˜¯å¦ä¸ºç©ºï¼Œå¦‚æœä¸ºç©ºï¼Œåˆ™ä¸º trueï¼›å¦åˆ™ï¼Œä¸º falseï¼ˆæ³¨æ„ï¼ŒæŒ‚èµ·ä»»åŠ¡ map å¯èƒ½ä¸ä¸ºç©ºï¼‰
+			for(int i=0; i<TASK_GET_NUM; i++) // TASK_GET_NUM è¡¨ç¤ºä¸€æ¬¡å–å‡ºçš„ä»»åŠ¡æ•°é‡ï¼Œé»˜è®¤ä¸º 1
 			{
-				nothing_processed_by_pop = false; // ±ê¼ÇÊÇ·ñÓĞÈÎÎñ¿ÉÒÔ¼ÌĞø´¦Àí£¬Èç¹ûÃ»ÓĞ¿ÉÒÔ¼ÌĞø´¦ÀíµÄÈÎÎñ£¬Ôò±ê¼ÇÎª true£»Èç¹ûÓĞÈÎÎñĞèÒª¼ÌĞø´¦Àí£¬Ôò±ê¼ÇÎª false
+				nothing_processed_by_pop = false; // æ ‡è®°æ˜¯å¦æœ‰ä»»åŠ¡å¯ä»¥ç»§ç»­å¤„ç†ï¼Œå¦‚æœæ²¡æœ‰å¯ä»¥ç»§ç»­å¤„ç†çš„ä»»åŠ¡ï¼Œåˆ™æ ‡è®°ä¸º trueï¼›å¦‚æœæœ‰ä»»åŠ¡éœ€è¦ç»§ç»­å¤„ç†ï¼Œåˆ™æ ‡è®°ä¸º false
 				blocked = false;
-				//check whether we can continue to pop a task (may add things to vcache) ¼ì²é»º´æ±í´óĞ¡
+				//check whether we can continue to pop a task (may add things to vcache) æ£€æŸ¥ç¼“å­˜è¡¨å¤§å°
 				if(global_cache_size < VCACHE_LIMIT + VCACHE_OVERSIZE_LIMIT) //(1 + alpha) * vcache_limit
 				{
-                    // ÅĞ¶ÏÏß³ÌµÄÈÎÎñ map ÊÇ·ñ»¹ÄÜ¼ÌĞø·ÅÈÎÎñ£¨ÔÚ pop_task() ÄÚ²¿£¬¿ÉÄÜ»áµ÷ÓÃ add2map £¬¼´»áÏò¹ÒÆğÈÎÎñ map ÖĞ¼ÓÈëÈÎÎñ£¬Òò´Ëµ÷ÓÃÇ°ÏÈ¼ì²é´óĞ¡£©
+                    // åˆ¤æ–­çº¿ç¨‹çš„ä»»åŠ¡ map æ˜¯å¦è¿˜èƒ½ç»§ç»­æ”¾ä»»åŠ¡ï¼ˆåœ¨ pop_task() å†…éƒ¨ï¼Œå¯èƒ½ä¼šè°ƒç”¨ add2map ï¼Œå³ä¼šå‘æŒ‚èµ·ä»»åŠ¡ map ä¸­åŠ å…¥ä»»åŠ¡ï¼Œå› æ­¤è°ƒç”¨å‰å…ˆæ£€æŸ¥å¤§å°ï¼‰
 					if(map_task.size < TASKMAP_LIMIT)
 					{
-                        // Ïß³ÌµÄÈÎÎñ map ¿ÉÒÔ¼ÌĞø·ÅÈÎÎñ£¬Ôòµ÷ÓÃ pop_task ´¦ÀíÈÎÎñ
-						if(!pop_task()) nothing_processed_by_pop = true; //only the last iteration is useful, others will be set back to false ÈÎÎñ¶ÓÁĞ q_task Îª¿Õ£¬²»ÄÜÉú³ÉĞÂÈÎÎñ£¬Ã»ÓĞ¿ÉÒÔ¼ÌĞø´¦ÀíµÄÈÎÎñ
+                        // çº¿ç¨‹çš„ä»»åŠ¡ map å¯ä»¥ç»§ç»­æ”¾ä»»åŠ¡ï¼Œåˆ™è°ƒç”¨ pop_task å¤„ç†ä»»åŠ¡
+						if(!pop_task()) nothing_processed_by_pop = true; //only the last iteration is useful, others will be set back to false ä»»åŠ¡é˜Ÿåˆ— q_task ä¸ºç©ºï¼Œä¸èƒ½ç”Ÿæˆæ–°ä»»åŠ¡ï¼Œæ²¡æœ‰å¯ä»¥ç»§ç»­å¤„ç†çš„ä»»åŠ¡
 					}
 					else blocked = true; //only the last iteration is useful, others will be set back to false 
 				}
-				else blocked = true; //only the last iteration is useful, others will be set back to false Ö»ÓĞÔÚ×îºóÒ»ÂÖµü´úÖĞÓĞĞ§
+				else blocked = true; //only the last iteration is useful, others will be set back to false åªæœ‰åœ¨æœ€åä¸€è½®è¿­ä»£ä¸­æœ‰æ•ˆ
 			}
 			//------
 			for(int i=0; i<TASK_RECV_NUM; i++)
 			{
 				nothing_to_push = false;
 				//unconditionally:
-				if(!push_task_from_taskmap()) nothing_to_push = true; //only the last iteration is useful, others will be set back to false ¾ÍĞ÷ÈÎÎñ¶ÓÁĞÎª¿Õ
+				if(!push_task_from_taskmap()) nothing_to_push = true; //only the last iteration is useful, others will be set back to false å°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸ºç©º
 			}
 			//------
 			if(nothing_to_push)
 			{
-                // ¾ÍĞ÷ÈÎÎñ¶ÓÁĞÎª¿Õ
-				if(blocked) usleep(WAIT_TIME_WHEN_IDLE); //avoid busy-wait when idle ¾ÍĞ÷ÈÎÎñ¶ÓÁĞÎª¿Õ£¬Í¬Ê±»º´æ±í»òÈÎÎñ map ÈİÁ¿´ïµ½ÉÏÏŞ£¬Ôò´ËÊ±µ±Ç°Ïß³ÌĞèÒª×èÈûÒ»¶ÎÊ±¼ä
+                // å°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸ºç©º
+				if(blocked) usleep(WAIT_TIME_WHEN_IDLE); //avoid busy-wait when idle å°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸ºç©ºï¼ŒåŒæ—¶ç¼“å­˜è¡¨æˆ–ä»»åŠ¡ map å®¹é‡è¾¾åˆ°ä¸Šé™ï¼Œåˆ™æ­¤æ—¶å½“å‰çº¿ç¨‹éœ€è¦é˜»å¡ä¸€æ®µæ—¶é—´
 				else if(nothing_processed_by_pop)
 				{
-                    // ÈÎÎñ¶ÓÁĞ q_task Îª¿Õ¡¢²»ÄÜÉú³ÉĞÂÈÎÎñ¡¢ÈÎÎñ map ÖĞÃ»ÓĞÈÎÎñ£¬Ôò½«µ±Ç°Ïß³ÌÉèÖÃÎª¿ÕÏĞ×´Ì¬
+                    // ä»»åŠ¡é˜Ÿåˆ— q_task ä¸ºç©ºã€ä¸èƒ½ç”Ÿæˆæ–°ä»»åŠ¡ã€ä»»åŠ¡ map ä¸­æ²¡æœ‰ä»»åŠ¡ï¼Œåˆ™å°†å½“å‰çº¿ç¨‹è®¾ç½®ä¸ºç©ºé—²çŠ¶æ€
 					if(map_task.size == 0) //needed because "push_task_from_taskmap()" does not check whether map_task's map is empty
 					{
 						unique_lock<mutex> lck(mtx_go);

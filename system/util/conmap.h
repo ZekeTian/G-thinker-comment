@@ -15,17 +15,17 @@
 //########################################################################
 
 /**
- * ²¢·¢ map£¬Á½¼¶¹şÏ£¡£
- * µÚ 1 ¼¶¹şÏ££¬Í¨¹ı key »ñµÃ conmap ÖĞÏàÓ¦µÄ bucket
- * µÚ 2 ¼¶¹şÏ££¬Í¨¹ı key »ñµÃ bucket ÖĞÏàÓ¦µÄÔªËØ
+ * å¹¶å‘ mapï¼Œä¸¤çº§å“ˆå¸Œã€‚
+ * ç¬¬ 1 çº§å“ˆå¸Œï¼Œé€šè¿‡ key è·å¾— conmap ä¸­ç›¸åº”çš„ bucket
+ * ç¬¬ 2 çº§å“ˆå¸Œï¼Œé€šè¿‡ key è·å¾— bucket ä¸­ç›¸åº”çš„å…ƒç´ 
  * 
- * ¸Ã Map ÖĞ·â×°ÁËÂÛÎÄÖĞµÄ ¦£-tables£¨Ïß³ÌÕıÔÚÊ¹ÓÃµÄ¶¥µã map£©¡¢ Z-table£¨¼ÇÂ¼Ä¿Ç°Ã»ÓĞÈÎÎñÊ¹ÓÃµÄ¶¥µãµÄ id£©
+ * è¯¥ Map ä¸­å°è£…äº†è®ºæ–‡ä¸­çš„ Î“-tablesï¼ˆçº¿ç¨‹æ­£åœ¨ä½¿ç”¨çš„é¡¶ç‚¹ mapï¼‰ã€ Z-tableï¼ˆè®°å½•ç›®å‰æ²¡æœ‰ä»»åŠ¡ä½¿ç”¨çš„é¡¶ç‚¹çš„ idï¼‰
  */
 
 #ifndef CONMAP_H
 #define CONMAP_H
 
-#define CONMAP_BUCKET_NUM 10000 //should be proportional to the number of threads on a machine ¹şÏ£±íÖĞ bucket µÄ¸öÊı
+#define CONMAP_BUCKET_NUM 10000 //should be proportional to the number of threads on a machine å“ˆå¸Œè¡¨ä¸­ bucket çš„ä¸ªæ•°
 
 //idea: 2-level hashing
 //1. id % CONMAP_BUCKET_NUM -> bucket_index
@@ -39,15 +39,15 @@
 using namespace std;
 
 /**
- * conmap ÖĞµÄÒ»¸ö bucket £¬ÀïÃæº¬ÓĞÒ»¸ö¹şÏ£±í bucket£¨¶ÔÓ¦ÂÛÎÄÖĞµÄ ¦£-tables£©ºÍÒ»¸ö¼¯ºÏ zeros£¨¶ÔÓ¦ÂÛÎÄÖĞµÄ Z-tables£©
+ * conmap ä¸­çš„ä¸€ä¸ª bucket ï¼Œé‡Œé¢å«æœ‰ä¸€ä¸ªå“ˆå¸Œè¡¨ bucketï¼ˆå¯¹åº”è®ºæ–‡ä¸­çš„ Î“-tablesï¼‰å’Œä¸€ä¸ªé›†åˆ zerosï¼ˆå¯¹åº”è®ºæ–‡ä¸­çš„ Z-tablesï¼‰
  */
 template <typename K, typename V> struct conmap_bucket
 {
 	typedef hash_map<K, V> KVMap;
 	typedef unordered_set<K> KSet;
 	mutex mtx;
-	KVMap bucket; // ´æ´¢Ïß³ÌÕıÔÚÊ¹ÓÃµÄ¶¥µã£¬¶ÔÓ¦ÂÛÎÄÖĞµÄ ¦£-tables
-	KSet zeros; // ¼ÇÂ¼Ä¿Ç°Ã»ÓĞ task Ê¹ÓÃµÄ¶¥µãµÄ id£¨¼´ zeros ÀïÃæµÄ¶¥µã¶¼Ã»ÓĞ±»ÆäËüÈÎÎñÊ¹ÓÃ£¬¿ÉÒÔ°²È«µØ´ÓÄÚ´æÖĞÉ¾³ı£©£¬¶ÔÓ¦ÂÛÎÄÖĞµÄ Z-tables
+	KVMap bucket; // å­˜å‚¨çº¿ç¨‹æ­£åœ¨ä½¿ç”¨çš„é¡¶ç‚¹ï¼Œå¯¹åº”è®ºæ–‡ä¸­çš„ Î“-tables
+	KSet zeros; // è®°å½•ç›®å‰æ²¡æœ‰ task ä½¿ç”¨çš„é¡¶ç‚¹çš„ idï¼ˆå³ zeros é‡Œé¢çš„é¡¶ç‚¹éƒ½æ²¡æœ‰è¢«å…¶å®ƒä»»åŠ¡ä½¿ç”¨ï¼Œå¯ä»¥å®‰å…¨åœ°ä»å†…å­˜ä¸­åˆ é™¤ï¼‰ï¼Œå¯¹åº”è®ºæ–‡ä¸­çš„ Z-tables
 
 	inline void lock()
 	{
@@ -60,7 +60,7 @@ template <typename K, typename V> struct conmap_bucket
 	}
 
     /**
-     * »ñÈ¡Ïß³ÌÕıÔÚÊ¹ÓÃµÄ¶¥µã map
+     * è·å–çº¿ç¨‹æ­£åœ¨ä½¿ç”¨çš„é¡¶ç‚¹ map
      */
 	KVMap & get_map()
 	{
@@ -68,11 +68,11 @@ template <typename K, typename V> struct conmap_bucket
 	}
 
     /**
-     * ½« id Îª key£¬Öµ Îª val µÄ¶¥µã²åÈëµ½Ïß³ÌÕıÔÚÊ¹ÓÃµÄ¶¥µã map ÖĞ¡£
-     * Èç¹û²åÈë³É¹¦£¬·µ»Ø true£»·ñÔò£¬·µ»Ø false£¨¼´ key ¶¥µãÒÑ¾­´æÔÚ map ÖĞ£©
+     * å°† id ä¸º keyï¼Œå€¼ ä¸º val çš„é¡¶ç‚¹æ’å…¥åˆ°çº¿ç¨‹æ­£åœ¨ä½¿ç”¨çš„é¡¶ç‚¹ map ä¸­ã€‚
+     * å¦‚æœæ’å…¥æˆåŠŸï¼Œè¿”å› trueï¼›å¦åˆ™ï¼Œè¿”å› falseï¼ˆå³ key é¡¶ç‚¹å·²ç»å­˜åœ¨ map ä¸­ï¼‰
      *
-     * @param key   ´ı²åÈëµÄ¶¥µãµÄ id Öµ 
-     * @param val   ´ı²åÈëµÄ¶¥µãµÄÖµ
+     * @param key   å¾…æ’å…¥çš„é¡¶ç‚¹çš„ id å€¼ 
+     * @param val   å¾…æ’å…¥çš„é¡¶ç‚¹çš„å€¼
      */
 	//returns true if inserted
 	//false if an entry with this key alreqdy exists
@@ -85,9 +85,9 @@ template <typename K, typename V> struct conmap_bucket
 	}
 
     /**
-     * ½« key ¶¥µã´ÓÏß³ÌÕıÔÚÊ¹ÓÃµÄ¶¥µã map ÖĞÉ¾³ı¡£Èç¹ûÉ¾³ı³É¹¦£¬·µ»Ø true£»·ñÔò£¬·µ»Ø false¡£
+     * å°† key é¡¶ç‚¹ä»çº¿ç¨‹æ­£åœ¨ä½¿ç”¨çš„é¡¶ç‚¹ map ä¸­åˆ é™¤ã€‚å¦‚æœåˆ é™¤æˆåŠŸï¼Œè¿”å› trueï¼›å¦åˆ™ï¼Œè¿”å› falseã€‚
      * 
-     * @param key   ´ıÉ¾³ıµÄ¶¥µãµÄ id 
+     * @param key   å¾…åˆ é™¤çš„é¡¶ç‚¹çš„ id 
      */
 	//returns whether deletion is successful
 	bool erase(K key)
@@ -98,7 +98,7 @@ template <typename K, typename V> struct conmap_bucket
 };
 
 /**
- * ²¢·¢ map£¬º¬ÓĞ¶à¸ö bucket
+ * å¹¶å‘ mapï¼Œå«æœ‰å¤šä¸ª bucket
  */
 template <typename K, typename V> struct conmap
 {
@@ -117,7 +117,7 @@ public:
 	}
 
     /**
-     * ·µ»ØÏÂ±êÎª pos µÄ bucket
+     * è¿”å›ä¸‹æ ‡ä¸º pos çš„ bucket
      */
 	bucket & pos(size_t pos)
 	{

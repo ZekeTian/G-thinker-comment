@@ -15,10 +15,10 @@
 //########################################################################
 
 /**
- *   ¾ÛºÏÆ÷£¬ÐèÒªÖ¸¶¨Èý¸öÄ£°å²ÎÊý£º<ValueT>, <PartialT> and <FinalT
- *      <ValueT>£º¾ÛºÏµ½±¾µØ¾ÛºÏÆ÷µÄÊý¾ÝÀàÐÍ
- *      <PartialT>£º±¾µØ¾ÛºÏÆ÷µÄÊý¾ÝÀàÐÍ
- *      <FinalT>£º×îÖÕµÄÊý¾ÝÀàÐÍ£¨È«¾ÖÊý¾ÝÀàÐÍ£©
+ *   èšåˆå™¨ï¼Œéœ€è¦æŒ‡å®šä¸‰ä¸ªæ¨¡æ¿å‚æ•°ï¼š<ValueT>, <PartialT> and <FinalT
+ *      <ValueT>ï¼šèšåˆåˆ°æœ¬åœ°èšåˆå™¨çš„æ•°æ®ç±»åž‹
+ *      <PartialT>ï¼šæœ¬åœ°èšåˆå™¨çš„æ•°æ®ç±»åž‹
+ *      <FinalT>ï¼šæœ€ç»ˆçš„æ•°æ®ç±»åž‹ï¼ˆå…¨å±€æ•°æ®ç±»åž‹ï¼‰
  */
 
 #ifndef AGGREGATOR_H_

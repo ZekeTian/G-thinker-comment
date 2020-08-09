@@ -15,7 +15,7 @@
 //########################################################################
 
 /**
- * ¶¥µã·â×°Àà
+ * é¡¶ç‚¹å°è£…ç±»
  */
 
 
@@ -28,7 +28,7 @@
 using namespace std;
 
 /**
- * ¹şÏ£º¯Êı£¬ÓÃÓÚ·ÖÇø£¬ÔÚ Worker.sync_graph() ¡¢Task.pull_all()¡¢ReqQueue.add() ÖĞ¾ùÓĞÊ¹ÓÃ
+ * å“ˆå¸Œå‡½æ•°ï¼Œç”¨äºåˆ†åŒºï¼Œåœ¨ Worker.sync_graph() ã€Task.pull_all()ã€ReqQueue.add() ä¸­å‡æœ‰ä½¿ç”¨
  */
 //Default Hash Function =====================
 template <class KeyT>

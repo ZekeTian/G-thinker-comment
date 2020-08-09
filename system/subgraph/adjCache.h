@@ -15,10 +15,10 @@
 //########################################################################
 
 /**
- * »º´æ±í·â×°Àà£¬ÓÃÀ´»º´æÔ¶³Ì¶¥µã£¬Ö÷Òª¶ÔÓ¦ÂÛÎÄÖĞÈçÏÂµÄÈı¸ö±í£º
- * ¦£-tables£ºÒÑÀ­È¡µ½µÄÔ¶³Ì¶¥µã»º´æ±í£¬¼ÇÂ¼ÒÑÀ­È¡µ½±¾µØµÄÔ¶³Ì¶¥µã£¬¼´ÕâÀïÃæµÄ¶¥µãÒÑ¾­´ÓÔ¶³Ì worker ÖĞÀ­È¡µ½±¾µØ£¨Êµ¼ÊÉÏÒ²ÊÇÏß³ÌÕıÔÚÊ¹ÓÃµÄÔ¶³Ì¶¥µã map£©
- * R-tables£ºÕıÔÚÇëÇóµÄÔ¶³Ì¶¥µã»º´æ±í£¬¼ÇÂ¼µÄÊÇÄÇĞ©ÕıÔÚÇëÇóµÄÔ¶³Ì¶¥µã£¬¼´£ºÕâĞ©¶¥µãÕıÔÚÏòÔ¶³Ì worker ÇëÇó£¬µ«ÊÇ»¹Ã»ÓĞ·µ»Ø¡£
- * Z-tables£ºÎŞÈÎÎñÊ¹ÓÃµÄÔ¶³Ì¶¥µã»º´æ±í£¬¼ÇÂ¼Ä¿Ç°Ã»ÓĞÈÎÎñÊ¹ÓÃµÄÔ¶³Ì¶¥µã
+ * ç¼“å­˜è¡¨å°è£…ç±»ï¼Œç”¨æ¥ç¼“å­˜è¿œç¨‹é¡¶ç‚¹ï¼Œä¸»è¦å¯¹åº”è®ºæ–‡ä¸­å¦‚ä¸‹çš„ä¸‰ä¸ªè¡¨ï¼š
+ * Î“-tablesï¼šå·²æ‹‰å–åˆ°çš„è¿œç¨‹é¡¶ç‚¹ç¼“å­˜è¡¨ï¼Œè®°å½•å·²æ‹‰å–åˆ°æœ¬åœ°çš„è¿œç¨‹é¡¶ç‚¹ï¼Œå³è¿™é‡Œé¢çš„é¡¶ç‚¹å·²ç»ä»è¿œç¨‹ worker ä¸­æ‹‰å–åˆ°æœ¬åœ°ï¼ˆå®é™…ä¸Šä¹Ÿæ˜¯çº¿ç¨‹æ­£åœ¨ä½¿ç”¨çš„è¿œç¨‹é¡¶ç‚¹ mapï¼‰
+ * R-tablesï¼šæ­£åœ¨è¯·æ±‚çš„è¿œç¨‹é¡¶ç‚¹ç¼“å­˜è¡¨ï¼Œè®°å½•çš„æ˜¯é‚£äº›æ­£åœ¨è¯·æ±‚çš„è¿œç¨‹é¡¶ç‚¹ï¼Œå³ï¼šè¿™äº›é¡¶ç‚¹æ­£åœ¨å‘è¿œç¨‹ worker è¯·æ±‚ï¼Œä½†æ˜¯è¿˜æ²¡æœ‰è¿”å›ã€‚
+ * Z-tablesï¼šæ— ä»»åŠ¡ä½¿ç”¨çš„è¿œç¨‹é¡¶ç‚¹ç¼“å­˜è¡¨ï¼Œè®°å½•ç›®å‰æ²¡æœ‰ä»»åŠ¡ä½¿ç”¨çš„è¿œç¨‹é¡¶ç‚¹
  */
 
 #ifndef ADJCACHE_H_
@@ -28,8 +28,8 @@
 The cache of data objects wraps cuckoo hashmap: http://efficient.github.io/libcuckoo
 Maintaining a lock_counter with each table entry
 Two sub-structures:
-1. zeroCache: keeps only those entrys with lock_counter == 0, for ease of eviction£¬¼´ÂÛÎÄÖĞµÄ Z-table
-2. pullCache: keeps objects to pull from remote£¬¼´ÂÛÎÄÖĞµÄ R-tables
+1. zeroCache: keeps only those entrys with lock_counter == 0, for ease of evictionï¼Œå³è®ºæ–‡ä¸­çš„ Z-table
+2. pullCache: keeps objects to pull from remoteï¼Œå³è®ºæ–‡ä¸­çš„ R-tables
 */
 
 #include <cassert>
@@ -43,7 +43,7 @@ Two sub-structures:
 using namespace std;
 
 //====== global counter ======
-atomic<int> global_cache_size(0); //cache size: "already-in" + "to-pull" »º´æ±íÖĞÒÑ»º´æµÄÊıÁ¿£¨¼´ÂÛÎÄÖĞ ¦£-table ºÍ R-table »º´æµÄÊı¾İÁ¿£©
+atomic<int> global_cache_size(0); //cache size: "already-in" + "to-pull" ç¼“å­˜è¡¨ä¸­å·²ç¼“å­˜çš„æ•°é‡ï¼ˆå³è®ºæ–‡ä¸­ Î“-table å’Œ R-table ç¼“å­˜çš„æ•°æ®é‡ï¼‰
 int COMMIT_FREQ = 10; //delta that needs to be committed from each local counter to "global_cache_size"
 //parameter to fine-tune !!!
 
@@ -57,7 +57,7 @@ struct thread_counter
         count = 0;
     }
     
-    void increment() //by 1, called when a vertex is requested over pull-cache for the 1st time µ±¶¥µãÊÇµÚÒ»´ÎÇëÇóÊ±£¬ÄÇÃ´ÖµÎª 1
+    void increment() //by 1, called when a vertex is requested over pull-cache for the 1st time å½“é¡¶ç‚¹æ˜¯ç¬¬ä¸€æ¬¡è¯·æ±‚æ—¶ï¼Œé‚£ä¹ˆå€¼ä¸º 1
     {
         count++;
         if(count >= COMMIT_FREQ)
@@ -81,11 +81,11 @@ struct thread_counter
 //====== pull-cache (to keep objects to pull from remote) ======
 //tracking tasks that request for each vertex
 /**
- * ¼ÇÂ¼ĞèÒªÔ¶³ÌÀ­È¡¶¥µãµÄÈÎÎñ£¬ÆäÓë KeyType Ò»Æğ´îÅäÊ¹ÓÃ£¬·Å½ø map ÖĞ£¨¼´ĞÎÈç conmap0<KeyType, TaskIDVec>£©£¬´Ó¶ø¿ÉÒÔ¼ÇÂ¼ÇëÇó key ¶¥µãµÄÈÎÎñÁĞ±í¡£
+ * è®°å½•éœ€è¦è¿œç¨‹æ‹‰å–é¡¶ç‚¹çš„ä»»åŠ¡ï¼Œå…¶ä¸ KeyType ä¸€èµ·æ­é…ä½¿ç”¨ï¼Œæ”¾è¿› map ä¸­ï¼ˆå³å½¢å¦‚ conmap0<KeyType, TaskIDVec>ï¼‰ï¼Œä»è€Œå¯ä»¥è®°å½•è¯·æ±‚ key é¡¶ç‚¹çš„ä»»åŠ¡åˆ—è¡¨ã€‚
  */
 struct TaskIDVec
 {
-	vector<long long> list; //for ease of erase ¼ÇÂ¼ÈÎÎñµÄ id£¬±ãÓÚºóÃæÇå³ı¡£ÒòÎª TaskIDVec »áÓë KeyType Ò»Æğ´îÅäÊ¹ÓÃ£¬·Å½ø map ÖĞ£¬ËùÒÔÆäÊµ¼ÊÉÏ¾ÍÊÇ¼ÇÂ¼ÇëÇó¶¥µã key µÄÈÎÎñ¡£
+	vector<long long> list; //for ease of erase è®°å½•ä»»åŠ¡çš„ idï¼Œä¾¿äºåé¢æ¸…é™¤ã€‚å› ä¸º TaskIDVec ä¼šä¸ KeyType ä¸€èµ·æ­é…ä½¿ç”¨ï¼Œæ”¾è¿› map ä¸­ï¼Œæ‰€ä»¥å…¶å®é™…ä¸Šå°±æ˜¯è®°å½•è¯·æ±‚é¡¶ç‚¹ key çš„ä»»åŠ¡ã€‚
 
 	TaskIDVec(){}
 
@@ -96,7 +96,7 @@ struct TaskIDVec
 };
 
 /**
- * ¶¥µãÀ­È¡ÇëÇóµÄ»º´æ±í£¨¼´ÂÛÎÄÖĞµÄ R-table£©£¬ÓÃÓÚ±£´æ¶¥µãµÄÀ­È¡ÇëÇó
+ * é¡¶ç‚¹æ‹‰å–è¯·æ±‚çš„ç¼“å­˜è¡¨ï¼ˆå³è®ºæ–‡ä¸­çš„ R-tableï¼‰ï¼Œç”¨äºä¿å­˜é¡¶ç‚¹çš„æ‹‰å–è¯·æ±‚
  */
 //pull cache
 template <class KeyType>
@@ -104,16 +104,16 @@ class PullCache
 {
 public:
     typedef conmap0<KeyType, TaskIDVec> PCache; //value is just lock-counter map
-    //we do not need a state to indicate whether the vertex request is sent or not ²»ĞèÒªÊ¹ÓÃÒ»¸ö×´Ì¬Î»À´±ê¼Ç¶¥µãÇëÇóÊÇ·ñÒÑ¾­·¢ËÍ
-    //a request will be added to the sending stream (ReqQueue) if an entry is newly inserted Èç¹û²åÈëÁËÒ»¸öĞÂÔªËØ£¬ÔòÒ»¸ö»áÔÚ ReqQueue ÖĞÌí¼ÓÒ»¸öÇëÇó
-    //otherwise, it may be on-the-fly, or waiting to be sent, but we only merge the reqs to avoid repeated sending Èç¹û²åÈëµÄÔªËØ²»ÊÇĞÂÔªËØ£¨¼´ÒÑ¾­ÔÚ PCache ÖĞ£©£¬ÄÇÃ´¾Í²»»áÖØ¸´Ïò ReqQueue ÖĞÌí¼ÓĞÂÇëÇó£¨¼´ºÏ²¢ÇëÇó£¬±ÜÃâÖØ¸´·¢ËÍ£©
-    PCache pcache; // ¶¥µãÇëÇó»º´æÁĞ±í£¨¼´ÂÛÎÄÖĞµÄ R-table£©£¬ÇëÇóÊÇ°´ÕÕ¶¥µã key À´Çø·ÖµÄ£¨²»ÓëÈÎÎñ¹Ò¹³£©£¬key ²»Í¬ÔòÇëÇó²»Í¬£¬key ÏàÍ¬ÔòÎªÍ¬Ò»¸öÇëÇó
+    //we do not need a state to indicate whether the vertex request is sent or not ä¸éœ€è¦ä½¿ç”¨ä¸€ä¸ªçŠ¶æ€ä½æ¥æ ‡è®°é¡¶ç‚¹è¯·æ±‚æ˜¯å¦å·²ç»å‘é€
+    //a request will be added to the sending stream (ReqQueue) if an entry is newly inserted å¦‚æœæ’å…¥äº†ä¸€ä¸ªæ–°å…ƒç´ ï¼Œåˆ™ä¸€ä¸ªä¼šåœ¨ ReqQueue ä¸­æ·»åŠ ä¸€ä¸ªè¯·æ±‚
+    //otherwise, it may be on-the-fly, or waiting to be sent, but we only merge the reqs to avoid repeated sending å¦‚æœæ’å…¥çš„å…ƒç´ ä¸æ˜¯æ–°å…ƒç´ ï¼ˆå³å·²ç»åœ¨ PCache ä¸­ï¼‰ï¼Œé‚£ä¹ˆå°±ä¸ä¼šé‡å¤å‘ ReqQueue ä¸­æ·»åŠ æ–°è¯·æ±‚ï¼ˆå³åˆå¹¶è¯·æ±‚ï¼Œé¿å…é‡å¤å‘é€ï¼‰
+    PCache pcache; // é¡¶ç‚¹è¯·æ±‚ç¼“å­˜åˆ—è¡¨ï¼ˆå³è®ºæ–‡ä¸­çš„ R-tableï¼‰ï¼Œè¯·æ±‚æ˜¯æŒ‰ç…§é¡¶ç‚¹ key æ¥åŒºåˆ†çš„ï¼ˆä¸ä¸ä»»åŠ¡æŒ‚é’©ï¼‰ï¼Œkey ä¸åŒåˆ™è¯·æ±‚ä¸åŒï¼Œkey ç›¸åŒåˆ™ä¸ºåŒä¸€ä¸ªè¯·æ±‚
     
     /**
-     * ½«¶¥µã key ´Ó¶¥µãÇëÇó»º´æÁĞ±íÖĞÉ¾³ı£¬²¢·µ»ØÇëÇó¹ı key ¶¥µãµÄÈÎÎñÊıÁ¿£¨ÆäÖµÊµ¼ÊÉÏ¾ÍÊÇ tid_collector.size£©£¬ÒÔ¼°ÔøÇëÇóÀ­È¡¹ı key ¶¥µãµÄÈÎÎñÁĞ±í£¨±£´æÔÚ tid_collector£©
+     * å°†é¡¶ç‚¹ key ä»é¡¶ç‚¹è¯·æ±‚ç¼“å­˜åˆ—è¡¨ä¸­åˆ é™¤ï¼Œå¹¶è¿”å›è¯·æ±‚è¿‡ key é¡¶ç‚¹çš„ä»»åŠ¡æ•°é‡ï¼ˆå…¶å€¼å®é™…ä¸Šå°±æ˜¯ tid_collector.sizeï¼‰ï¼Œä»¥åŠæ›¾è¯·æ±‚æ‹‰å–è¿‡ key é¡¶ç‚¹çš„ä»»åŠ¡åˆ—è¡¨ï¼ˆä¿å­˜åœ¨ tid_collectorï¼‰
      *
-     * @param key               ´ıÉ¾³ıµÄ¶¥µãµÄ key
-     * @param tid_collector     Êä³öÀàĞÍ²ÎÊı£¬Æä±íÊ¾£ºÇëÇó key ¶¥µãµÄÈÎÎñÁĞ±í£¨¼´´æ´¢ÁËÇëÇó key ¶¥µãµÄÈÎÎñ£©
+     * @param key               å¾…åˆ é™¤çš„é¡¶ç‚¹çš„ key
+     * @param tid_collector     è¾“å‡ºç±»å‹å‚æ•°ï¼Œå…¶è¡¨ç¤ºï¼šè¯·æ±‚ key é¡¶ç‚¹çš„ä»»åŠ¡åˆ—è¡¨ï¼ˆå³å­˜å‚¨äº†è¯·æ±‚ key é¡¶ç‚¹çš„ä»»åŠ¡ï¼‰
      */
     //subfunctions to be called by adjCache
     size_t erase(KeyType key, vector<long long> & tid_collector) //returns lock-counter, to be inserted along with received adj-list into vcache
@@ -121,47 +121,47 @@ public:
     	conmap0_bucket<KeyType, TaskIDVec> & bucket = pcache.get_bucket(key);
     	hash_map<KeyType, TaskIDVec> & kvmap = bucket.get_map();
     	auto it = kvmap.find(key);
-    	assert(it != kvmap.end()); //#DEBUG# to make sure key is found È·±£ key ¶¥µãÔÚ pcache ÖĞ´æÔÚ
-    	TaskIDVec & ids = it->second; // ÇëÇó key ¶¥µãµÄÈÎÎñÁĞ±í£¬Æä´óĞ¡¾ÍÊÇÂÛÎÄ R-table ÖĞµÄ lock-count£¬¼´ÇëÇó key ¶¥µãµÄÈÎÎñÊıÁ¿
+    	assert(it != kvmap.end()); //#DEBUG# to make sure key is found ç¡®ä¿ key é¡¶ç‚¹åœ¨ pcache ä¸­å­˜åœ¨
+    	TaskIDVec & ids = it->second; // è¯·æ±‚ key é¡¶ç‚¹çš„ä»»åŠ¡åˆ—è¡¨ï¼Œå…¶å¤§å°å°±æ˜¯è®ºæ–‡ R-table ä¸­çš„ lock-countï¼Œå³è¯·æ±‚ key é¡¶ç‚¹çš„ä»»åŠ¡æ•°é‡
     	size_t ret = ids.list.size(); //record the lock-counter before deleting the element 
-		assert(ret > 0); //#DEBUG# we do not allow counter to be 0 here ÒòÎª key ¶¥µãÔÚ pcache ÖĞ£¬ÔòÇëÇó¶¥µãµÄÈÎÎñÊıÒ»¶¨»á´óÓÚ 0
-		tid_collector.swap(ids.list); // tid_collector Óë ids.list ½»»»£¬´Ó¶ø¿ÉÒÔ½« ids.list µÄÖµÍ¨¹ı tid_collector ·µ»Ø³öÈ¥
-		kvmap.erase(it); //to erase the element ½«¶¥µã key ´Ó¶¥µãÇëÇó»º´æÁĞ±íÖĞÉ¾³ı
+		assert(ret > 0); //#DEBUG# we do not allow counter to be 0 here å› ä¸º key é¡¶ç‚¹åœ¨ pcache ä¸­ï¼Œåˆ™è¯·æ±‚é¡¶ç‚¹çš„ä»»åŠ¡æ•°ä¸€å®šä¼šå¤§äº 0
+		tid_collector.swap(ids.list); // tid_collector ä¸ ids.list äº¤æ¢ï¼Œä»è€Œå¯ä»¥å°† ids.list çš„å€¼é€šè¿‡ tid_collector è¿”å›å‡ºå»
+		kvmap.erase(it); //to erase the element å°†é¡¶ç‚¹ key ä»é¡¶ç‚¹è¯·æ±‚ç¼“å­˜åˆ—è¡¨ä¸­åˆ é™¤
         return ret;
     }
     
     /**
-     * ÅĞ¶ÏÒ»¸öÀ­È¡ key ¶¥µãµÄÇëÇóÊÇ·ñÎªĞÂÇëÇó£¨¼´¸ù¾İ¶¥µãµÄ key À´ÅĞ¶ÏÊÇ·ñĞÂÇëÇó£©¡£ 
-     * Èç¹ûÊÇÒ»¸öĞÂÇëÇó£¨¼´ÔÚ¶¥µãÀ­È¡ÇëÇó»º´æÁĞ±íÖĞÎ´ÕÒµ½À­È¡ key ¶¥µãµÄÇëÇó£¬Ò²¾ÍÊÇËµÖ®Ç°Ã»ÓĞÈÎÎñÇëÇó¹ı key ¶¥µã£©£¬Ôò·µ»Ø true£»
-     * ·ñÔò£¬·µ»Ø false£¨¼´¸ÃÇëÇóÒÑ¾­ÔÚ¶¥µãÀ­È¡ÇëÇó»º´æÁĞ±í pcache ÖĞ¡£Ò²¾ÍÊÇËµÖ®Ç°ÒÑ¾­ÓĞÈÎÎñĞèÒªÇëÇó key ¶¥µã£¬Òò´ËÒÑ¾­½« key ¶¥µãµÄÀ­È¡ÇëÇó·Å½øÁËÇëÇó»º´æÁĞ±íÖĞ£©
+     * åˆ¤æ–­ä¸€ä¸ªæ‹‰å– key é¡¶ç‚¹çš„è¯·æ±‚æ˜¯å¦ä¸ºæ–°è¯·æ±‚ï¼ˆå³æ ¹æ®é¡¶ç‚¹çš„ key æ¥åˆ¤æ–­æ˜¯å¦æ–°è¯·æ±‚ï¼‰ã€‚ 
+     * å¦‚æœæ˜¯ä¸€ä¸ªæ–°è¯·æ±‚ï¼ˆå³åœ¨é¡¶ç‚¹æ‹‰å–è¯·æ±‚ç¼“å­˜åˆ—è¡¨ä¸­æœªæ‰¾åˆ°æ‹‰å– key é¡¶ç‚¹çš„è¯·æ±‚ï¼Œä¹Ÿå°±æ˜¯è¯´ä¹‹å‰æ²¡æœ‰ä»»åŠ¡è¯·æ±‚è¿‡ key é¡¶ç‚¹ï¼‰ï¼Œåˆ™è¿”å› trueï¼›
+     * å¦åˆ™ï¼Œè¿”å› falseï¼ˆå³è¯¥è¯·æ±‚å·²ç»åœ¨é¡¶ç‚¹æ‹‰å–è¯·æ±‚ç¼“å­˜åˆ—è¡¨ pcache ä¸­ã€‚ä¹Ÿå°±æ˜¯è¯´ä¹‹å‰å·²ç»æœ‰ä»»åŠ¡éœ€è¦è¯·æ±‚ key é¡¶ç‚¹ï¼Œå› æ­¤å·²ç»å°† key é¡¶ç‚¹çš„æ‹‰å–è¯·æ±‚æ”¾è¿›äº†è¯·æ±‚ç¼“å­˜åˆ—è¡¨ä¸­ï¼‰
      *
-     * Í¬Ê±¼ÇÂ¼ĞèÒªÇëÇó key ¶¥µãµÄÈÎÎñ£¬Ä¿µÄÊÇÎªÁËºÏ²¢¶à¸öÏàÍ¬µÄÇëÇó£¬¼´¶à¸öÈÎÎñÍ¬Ê±À­È¡ key ¶¥µã£¬ÄÇÃ´¶à¸öÈÎÎñµÄÇëÇóÊµ¼ÊÉÏ¿ÉÒÔºÏ²¢³ÉÒ»¸öÇëÇó¡£
-     * »»ÑÔÖ®£¬¼´¶à¸öÈÎÎñÍ¬Ê±ÇëÇó key ¶¥µã£¬Ã»ÓĞ±ØÒªÃ¿¸öÈÎÎñ¶¼ÇëÇóÒ»´Î key ¶¥µã£¬µ±Ç° worker ¿ÉÒÔÖ»ÇëÇóÒ»´Î key ¶¥µã£¬µÈ»ñÈ¡µ½ key ¶¥µãºó£¬ÕâĞ©ÈÎÎñ¿ÉÒÔÒ»ÆğÊ¹ÓÃ¡£
+     * åŒæ—¶è®°å½•éœ€è¦è¯·æ±‚ key é¡¶ç‚¹çš„ä»»åŠ¡ï¼Œç›®çš„æ˜¯ä¸ºäº†åˆå¹¶å¤šä¸ªç›¸åŒçš„è¯·æ±‚ï¼Œå³å¤šä¸ªä»»åŠ¡åŒæ—¶æ‹‰å– key é¡¶ç‚¹ï¼Œé‚£ä¹ˆå¤šä¸ªä»»åŠ¡çš„è¯·æ±‚å®é™…ä¸Šå¯ä»¥åˆå¹¶æˆä¸€ä¸ªè¯·æ±‚ã€‚
+     * æ¢è¨€ä¹‹ï¼Œå³å¤šä¸ªä»»åŠ¡åŒæ—¶è¯·æ±‚ key é¡¶ç‚¹ï¼Œæ²¡æœ‰å¿…è¦æ¯ä¸ªä»»åŠ¡éƒ½è¯·æ±‚ä¸€æ¬¡ key é¡¶ç‚¹ï¼Œå½“å‰ worker å¯ä»¥åªè¯·æ±‚ä¸€æ¬¡ key é¡¶ç‚¹ï¼Œç­‰è·å–åˆ° key é¡¶ç‚¹åï¼Œè¿™äº›ä»»åŠ¡å¯ä»¥ä¸€èµ·ä½¿ç”¨ã€‚
      *
-     * @param key       ±»À­È¡µÄ¶¥µãµÄ key£¬¸ù¾İ¸ÃÖµÇø·ÖÊÇ·ñÎªÒ»¸öĞÂÇëÇó
+     * @param key       è¢«æ‹‰å–çš„é¡¶ç‚¹çš„ keyï¼Œæ ¹æ®è¯¥å€¼åŒºåˆ†æ˜¯å¦ä¸ºä¸€ä¸ªæ–°è¯·æ±‚
      * @param counter   
-     * @param task_id   ÈÎÎñ id£¬¼´´Ë´ÎÀ­È¡ key ¶¥µãµÄÈÎÎñµÄ id
+     * @param task_id   ä»»åŠ¡ idï¼Œå³æ­¤æ¬¡æ‹‰å– key é¡¶ç‚¹çš„ä»»åŠ¡çš„ id
      */
     bool request(KeyType key, thread_counter & counter, long long task_id) //returns "whether a req is newly inserted" (i.e., not just add lock-counter)
     {
-        // ¸ù¾İ¶¥µã key ÔÚ¶¥µãÀ­È¡ÇëÇó»º´æÁĞ±í£¨pcache£©ÖĞ»ñÈ¡¶ÔÓ¦µÄÇëÇó
-    	conmap0_bucket<KeyType, TaskIDVec> & bucket = pcache.get_bucket(key); // »ñÈ¡¶¥µã key ¶ÔÓ¦µÄ bucket
-		hash_map<KeyType, TaskIDVec> & kvmap = bucket.get_map(); // »ñÈ¡ bucket ÄÚ²¿´æ´¢ÇëÇóµÄ map
-		auto it = kvmap.find(key); // »ñÈ¡ key ¶ÔÓ¦µÄÇëÇó
+        // æ ¹æ®é¡¶ç‚¹ key åœ¨é¡¶ç‚¹æ‹‰å–è¯·æ±‚ç¼“å­˜åˆ—è¡¨ï¼ˆpcacheï¼‰ä¸­è·å–å¯¹åº”çš„è¯·æ±‚
+    	conmap0_bucket<KeyType, TaskIDVec> & bucket = pcache.get_bucket(key); // è·å–é¡¶ç‚¹ key å¯¹åº”çš„ bucket
+		hash_map<KeyType, TaskIDVec> & kvmap = bucket.get_map(); // è·å– bucket å†…éƒ¨å­˜å‚¨è¯·æ±‚çš„ map
+		auto it = kvmap.find(key); // è·å– key å¯¹åº”çš„è¯·æ±‚
     	if(it != kvmap.end())
     	{
-            // »ñÈ¡µ½ÁË key ¶ÔÓ¦µÄÇëÇó
-    		TaskIDVec & ids = it->second; // È¡³ö map ÖĞ Key ¶ÔÓ¦µÄÖµ 
-    		ids.list.push_back(task_id); // ÒòÎª task_id ÈÎÎñĞèÒªÀ­È¡ key ¶¥µã£¬Òò´ËĞèÒª½« task_id ¼ÓÈëµ½ key ¶¥µãµÄÈÎÎñÁĞ±íÖĞ
+            // è·å–åˆ°äº† key å¯¹åº”çš„è¯·æ±‚
+    		TaskIDVec & ids = it->second; // å–å‡º map ä¸­ Key å¯¹åº”çš„å€¼ 
+    		ids.list.push_back(task_id); // å› ä¸º task_id ä»»åŠ¡éœ€è¦æ‹‰å– key é¡¶ç‚¹ï¼Œå› æ­¤éœ€è¦å°† task_id åŠ å…¥åˆ° key é¡¶ç‚¹çš„ä»»åŠ¡åˆ—è¡¨ä¸­
     		return false;
     	}
     	else
     	{
-            // ÔÚ pcache ÖĞÃ»ÓĞ»ñÈ¡µ½¶¥µã key ¶ÔÓ¦µÄÇëÇó£¬ÔòÖ±½ÓÔÚ pcache ÖĞ·ÅÈë¸ÃÇëÇó£¬
+            // åœ¨ pcache ä¸­æ²¡æœ‰è·å–åˆ°é¡¶ç‚¹ key å¯¹åº”çš„è¯·æ±‚ï¼Œåˆ™ç›´æ¥åœ¨ pcache ä¸­æ”¾å…¥è¯¥è¯·æ±‚ï¼Œ
             counter.increment();
-    		kvmap[key].list.push_back(task_id); // ÒòÎª kvmap ÖĞ²»°üº¬ key £¬Òò´ËÊ¹ÓÃ kvmap[key] Ê±»áÔÚ map ÖĞ²åÈëÒ»¸ö key µÄÔªËØ£¬value È¡Ä¬ÈÏÖµ£¨ÔÚÕâÀï value Ä¬ÈÏÖµ¼´Îª TaskIDVec ÊÇ£©£¬È»ºó·µ»Ø value £¨¼´²»»á·µ»Ø NULL£©¡£
-            // ¼ò¶øÑÔÖ®£¬ÉÏÃæÄÇĞĞ´úÂëÖĞµÄ kvmap[key] »áÔÚ map ÖĞ²åÈëÒ»¸ö key µÄÔªËØ£¬²¢½«Æä·µ»Ø
-            // ¸ÃĞĞ´úÂëµÄ×÷ÓÃµÈÍ¬ÓÚ£ºÏÈ new Ò»¸ö TaskIDVec£¬È»ºó½« task_id ·ÅÈë TaskIDVec ÖĞ£¬×îºóÔÙ½« TaskIDVec ·ÅÈë map ÖĞ
+    		kvmap[key].list.push_back(task_id); // å› ä¸º kvmap ä¸­ä¸åŒ…å« key ï¼Œå› æ­¤ä½¿ç”¨ kvmap[key] æ—¶ä¼šåœ¨ map ä¸­æ’å…¥ä¸€ä¸ª key çš„å…ƒç´ ï¼Œvalue å–é»˜è®¤å€¼ï¼ˆåœ¨è¿™é‡Œ value é»˜è®¤å€¼å³ä¸º TaskIDVec æ˜¯ï¼‰ï¼Œç„¶åè¿”å› value ï¼ˆå³ä¸ä¼šè¿”å› NULLï¼‰ã€‚
+            // ç®€è€Œè¨€ä¹‹ï¼Œä¸Šé¢é‚£è¡Œä»£ç ä¸­çš„ kvmap[key] ä¼šåœ¨ map ä¸­æ’å…¥ä¸€ä¸ª key çš„å…ƒç´ ï¼Œå¹¶å°†å…¶è¿”å›
+            // è¯¥è¡Œä»£ç çš„ä½œç”¨ç­‰åŒäºï¼šå…ˆ new ä¸€ä¸ª TaskIDVecï¼Œç„¶åå°† task_id æ”¾å…¥ TaskIDVec ä¸­ï¼Œæœ€åå†å°† TaskIDVec æ”¾å…¥ map ä¸­
     		return true;
     	}
     }
@@ -169,7 +169,7 @@ public:
 
 
 /**
- * ¶ÔÏó»º´æ£¬ÔÚ RespServer¡¢Task¡¢Worker ÖĞ¾ùÓĞÊ¹ÓÃ
+ * å¯¹è±¡ç¼“å­˜ï¼Œåœ¨ RespServerã€Taskã€Worker ä¸­å‡æœ‰ä½¿ç”¨
  */
 //====== object cache ======
 
@@ -178,27 +178,27 @@ class AdjCache
 {
 public:
 
-	typedef typename TaskT::VertexType ValType; // ¶¥µãÊı¾İÀàĞÍ Vertex<KeyT, ValueT, HashT> 
-	typedef typename ValType::KeyType KeyType; // ¶¥µãµÄ Key Êı¾İÀàĞÍ
+	typedef typename TaskT::VertexType ValType; // é¡¶ç‚¹æ•°æ®ç±»å‹ Vertex<KeyT, ValueT, HashT> 
+	typedef typename ValType::KeyType KeyType; // é¡¶ç‚¹çš„ Key æ•°æ®ç±»å‹
 
-	typedef TaskMap<TaskT> TaskMapT; // ´æ·ÅÈÎÎñµÄ map Êı¾İÀàĞÍ
+	typedef TaskMap<TaskT> TaskMapT; // å­˜æ”¾ä»»åŠ¡çš„ map æ•°æ®ç±»å‹
 
-	ReqQueue<ValType> q_req; // ÇëÇó¶ÓÁĞ
+	ReqQueue<ValType> q_req; // è¯·æ±‚é˜Ÿåˆ—
     
     /**
-     * conmap ÖĞ map ´æ·ÅµÄÔªËØÀàĞÍ£¬ÆäÊµ¼ÊÉÏ¾ÍÊÇÂÛÎÄÖĞ ¦£-tables ´æ´¢µÄÔªËØÀàĞÍ
+     * conmap ä¸­ map å­˜æ”¾çš„å…ƒç´ ç±»å‹ï¼Œå…¶å®é™…ä¸Šå°±æ˜¯è®ºæ–‡ä¸­ Î“-tables å­˜å‚¨çš„å…ƒç´ ç±»å‹
      */
     //an object wrapper, expanded with lock-counter
     struct AdjValue
     {
-        ValType * value;//note that it is a pointer !!! ¶¥µãÊı¾İ
-        int counter; //lock-counter, bounded by the number of active tasks in a machine ¼ÇÂ¼ value Õâ¸ö¶¥µã±»¶àÉÙ¸öÈÎÎñÊ¹ÓÃ£¨¼´Ê¹ÓÃ value ¶¥µãµÄÈÎÎñÊıÁ¿£©£¬ÊÜ»úÆ÷ÖĞ»îÔ¾ÈÎÎñÊıÁ¿µÄÏŞÖÆ
+        ValType * value;//note that it is a pointer !!! é¡¶ç‚¹æ•°æ®
+        int counter; //lock-counter, bounded by the number of active tasks in a machine è®°å½• value è¿™ä¸ªé¡¶ç‚¹è¢«å¤šå°‘ä¸ªä»»åŠ¡ä½¿ç”¨ï¼ˆå³ä½¿ç”¨ value é¡¶ç‚¹çš„ä»»åŠ¡æ•°é‡ï¼‰ï¼Œå—æœºå™¨ä¸­æ´»è·ƒä»»åŠ¡æ•°é‡çš„é™åˆ¶
     };
     
     //internal conmap for cached objects
-    typedef conmap<KeyType, AdjValue> ValCache; // ²¢·¢ map ÀàĞÍ£¬ÊÇÒ»¸öÁ½¼¶¹şÏ£ map£¬ÀïÃæ°üº¬ ¦£-tables¡¢Z-table
-    ValCache vcache; // ±£´æ»º´æ¶ÔÏó£¬·â×°ÁËÂÛÎÄÖĞµÄ ¦£-tables£¨ÒÑÀ­È¡µ½µÄÔ¶³Ì¶¥µã»º´æ±í£¬¼´Ïß³ÌÕıÔÚÊ¹ÓÃµÄ¶¥µã map£©¡¢ Z-table£¨¼ÇÂ¼Ä¿Ç°Ã»ÓĞÈÎÎñÊ¹ÓÃµÄ¶¥µãµÄ id£©
-    PullCache<KeyType> pcache; // ¶¥µãÀ­È¡ÇëÇó»º´æ±í£¬·â×°ÁËÂÛÎÄÖĞµÄ R-table
+    typedef conmap<KeyType, AdjValue> ValCache; // å¹¶å‘ map ç±»å‹ï¼Œæ˜¯ä¸€ä¸ªä¸¤çº§å“ˆå¸Œ mapï¼Œé‡Œé¢åŒ…å« Î“-tablesã€Z-table
+    ValCache vcache; // ä¿å­˜ç¼“å­˜å¯¹è±¡ï¼Œå°è£…äº†è®ºæ–‡ä¸­çš„ Î“-tablesï¼ˆå·²æ‹‰å–åˆ°çš„è¿œç¨‹é¡¶ç‚¹ç¼“å­˜è¡¨ï¼Œå³çº¿ç¨‹æ­£åœ¨ä½¿ç”¨çš„é¡¶ç‚¹ mapï¼‰ã€ Z-tableï¼ˆè®°å½•ç›®å‰æ²¡æœ‰ä»»åŠ¡ä½¿ç”¨çš„é¡¶ç‚¹çš„ idï¼‰
+    PullCache<KeyType> pcache; // é¡¶ç‚¹æ‹‰å–è¯·æ±‚ç¼“å­˜è¡¨ï¼Œå°è£…äº†è®ºæ–‡ä¸­çš„ R-table
     
     ~AdjCache()
     {
@@ -216,72 +216,72 @@ public:
     }
     
     /**
-     * ±» comper£¨¼´¼ÆËãÏß³Ì£©µ÷ÓÃ£¬ÓÃÓÚ»ñÈ¡ key ¶ÔÓ¦µÄÔ¶³Ì¶¥µã¡£ÔÚ´Ëº¯ÊıÖĞ£¬»áµ÷ÓÃ add2map £¬¼´»á½«ÈÎÎñ·Å½ø¹ÒÆğÈÎÎñ map ÖĞ¡£ÔÚ Task.pull_all ÖĞ±»µ÷ÓÃ¡£
-     * Èç¹ûÔÚ±¾µØ»º´æÖĞÃ»ÓĞÕÒµ½ key ¶ÔÓ¦µÄ¶¥µã£¬·µ»Ø NULL£¬²¢ÇÒ»áÏòÔ¶³Ì worker ·¢ËÍÇëÇó£¬»ñÈ¡¶¥µã¡£
-     * Èç¹ûÕÒµ½£¬Ôò·µ»Ø¸Ã¶¥µã¡£
+     * è¢« comperï¼ˆå³è®¡ç®—çº¿ç¨‹ï¼‰è°ƒç”¨ï¼Œç”¨äºè·å– key å¯¹åº”çš„è¿œç¨‹é¡¶ç‚¹ã€‚åœ¨æ­¤å‡½æ•°ä¸­ï¼Œä¼šè°ƒç”¨ add2map ï¼Œå³ä¼šå°†ä»»åŠ¡æ”¾è¿›æŒ‚èµ·ä»»åŠ¡ map ä¸­ã€‚åœ¨ Task.pull_all ä¸­è¢«è°ƒç”¨ã€‚
+     * å¦‚æœåœ¨æœ¬åœ°ç¼“å­˜ä¸­æ²¡æœ‰æ‰¾åˆ° key å¯¹åº”çš„é¡¶ç‚¹ï¼Œè¿”å› NULLï¼Œå¹¶ä¸”ä¼šå‘è¿œç¨‹ worker å‘é€è¯·æ±‚ï¼Œè·å–é¡¶ç‚¹ã€‚
+     * å¦‚æœæ‰¾åˆ°ï¼Œåˆ™è¿”å›è¯¥é¡¶ç‚¹ã€‚
      *
-     * ×¢Òâ£º´Ëº¯ÊıÖĞ»áµ÷ÓÃ add2map
+     * æ³¨æ„ï¼šæ­¤å‡½æ•°ä¸­ä¼šè°ƒç”¨ add2map
      *
-     * ´Ëº¯ÊıÔÚ Task.pull_all ÖĞ±»µ÷ÓÃ£¬µ÷ÓÃ³¡¾°£º
-     * task_id ÈÎÎñÔÚÇëÇóÔ¶³Ì¶¥µãÊ±£¬±¾µØ»º´æÖĞÃ»ÓĞÏàÓ¦µÄÔ¶³Ì¶¥µã£¬ĞèÒªÏòÔ¶³Ì worker ·¢ËÍÇëÇó£¬´Ó¶ø»ñÈ¡¶¥µãÊı¾İ¡£
-     * Èç¹û task_id ÈÎÎñÊÇµÚÒ»´ÎÏòÔ¶³Ì worker ·¢ËÍ¶¥µãÇëÇó£¬¸ÃÈÎÎñĞèÒª¸ü¸Ä×´Ì¬£¬¼´ĞèÒªµ÷ÓÃ±¾º¯Êı£¬½«¸ÃÈÎÎñ¹ÒÆğ¡£
+     * æ­¤å‡½æ•°åœ¨ Task.pull_all ä¸­è¢«è°ƒç”¨ï¼Œè°ƒç”¨åœºæ™¯ï¼š
+     * task_id ä»»åŠ¡åœ¨è¯·æ±‚è¿œç¨‹é¡¶ç‚¹æ—¶ï¼Œæœ¬åœ°ç¼“å­˜ä¸­æ²¡æœ‰ç›¸åº”çš„è¿œç¨‹é¡¶ç‚¹ï¼Œéœ€è¦å‘è¿œç¨‹ worker å‘é€è¯·æ±‚ï¼Œä»è€Œè·å–é¡¶ç‚¹æ•°æ®ã€‚
+     * å¦‚æœ task_id ä»»åŠ¡æ˜¯ç¬¬ä¸€æ¬¡å‘è¿œç¨‹ worker å‘é€é¡¶ç‚¹è¯·æ±‚ï¼Œè¯¥ä»»åŠ¡éœ€è¦æ›´æ”¹çŠ¶æ€ï¼Œå³éœ€è¦è°ƒç”¨æœ¬å‡½æ•°ï¼Œå°†è¯¥ä»»åŠ¡æŒ‚èµ·ã€‚
      *
-     * @param key       ´ı»ñÈ¡µÄ¶¥µã key
+     * @param key       å¾…è·å–çš„é¡¶ç‚¹ key
      * @param counter   
-     * @param task_id   ÈÎÎñµÄ id
-     * @param taskmap   ÈÎÎñ¶ÔÓ¦µÄ map£¨±£´æÁË¸ÃÈÎÎñµÄ¾ÍĞ÷ÈÎÎñºÍ¹ÒÆğÈÎÎñ£© 
-     * @param task      ÈÎÎñ
+     * @param task_id   ä»»åŠ¡çš„ id
+     * @param taskmap   ä»»åŠ¡å¯¹åº”çš„ mapï¼ˆä¿å­˜äº†è¯¥ä»»åŠ¡çš„å°±ç»ªä»»åŠ¡å’ŒæŒ‚èµ·ä»»åŠ¡ï¼‰ 
+     * @param task      ä»»åŠ¡
      */
     //to be called by computing threads, returns:
     //1. NULL, if not found; but req will be posed
     //2. vcache[key].value, if found; vcache[counter] is incremented by 1
     ValType * lock_and_get(KeyType & key, thread_counter & counter, long long task_id,
-    		TaskMapT & taskmap, TaskT* task) //used when vcache miss happens, for adding the task to task_map »áµ÷ÓÃ add2map £¬¼´»á½«ÈÎÎñ·Å½ø¹ÒÆğÈÎÎñ map ÖĞ
+    		TaskMapT & taskmap, TaskT* task) //used when vcache miss happens, for adding the task to task_map ä¼šè°ƒç”¨ add2map ï¼Œå³ä¼šå°†ä»»åŠ¡æ”¾è¿›æŒ‚èµ·ä»»åŠ¡ map ä¸­
     {
-    	ValType * ret; // ·µ»ØÖµ
-    	conmap_bucket<KeyType, AdjValue> & bucket = vcache.get_bucket(key); // »ñÈ¡¶¥µãËùÔÚµÄ bucket 
+    	ValType * ret; // è¿”å›å€¼
+    	conmap_bucket<KeyType, AdjValue> & bucket = vcache.get_bucket(key); // è·å–é¡¶ç‚¹æ‰€åœ¨çš„ bucket 
     	bucket.lock();
-    	hash_map<KeyType, AdjValue> & kvmap = bucket.get_map(); // »ñÈ¡ bucket ÖĞµÄ map£¬±ãÓÚÏÂÃæÍ¨¹ı¶¥µãµÄ key È¡³ö¶¥µã
-    	auto it = kvmap.find(key); // È¡³ö¶¥µãÊı¾İ
+    	hash_map<KeyType, AdjValue> & kvmap = bucket.get_map(); // è·å– bucket ä¸­çš„ mapï¼Œä¾¿äºä¸‹é¢é€šè¿‡é¡¶ç‚¹çš„ key å–å‡ºé¡¶ç‚¹
+    	auto it = kvmap.find(key); // å–å‡ºé¡¶ç‚¹æ•°æ®
     	if(it == kvmap.end())
-		{   // Ô¶³Ì¶¥µã
-            // ÔÚ vcache ÖĞ²»ÄÜÈ¡³ö key ¶ÔÓ¦µÄ¶¥µãÊı¾İ£¬Ôòµ÷ÓÃ add2map£¬½«ÈÎÎñ·ÅÈë¹ÒÆğÈÎÎñ map ÖĞ
-			taskmap.add2map(task); // ÒòÎª¸ÃÈÎÎñĞèÒªÍ¨¹ı·¢ËÍÇëÇóÀ´»ñÈ¡Ô¶³Ì¶¥µã£¬Òò´ËĞèÒª½«¸ÃÈÎÎñ·Å½ø¹ÒÆğÈÎÎñ map ÖĞ
+		{   // è¿œç¨‹é¡¶ç‚¹
+            // åœ¨ vcache ä¸­ä¸èƒ½å–å‡º key å¯¹åº”çš„é¡¶ç‚¹æ•°æ®ï¼Œåˆ™è°ƒç”¨ add2mapï¼Œå°†ä»»åŠ¡æ”¾å…¥æŒ‚èµ·ä»»åŠ¡ map ä¸­
+			taskmap.add2map(task); // å› ä¸ºè¯¥ä»»åŠ¡éœ€è¦é€šè¿‡å‘é€è¯·æ±‚æ¥è·å–è¿œç¨‹é¡¶ç‚¹ï¼Œå› æ­¤éœ€è¦å°†è¯¥ä»»åŠ¡æ”¾è¿›æŒ‚èµ·ä»»åŠ¡ map ä¸­
 
-            // ÒòÎªÊÇÔ¶³Ì¶¥µã£¬ËùÒÔĞèÒª·¢ËÍÇëÇó£¬¼´ÒªÔÚÇëÇó¶ÓÁĞÖĞÌí¼ÓÒ»¸öĞÂÇëÇó¡£
-            // µ«ÊÇÔÚÌí¼ÓÖ®Ç°£¬ÏÈÅĞ¶Ï¸ÃÇëÇóÊÇ·ñÊÇÒ»¸öĞÂÇëÇó£¨¼´ÅĞ¶ÏÖ®Ç°ÊÇ·ñÓĞÈÎÎñÇëÇó¹ı¶¥µã key£©
-            // Èç¹ûÊÇĞÂÇëÇó£¬ÔòÖ®Ç°Ã»ÓĞÈÎÎñÇëÇó¹ı¸Ã¶¥µã£¬ÄÇÃ´ÇëÇó¶ÓÁĞÖĞÒ²²»»á´æÔÚ¸ÃÇëÇó£¬Òò´ËĞèÒª²åÈëµ½¶ÓÁĞÖĞ¡£
-            // ·ñÔò£¬¸Ã¶¥µãÔÚÖ®Ç°ÒÑ¾­±»ÆäËüÈÎÎñÇëÇó¹ı£¬¼´ÒÑ¾­´æÔÚÇëÇó¶ÓÁĞÖĞ£¬²»ĞèÒªÔÙ²åÈë¡£
-			bool new_req = pcache.request(key, counter, task_id); // ÅĞ¶ÏÔÚ¶¥µãÀ­È¡ÇëÇó»º´æ±íÖĞÊÇ·ñÄÜÕÒ key ¶¥µã¶ÔÓ¦µÄÇëÇó
-			if(new_req) q_req.add(key); // Èç¹ûÊÇÒ»¸öĞÂÇëÇó£¬Ôò½«¸ÃÇëÇó¼ÓÈëµ½ÇëÇó¶ÓÁĞÖĞ
+            // å› ä¸ºæ˜¯è¿œç¨‹é¡¶ç‚¹ï¼Œæ‰€ä»¥éœ€è¦å‘é€è¯·æ±‚ï¼Œå³è¦åœ¨è¯·æ±‚é˜Ÿåˆ—ä¸­æ·»åŠ ä¸€ä¸ªæ–°è¯·æ±‚ã€‚
+            // ä½†æ˜¯åœ¨æ·»åŠ ä¹‹å‰ï¼Œå…ˆåˆ¤æ–­è¯¥è¯·æ±‚æ˜¯å¦æ˜¯ä¸€ä¸ªæ–°è¯·æ±‚ï¼ˆå³åˆ¤æ–­ä¹‹å‰æ˜¯å¦æœ‰ä»»åŠ¡è¯·æ±‚è¿‡é¡¶ç‚¹ keyï¼‰
+            // å¦‚æœæ˜¯æ–°è¯·æ±‚ï¼Œåˆ™ä¹‹å‰æ²¡æœ‰ä»»åŠ¡è¯·æ±‚è¿‡è¯¥é¡¶ç‚¹ï¼Œé‚£ä¹ˆè¯·æ±‚é˜Ÿåˆ—ä¸­ä¹Ÿä¸ä¼šå­˜åœ¨è¯¥è¯·æ±‚ï¼Œå› æ­¤éœ€è¦æ’å…¥åˆ°é˜Ÿåˆ—ä¸­ã€‚
+            // å¦åˆ™ï¼Œè¯¥é¡¶ç‚¹åœ¨ä¹‹å‰å·²ç»è¢«å…¶å®ƒä»»åŠ¡è¯·æ±‚è¿‡ï¼Œå³å·²ç»å­˜åœ¨è¯·æ±‚é˜Ÿåˆ—ä¸­ï¼Œä¸éœ€è¦å†æ’å…¥ã€‚
+			bool new_req = pcache.request(key, counter, task_id); // åˆ¤æ–­åœ¨é¡¶ç‚¹æ‹‰å–è¯·æ±‚ç¼“å­˜è¡¨ä¸­æ˜¯å¦èƒ½æ‰¾ key é¡¶ç‚¹å¯¹åº”çš„è¯·æ±‚
+			if(new_req) q_req.add(key); // å¦‚æœæ˜¯ä¸€ä¸ªæ–°è¯·æ±‚ï¼Œåˆ™å°†è¯¥è¯·æ±‚åŠ å…¥åˆ°è¯·æ±‚é˜Ÿåˆ—ä¸­
 			ret = NULL;
 		}
     	else
-    	{   // ÔÚ±¾µØ»º´æÖĞÕÒµ½Ô¶³Ì¶¥µã
-            // ÔÚ vcache ÖĞÄÜÈ¡³ö key ¶ÔÓ¦µÄ¶¥µãÊı¾İ
+    	{   // åœ¨æœ¬åœ°ç¼“å­˜ä¸­æ‰¾åˆ°è¿œç¨‹é¡¶ç‚¹
+            // åœ¨ vcache ä¸­èƒ½å–å‡º key å¯¹åº”çš„é¡¶ç‚¹æ•°æ®
         	AdjValue & vpair = it->second;
-        	if(vpair.counter == 0) bucket.zeros.erase(key); //zero-cache.remove µ±Ç°¶¥µãÖ®Ç°ÔÚ zeros ÖĞ£¨¼´Ö®Ç°Ã»ÓĞ±»ÈÎÎñÊ¹ÓÃ¹ı£©£¬ÔòĞèÒª½«Æä´Ó zeros ÖĞÉ¾³ı£¨ÒòÎª¸Ã¶¥µã»áÔÚ±¾´ÎÈÎÎñÖĞÊ¹ÓÃ£©
-        	vpair.counter++; // ¸Ã¶¥µã»áÔÚµ±Ç°ÈÎÎñÖĞÊ¹ÓÃ£¬ËùÒÔ¸Ã¶¥µã¶ÔÓ¦µÄ counter ¼Ó 1
-        	ret = vpair.value; // ·µ»Ø¸Ã¶¥µã
+        	if(vpair.counter == 0) bucket.zeros.erase(key); //zero-cache.remove å½“å‰é¡¶ç‚¹ä¹‹å‰åœ¨ zeros ä¸­ï¼ˆå³ä¹‹å‰æ²¡æœ‰è¢«ä»»åŠ¡ä½¿ç”¨è¿‡ï¼‰ï¼Œåˆ™éœ€è¦å°†å…¶ä» zeros ä¸­åˆ é™¤ï¼ˆå› ä¸ºè¯¥é¡¶ç‚¹ä¼šåœ¨æœ¬æ¬¡ä»»åŠ¡ä¸­ä½¿ç”¨ï¼‰
+        	vpair.counter++; // è¯¥é¡¶ç‚¹ä¼šåœ¨å½“å‰ä»»åŠ¡ä¸­ä½¿ç”¨ï¼Œæ‰€ä»¥è¯¥é¡¶ç‚¹å¯¹åº”çš„ counter åŠ  1
+        	ret = vpair.value; // è¿”å›è¯¥é¡¶ç‚¹
     	}
     	bucket.unlock();
     	return ret;
     }
     
     /**
-     * ±» comper£¨¼´¼ÆËãÏß³Ì£©µ÷ÓÃ£¬ÓÃÓÚ»ñÈ¡ key ¶ÔÓ¦µÄÔ¶³Ì¶¥µã¡£ÔÚ´Ëº¯ÊıÖĞ£¬²»»áµ÷ÓÃ add2map £¬¼´²»»á½«ÈÎÎñ·Å½ø¹ÒÆğÈÎÎñ map ÖĞ¡£ÔÚ Task.pull_all ÖĞ±»µ÷ÓÃ¡£
-     * Èç¹ûÃ»ÓĞÕÒµ½ key ¶ÔÓ¦µÄ¶¥µã£¬·µ»Ø NULL£¬²¢ÇÒ»áÏòÔ¶³Ì worker ·¢ËÍÇëÇó£¬»ñÈ¡¶¥µã¡£
-     * Èç¹ûÕÒµ½£¬Ôò·µ»Ø¸Ã¶¥µã¡£
+     * è¢« comperï¼ˆå³è®¡ç®—çº¿ç¨‹ï¼‰è°ƒç”¨ï¼Œç”¨äºè·å– key å¯¹åº”çš„è¿œç¨‹é¡¶ç‚¹ã€‚åœ¨æ­¤å‡½æ•°ä¸­ï¼Œä¸ä¼šè°ƒç”¨ add2map ï¼Œå³ä¸ä¼šå°†ä»»åŠ¡æ”¾è¿›æŒ‚èµ·ä»»åŠ¡ map ä¸­ã€‚åœ¨ Task.pull_all ä¸­è¢«è°ƒç”¨ã€‚
+     * å¦‚æœæ²¡æœ‰æ‰¾åˆ° key å¯¹åº”çš„é¡¶ç‚¹ï¼Œè¿”å› NULLï¼Œå¹¶ä¸”ä¼šå‘è¿œç¨‹ worker å‘é€è¯·æ±‚ï¼Œè·å–é¡¶ç‚¹ã€‚
+     * å¦‚æœæ‰¾åˆ°ï¼Œåˆ™è¿”å›è¯¥é¡¶ç‚¹ã€‚
      * 
-     * ×¢Òâ£º´Ëº¯ÊıÖĞ²»µ÷ÓÃ add2map
+     * æ³¨æ„ï¼šæ­¤å‡½æ•°ä¸­ä¸è°ƒç”¨ add2map
      * 
-     * ´Ëº¯ÊıÔÚ Task.pull_all ÖĞ±»µ÷ÓÃ£¬µ÷ÓÃ³¡¾°£º
-     * task_id ÈÎÎñÔÚÖ®Ç°ÇëÇóÔ¶³Ì¶¥µãÊ±£¬ÒÑ¾­±»·Å½ø¹ÒÆğÈÎÎñ map ÖĞ£¬ÔòºóÃæ¸ÃÈÎÎñÔÚÇëÇóÔ¶³Ì¶¥µãÊ±£¬²»±ØÔÙ½«Æä·ÅÈë¹ÒÆğÈÎÎñ map ÖĞ
+     * æ­¤å‡½æ•°åœ¨ Task.pull_all ä¸­è¢«è°ƒç”¨ï¼Œè°ƒç”¨åœºæ™¯ï¼š
+     * task_id ä»»åŠ¡åœ¨ä¹‹å‰è¯·æ±‚è¿œç¨‹é¡¶ç‚¹æ—¶ï¼Œå·²ç»è¢«æ”¾è¿›æŒ‚èµ·ä»»åŠ¡ map ä¸­ï¼Œåˆ™åé¢è¯¥ä»»åŠ¡åœ¨è¯·æ±‚è¿œç¨‹é¡¶ç‚¹æ—¶ï¼Œä¸å¿…å†å°†å…¶æ”¾å…¥æŒ‚èµ·ä»»åŠ¡ map ä¸­
      */
     //to be called by computing threads, returns:
 	//1. NULL, if not found; but req will be posed
 	//2. vcache[key].value, if found; vcache[counter] is incremented by 1
-	ValType * lock_and_get(KeyType & key, thread_counter & counter, long long task_id) // ²»µ÷ÓÃ add2map £¬¼´²»»á½«ÈÎÎñ·Å½ø¹ÒÆğÈÎÎñ map ÖĞ
+	ValType * lock_and_get(KeyType & key, thread_counter & counter, long long task_id) // ä¸è°ƒç”¨ add2map ï¼Œå³ä¸ä¼šå°†ä»»åŠ¡æ”¾è¿›æŒ‚èµ·ä»»åŠ¡ map ä¸­
 	{
 		ValType * ret;
 		conmap_bucket<KeyType, AdjValue> & bucket = vcache.get_bucket(key);
@@ -306,9 +306,9 @@ public:
 	}
 
     /**
-     * ´Ó±¾µØ»º´æÖĞÈ¡³ö key ¶ÔÓ¦µÄ¶¥µã¡£µ÷ÓÃÇ°ĞèÒªÈ·±£ key ¶¥µãÔÚ map ÖĞ´æÔÚ¡£
+     * ä»æœ¬åœ°ç¼“å­˜ä¸­å–å‡º key å¯¹åº”çš„é¡¶ç‚¹ã€‚è°ƒç”¨å‰éœ€è¦ç¡®ä¿ key é¡¶ç‚¹åœ¨ map ä¸­å­˜åœ¨ã€‚
      *
-     * @param key   ´ı»ñÈ¡µÄ¶¥µãµÄ id 
+     * @param key   å¾…è·å–çš„é¡¶ç‚¹çš„ id 
      */
 	//must lock, since the hash_map may be updated by other key-insertion
 	ValType * get(KeyType & key) //called only if you are sure of cache hit
@@ -324,8 +324,8 @@ public:
 	}
 
     /**
-     * ½âËø key ¶¥µã£¬µ±¼ÆËãÏß³ÌÊ¹ÓÃÍêÁË key ¶¥µãºóµ÷ÓÃ¸Ãº¯Êı¡£
-     * Í¬Ê±£¬Ê¹ÓÃ¸Ã¶¥µãµÄÈÎÎñÊı¼õ 1¡£Èç¹ûÊ¹ÓÃ¸Ã¶¥µãµÄÈÎÎñÊıÎª 0£¨¼´Ã»ÓĞÈÎÎñ»áÊ¹ÓÃ¸Ã¶¥µã£©£¬Ôò½«¶¥µãÒÆµ½ zero »º´æÖĞ¡£
+     * è§£é” key é¡¶ç‚¹ï¼Œå½“è®¡ç®—çº¿ç¨‹ä½¿ç”¨å®Œäº† key é¡¶ç‚¹åè°ƒç”¨è¯¥å‡½æ•°ã€‚
+     * åŒæ—¶ï¼Œä½¿ç”¨è¯¥é¡¶ç‚¹çš„ä»»åŠ¡æ•°å‡ 1ã€‚å¦‚æœä½¿ç”¨è¯¥é¡¶ç‚¹çš„ä»»åŠ¡æ•°ä¸º 0ï¼ˆå³æ²¡æœ‰ä»»åŠ¡ä¼šä½¿ç”¨è¯¥é¡¶ç‚¹ï¼‰ï¼Œåˆ™å°†é¡¶ç‚¹ç§»åˆ° zero ç¼“å­˜ä¸­ã€‚
      */
     //to be called by computing threads, after finishing using an object
     //will not check existence, assume previously locked and so must be in the hashmap
@@ -336,20 +336,20 @@ public:
     	hash_map<KeyType, AdjValue> & kvmap = bucket.get_map();
 		auto it = kvmap.find(key);
 		assert(it != kvmap.end());
-    	it->second.counter--; // ÒòÎª¸Ã¼ÆËãÏß³ÌÒÑ¾­Ê¹ÓÃÍê key ¶¥µã£¬Òò´ËÊ¹ÓÃ key ¶¥µãµÄÈÎÎñÊıĞèÒª¼õ 1
-    	if(it->second.counter == 0) bucket.zeros.insert(key); //zero-cache.insert ÒòÎªÒÑ¾­Ã»ÓĞÈÎÎñÊ¹ÓÃ key ¶¥µã£¬Òò´Ë½«¸Ã¶¥µã·ÅÈë zeros »º´æÖĞ
+    	it->second.counter--; // å› ä¸ºè¯¥è®¡ç®—çº¿ç¨‹å·²ç»ä½¿ç”¨å®Œ key é¡¶ç‚¹ï¼Œå› æ­¤ä½¿ç”¨ key é¡¶ç‚¹çš„ä»»åŠ¡æ•°éœ€è¦å‡ 1
+    	if(it->second.counter == 0) bucket.zeros.insert(key); //zero-cache.insert å› ä¸ºå·²ç»æ²¡æœ‰ä»»åŠ¡ä½¿ç”¨ key é¡¶ç‚¹ï¼Œå› æ­¤å°†è¯¥é¡¶ç‚¹æ”¾å…¥ zeros ç¼“å­˜ä¸­
     	bucket.unlock();
     }
 
     /**
-     * ½« id Îª key£¬ÖµÎª value µÄ¶¥µã´ÓÇëÇó»º´æÁĞ±íÖĞÉ¾³ı£¬È»ºó²åÈëµ½ÒÑÀ­È¡µ½µÄÔ¶³Ì¶¥µã»º´æ±í ÖĞ£¨¼´ ¦£-tables£©¡£
-     * ¸Ãº¯Êı±»Í¨ĞÅÏß³Ì RespServer µ÷ÓÃ£¨RespServer.thread_func() º¯Êı£©£¬¼´µ±Í¨ĞÅÏß³Ì½ÓÊÕµ½·µ»ØµÄÔ¶³Ì¶¥µãÊı¾İºó£¬µ÷ÓÃ¸Ãº¯Êı¡£
+     * å°† id ä¸º keyï¼Œå€¼ä¸º value çš„é¡¶ç‚¹ä»è¯·æ±‚ç¼“å­˜åˆ—è¡¨ä¸­åˆ é™¤ï¼Œç„¶åæ’å…¥åˆ°å·²æ‹‰å–åˆ°çš„è¿œç¨‹é¡¶ç‚¹ç¼“å­˜è¡¨ ä¸­ï¼ˆå³ Î“-tablesï¼‰ã€‚
+     * è¯¥å‡½æ•°è¢«é€šä¿¡çº¿ç¨‹ RespServer è°ƒç”¨ï¼ˆRespServer.thread_func() å‡½æ•°ï¼‰ï¼Œå³å½“é€šä¿¡çº¿ç¨‹æ¥æ”¶åˆ°è¿”å›çš„è¿œç¨‹é¡¶ç‚¹æ•°æ®åï¼Œè°ƒç”¨è¯¥å‡½æ•°ã€‚
      * 
-     * ¸Ãº¯ÊıµÄ¹ı³ÌÊµÖÊÉÏÒ²¾ÍÊÇ½« key ¶¥µã´ÓÇëÇó»º´æÁĞ±í pcache£¨R-table£©ÖĞÒÆµ½ÒÑÀ­È¡µ½µÄÔ¶³Ì¶¥µã»º´æ±í ÖĞ£¨¼´´úÂëÖĞµÄ vcache£¬ÂÛÎÄÖĞµÄ ¦£-table£©
+     * è¯¥å‡½æ•°çš„è¿‡ç¨‹å®è´¨ä¸Šä¹Ÿå°±æ˜¯å°† key é¡¶ç‚¹ä»è¯·æ±‚ç¼“å­˜åˆ—è¡¨ pcacheï¼ˆR-tableï¼‰ä¸­ç§»åˆ°å·²æ‹‰å–åˆ°çš„è¿œç¨‹é¡¶ç‚¹ç¼“å­˜è¡¨ ä¸­ï¼ˆå³ä»£ç ä¸­çš„ vcacheï¼Œè®ºæ–‡ä¸­çš„ Î“-tableï¼‰
      * 
-     * @param key               ÊäÈë²ÎÊıÀàĞÍ£¬¶¥µã id
-     * @param value             ÊäÈë²ÎÊıÀàĞÍ£¬¶¥µãÖµ     
-     * @param tid_collector     Êä³ö²ÎÊıÀàĞÍ£¬±£´æÇëÇó¹ı key ¶¥µãµÄÈÎÎñ id
+     * @param key               è¾“å…¥å‚æ•°ç±»å‹ï¼Œé¡¶ç‚¹ id
+     * @param value             è¾“å…¥å‚æ•°ç±»å‹ï¼Œé¡¶ç‚¹å€¼     
+     * @param tid_collector     è¾“å‡ºå‚æ•°ç±»å‹ï¼Œä¿å­˜è¯·æ±‚è¿‡ key é¡¶ç‚¹çš„ä»»åŠ¡ id
      */
     //to be called by communication threads: pass in "ValType *", "new"-ed outside
     //** obtain lock-counter from pcache
@@ -360,20 +360,20 @@ public:
 		bucket.lock();
 		AdjValue vpair;
 		vpair.value = value;
-		vpair.counter = pcache.erase(key, tid_collector); // ½« key ¶¥µã´ÓÇëÇó»º´æÁĞ±íÖĞÉ¾³ı£¨ÒòÎª¸Ã¶¥µãÒÑ¾­»ñÈ¡µ½ÁË£©£¬Í¬Ê±·µ»ØÇëÇó¹ı key ¶¥µãµÄÈÎÎñ£¨±£´æÔÚ tid_collector£©¼°ÆäÊıÁ¿
-		bool inserted = bucket.insert(key, vpair); // ½«¶¥µãÊı¾İ²åÈëµ½ÒÑÀ­È¡µ½µÄÔ¶³Ì¶¥µã»º´æ±í ÖĞ£¨¼´ ¦£-tables£©
-		assert(inserted);//#DEBUG# to make sure item is not already in vcache ±ØĞëÒªÈ·±£²åÈë³É¹¦£¬¼´È·±£ÒÑÀ­È¡µ½µÄÔ¶³Ì¶¥µã»º´æ±í ÖĞ²»´æÔÚ¶¥µã key¡£
-        // ÒòÎª¶¥µã key ÊÇÍ¨¹ıÔ¶³ÌÇëÇó»ñÈ¡µ½µÄ£¬ÄÇËµÃ÷±¾µØÕıÔÚÊ¹ÓÃµÄ¶¥µã map ÖĞÒ»¶¨²»´æÔÚ¸Ã¶¥µã£¨Èç¹û´æÔÚµÄ»°£¬ÄÇÃ´Ò²²»»áÍ¨¹ıÔ¶³ÌÇëÇó»ñÈ¡£©
+		vpair.counter = pcache.erase(key, tid_collector); // å°† key é¡¶ç‚¹ä»è¯·æ±‚ç¼“å­˜åˆ—è¡¨ä¸­åˆ é™¤ï¼ˆå› ä¸ºè¯¥é¡¶ç‚¹å·²ç»è·å–åˆ°äº†ï¼‰ï¼ŒåŒæ—¶è¿”å›è¯·æ±‚è¿‡ key é¡¶ç‚¹çš„ä»»åŠ¡ï¼ˆä¿å­˜åœ¨ tid_collectorï¼‰åŠå…¶æ•°é‡
+		bool inserted = bucket.insert(key, vpair); // å°†é¡¶ç‚¹æ•°æ®æ’å…¥åˆ°å·²æ‹‰å–åˆ°çš„è¿œç¨‹é¡¶ç‚¹ç¼“å­˜è¡¨ ä¸­ï¼ˆå³ Î“-tablesï¼‰
+		assert(inserted);//#DEBUG# to make sure item is not already in vcache å¿…é¡»è¦ç¡®ä¿æ’å…¥æˆåŠŸï¼Œå³ç¡®ä¿å·²æ‹‰å–åˆ°çš„è¿œç¨‹é¡¶ç‚¹ç¼“å­˜è¡¨ ä¸­ä¸å­˜åœ¨é¡¶ç‚¹ keyã€‚
+        // å› ä¸ºé¡¶ç‚¹ key æ˜¯é€šè¿‡è¿œç¨‹è¯·æ±‚è·å–åˆ°çš„ï¼Œé‚£è¯´æ˜æœ¬åœ°æ­£åœ¨ä½¿ç”¨çš„é¡¶ç‚¹ map ä¸­ä¸€å®šä¸å­˜åœ¨è¯¥é¡¶ç‚¹ï¼ˆå¦‚æœå­˜åœ¨çš„è¯ï¼Œé‚£ä¹ˆä¹Ÿä¸ä¼šé€šè¿‡è¿œç¨‹è¯·æ±‚è·å–ï¼‰
 		//#DEBUG# this should be the case if logic is correct:
 		//#DEBUG# not_in_vcache -> pull -> insert
 		bucket.unlock();
 	}
     
     //note:
-    //1. lock_and_get & insert operates on pull-cache £¨lock_and_get ºÍ insert º¯ÊıÊÇÔÚ pull-cache ÉÏ²Ù×÷£©
+    //1. lock_and_get & insert operates on pull-cache ï¼ˆlock_and_get å’Œ insert å‡½æ•°æ˜¯åœ¨ pull-cache ä¸Šæ“ä½œï¼‰
     //2. pcache.erase/request(key) should have no conflict, since they are called in vcache's lock(key) section
     
-    int pos = 0; //starting position of bucket in conmap £¨conmap ÖĞµ±Ç° bucket µÄÏÂ±ê£¬Ò²¾ÍÊÇ Z-tables¡¢¦£-tables ÖĞµ±Ç° bucket µÄÏÂ±ê£¬ÔÚÉ¾³ı Z-tables¡¢¦£-tables µÄ»º´æÊı¾İÊ±Ê¹ÓÃ£¬¼´É¾³ı pos ´¦ bucket £©
+    int pos = 0; //starting position of bucket in conmap ï¼ˆconmap ä¸­å½“å‰ bucket çš„ä¸‹æ ‡ï¼Œä¹Ÿå°±æ˜¯ Z-tablesã€Î“-tables ä¸­å½“å‰ bucket çš„ä¸‹æ ‡ï¼Œåœ¨åˆ é™¤ Z-tablesã€Î“-tables çš„ç¼“å­˜æ•°æ®æ—¶ä½¿ç”¨ï¼Œå³åˆ é™¤ pos å¤„ bucket ï¼‰
 
     //try to delete "num_to_delete" elements, called only if capacity VCACHE_LIMIT is reached
     //insert(.) just moves data from pcache to vcache, does not change total cache capacity
@@ -381,10 +381,10 @@ public:
     //we use the strategy of "batch-insert" + "trim-to-limit" (best-effort)
     //if we fail to trim to capacity limit after checking one round of zero-cache, we just return
     /**
-     * ¸ù¾İ Z-tables É¾³ı ¦£-tables ÖĞÎŞÈÎÎñÊ¹ÓÃµÄ¶¥µãµÄ»º´æÊı¾İ£¨¼´ÔÚ ¦£-tables ÖĞ£¬ÓĞĞ©¶¥µãÃ»ÓĞ±»ÈÎÎñÊ¹ÓÃ£¬ÔòÕâĞ©¶¥µãµÄ»º´æÊı¾İ¿ÉÒÔÉ¾³ıµô£¬´Ó¶øÊÍ·ÅÄÚ´æ¿Õ¼ä£©¡£
-     * ·µ»ØµÄÊÇÉ¾³ıÊ§°ÜµÄ¶¥µã¸öÊı
+     * æ ¹æ® Z-tables åˆ é™¤ Î“-tables ä¸­æ— ä»»åŠ¡ä½¿ç”¨çš„é¡¶ç‚¹çš„ç¼“å­˜æ•°æ®ï¼ˆå³åœ¨ Î“-tables ä¸­ï¼Œæœ‰äº›é¡¶ç‚¹æ²¡æœ‰è¢«ä»»åŠ¡ä½¿ç”¨ï¼Œåˆ™è¿™äº›é¡¶ç‚¹çš„ç¼“å­˜æ•°æ®å¯ä»¥åˆ é™¤æ‰ï¼Œä»è€Œé‡Šæ”¾å†…å­˜ç©ºé—´ï¼‰ã€‚
+     * è¿”å›çš„æ˜¯åˆ é™¤å¤±è´¥çš„é¡¶ç‚¹ä¸ªæ•°
      * 
-     * @param num_to_delete     ÊÔÍ¼É¾³ıµÄ¶¥µã¸öÊı
+     * @param num_to_delete     è¯•å›¾åˆ é™¤çš„é¡¶ç‚¹ä¸ªæ•°
      * @param counter           
      */
     size_t shrink(size_t num_to_delete, thread_counter & counter) //return value = how many elements failed to trim
@@ -395,28 +395,28 @@ public:
 		{
 			conmap_bucket<KeyType, AdjValue> & bucket = vcache.pos(pos);
 			bucket.lock();
-            // ±éÀú Z-tables£¨ÆäÊÇÒ»¸ö¼¯ºÏ£¬¼ÇÂ¼ÁËÄ¿Ç°Ã»ÓĞ task Ê¹ÓÃµÄ¶¥µã£©£¬È¡³ö¶¥µã key £¬È»ºóÔÚ Z-tables¡¢¦£-tables ÖĞ½«¶¥µã key µÄ»º´æÊı¾İÉ¾³ı
+            // éå† Z-tablesï¼ˆå…¶æ˜¯ä¸€ä¸ªé›†åˆï¼Œè®°å½•äº†ç›®å‰æ²¡æœ‰ task ä½¿ç”¨çš„é¡¶ç‚¹ï¼‰ï¼Œå–å‡ºé¡¶ç‚¹ key ï¼Œç„¶ååœ¨ Z-tablesã€Î“-tables ä¸­å°†é¡¶ç‚¹ key çš„ç¼“å­˜æ•°æ®åˆ é™¤
 			auto it = bucket.zeros.begin();
 			while(it != bucket.zeros.end())
 			{
-				KeyType key = *it; // zeros ÖĞ¶¥µãµÄ key
-				hash_map<KeyType, AdjValue> & kvmap = bucket.get_map(); // ÒÑÀ­È¡µ½µÄÔ¶³Ì¶¥µã»º´æ±í£¬¶ÔÓ¦ÂÛÎÄÖĞµÄ ¦£-tables
+				KeyType key = *it; // zeros ä¸­é¡¶ç‚¹çš„ key
+				hash_map<KeyType, AdjValue> & kvmap = bucket.get_map(); // å·²æ‹‰å–åˆ°çš„è¿œç¨‹é¡¶ç‚¹ç¼“å­˜è¡¨ï¼Œå¯¹åº”è®ºæ–‡ä¸­çš„ Î“-tables
 				auto it1 = kvmap.find(key);
 				assert(it1 != kvmap.end()); //#DEBUG# to make sure key is found, this is where libcuckoo's bug prompts
 				AdjValue & vpair = it1->second;
-				if(vpair.counter == 0) //to make sure item is not locked È·±£ key ¶¥µãÈ·ÊµÃ»ÓĞÈÎÎñÊ¹ÓÃ£¬´Ó¶ø½«¸Ã¶¥µã´Ó»º´æ±íÖĞÉ¾³ı
+				if(vpair.counter == 0) //to make sure item is not locked ç¡®ä¿ key é¡¶ç‚¹ç¡®å®æ²¡æœ‰ä»»åŠ¡ä½¿ç”¨ï¼Œä»è€Œå°†è¯¥é¡¶ç‚¹ä»ç¼“å­˜è¡¨ä¸­åˆ é™¤
 				{
-                    // É¾³ı Z-tables¡¢¦£-tables ÖĞ»º´æµÄÊı¾İ
+                    // åˆ é™¤ Z-tablesã€Î“-tables ä¸­ç¼“å­˜çš„æ•°æ®
 					counter.decrement();
 					delete vpair.value;
 					kvmap.erase(it1);
-					it = bucket.zeros.erase(it); //update it ·µ»Ø it Î»ÖÃÏÂÒ»¸öÔªËØµÄµü´úÆ÷£¬²¢¸üĞÂ it
+					it = bucket.zeros.erase(it); //update it è¿”å› it ä½ç½®ä¸‹ä¸€ä¸ªå…ƒç´ çš„è¿­ä»£å™¨ï¼Œå¹¶æ›´æ–° it
 					num_to_delete--;
 					if(num_to_delete == 0) //there's no need to look at more candidates
 					{
 						bucket.unlock();
-						pos++; //current bucket has been checked, next time, start from next bucket ÏÂÒ»´Îµ÷ÓÃ±¾º¯ÊıÊ±£¬´Ó Z-tables µÄÏÂÒ»¸ö bucket ¿ªÊ¼É¾³ı
-						return 0; // ÒòÎªÒÑ¾­½«ĞèÒªÉ¾³ıµÄ¶¥µãÈ«²¿É¾³ı£¬ÔòÉ¾³ıÊ§°ÜµÄ
+						pos++; //current bucket has been checked, next time, start from next bucket ä¸‹ä¸€æ¬¡è°ƒç”¨æœ¬å‡½æ•°æ—¶ï¼Œä» Z-tables çš„ä¸‹ä¸€ä¸ª bucket å¼€å§‹åˆ é™¤
+						return 0; // å› ä¸ºå·²ç»å°†éœ€è¦åˆ é™¤çš„é¡¶ç‚¹å…¨éƒ¨åˆ é™¤ï¼Œåˆ™åˆ é™¤å¤±è´¥çš„
 					}
 				}
 			}
@@ -424,14 +424,14 @@ public:
 			//------
 			//move set index forward in a circular manner
 			pos++;
-			if(pos >= CONMAP_BUCKET_NUM) pos -= CONMAP_BUCKET_NUM; // ÒÑ¾­±éÀúµ½×îºóÒ»¸ö bucket £¨´ËÊ± pos = CONMAP_BUCKET_NUM£¬¶ø²»»á´óÓÚ CONMAP_BUCKET_NUM£©£¬Ôò½« pos ÖØÖÃÎª 0
-			if(pos == start_pos) break; //finish one round of checking all zero-sets, no more checking £¨ÒÑ¾­½« Z-tables¡¢¦£-tables ÖĞËùÓĞµÄ bucket ÍêÕûµØ±éÀúÒ»±é£¬²»ÔÙ½øĞĞÏÂÒ»ÂÖ±éÀú£¬½áÊøÉ¾³ı²Ù×÷£©
-            // ÅĞ¶ÏÊÇ·ñ±éÀúÁËÒ»±é bucket µÄ±êÖ¾ÊÇ ¡°pos == start_pos¡±£¬¶ø²»ÊÇ ¡°pos == start_pos¡± ¡£
-            // ÕâÊÇÒòÎª±¾º¯Êı¿ÉÄÜ»á´ÓÉÏÃæµÄ return ´¦½áÊøµô£¬ÔÚÕâÖÖÇé¿öÏÂ£¬ÏÂ´Î½øÈë±¾º¯ÊıÊ±£¬pos ²»Îª 0£¨¼´ÆğÊ¼Î»ÖÃ²»Îª 0£©£¬ËùÒÔÓ¦¸ÃÓë start_pos ½øĞĞ±È½Ï£¬¶ø²»ÊÇÓë 0 ½øĞĞ±È½Ï
-            // ¶Ô Z-tables¡¢¦£-tables ÖĞËùÓĞµÄ bucket Ö»±éÀúÒ»±é£¬ÊÇÒòÎª±éÀúÍêÒ»±éºó£¬Z-tables ÖĞÒÑ¾­É¾¿ÕÁË£¬Òò´Ë²»ĞèÒªÔÙ½øĞĞÉ¾³ı¡£
-            // µ± num_to_delete µÄÖµ½Ï´ó£¬´óÓÚ Z-tables µÄÔªËØ¸öÊıÊ±£¬ÄÇÃ´×îÖÕ·µ»ØµÄ num_to_delete ¾Í²»»áÎª 0£¬¼´ÓĞ num_to_delete ¸ö ¡°É¾³ıÊ§°Ü¡± µÄ¶¥µã¡£
+			if(pos >= CONMAP_BUCKET_NUM) pos -= CONMAP_BUCKET_NUM; // å·²ç»éå†åˆ°æœ€åä¸€ä¸ª bucket ï¼ˆæ­¤æ—¶ pos = CONMAP_BUCKET_NUMï¼Œè€Œä¸ä¼šå¤§äº CONMAP_BUCKET_NUMï¼‰ï¼Œåˆ™å°† pos é‡ç½®ä¸º 0
+			if(pos == start_pos) break; //finish one round of checking all zero-sets, no more checking ï¼ˆå·²ç»å°† Z-tablesã€Î“-tables ä¸­æ‰€æœ‰çš„ bucket å®Œæ•´åœ°éå†ä¸€éï¼Œä¸å†è¿›è¡Œä¸‹ä¸€è½®éå†ï¼Œç»“æŸåˆ é™¤æ“ä½œï¼‰
+            // åˆ¤æ–­æ˜¯å¦éå†äº†ä¸€é bucket çš„æ ‡å¿—æ˜¯ â€œpos == start_posâ€ï¼Œè€Œä¸æ˜¯ â€œpos == start_posâ€ ã€‚
+            // è¿™æ˜¯å› ä¸ºæœ¬å‡½æ•°å¯èƒ½ä¼šä»ä¸Šé¢çš„ return å¤„ç»“æŸæ‰ï¼Œåœ¨è¿™ç§æƒ…å†µä¸‹ï¼Œä¸‹æ¬¡è¿›å…¥æœ¬å‡½æ•°æ—¶ï¼Œpos ä¸ä¸º 0ï¼ˆå³èµ·å§‹ä½ç½®ä¸ä¸º 0ï¼‰ï¼Œæ‰€ä»¥åº”è¯¥ä¸ start_pos è¿›è¡Œæ¯”è¾ƒï¼Œè€Œä¸æ˜¯ä¸ 0 è¿›è¡Œæ¯”è¾ƒ
+            // å¯¹ Z-tablesã€Î“-tables ä¸­æ‰€æœ‰çš„ bucket åªéå†ä¸€éï¼Œæ˜¯å› ä¸ºéå†å®Œä¸€éåï¼ŒZ-tables ä¸­å·²ç»åˆ ç©ºäº†ï¼Œå› æ­¤ä¸éœ€è¦å†è¿›è¡Œåˆ é™¤ã€‚
+            // å½“ num_to_delete çš„å€¼è¾ƒå¤§ï¼Œå¤§äº Z-tables çš„å…ƒç´ ä¸ªæ•°æ—¶ï¼Œé‚£ä¹ˆæœ€ç»ˆè¿”å›çš„ num_to_delete å°±ä¸ä¼šä¸º 0ï¼Œå³æœ‰ num_to_delete ä¸ª â€œåˆ é™¤å¤±è´¥â€ çš„é¡¶ç‚¹ã€‚
 		}
-		return num_to_delete; // num_to_delete ×îÖÕÊÇÉ¾³ıÊ§°ÜµÄ¶¥µã¸öÊı
+		return num_to_delete; // num_to_delete æœ€ç»ˆæ˜¯åˆ é™¤å¤±è´¥çš„é¡¶ç‚¹ä¸ªæ•°
     }
 
 };

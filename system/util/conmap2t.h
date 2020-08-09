@@ -15,7 +15,7 @@
 //########################################################################
 
 /**
- * ÓÃÓÚÁ½¸öÏß³ÌµÄ²¢·¢ map£¬¹ÒÆğÈÎÎñ map
+ * ç”¨äºä¸¤ä¸ªçº¿ç¨‹çš„å¹¶å‘ mapï¼ŒæŒ‚èµ·ä»»åŠ¡ map
  */
 
 #ifndef CONMAP2T_H
@@ -36,7 +36,7 @@
 using namespace std;
 
 /**
- * Êı¾İÀàĞÍ <long long, TaskT *>
+ * æ•°æ®ç±»å‹ <long long, TaskT *>
  */
 template <typename K, typename V> struct conmap2t_bucket
 {
@@ -56,7 +56,7 @@ template <typename K, typename V> struct conmap2t_bucket
 	}
 
     /**
-     * »ñÈ¡µ±Ç° bucket ÖĞ´æ´¢µÄÈÎÎñ map
+     * è·å–å½“å‰ bucket ä¸­å­˜å‚¨çš„ä»»åŠ¡ map
      */
 	KVMap & get_map()
 	{
@@ -64,7 +64,7 @@ template <typename K, typename V> struct conmap2t_bucket
 	}
 
     /**
-     * Ïòµ±Ç° bucket ÖĞ²åÈëÒ»¸öĞÂµÄÈÎÎñ£¬Èç¹û²åÈë³É¹¦£¨¸ÃÈÎÎñ²»ÔÚ map ÖĞ£©£¬Ôò·µ»Ø true£»·ñÔò£¬·µ»Ø false£¨¸ÃÈÎÎñÔÚ map ÖĞ£©
+     * å‘å½“å‰ bucket ä¸­æ’å…¥ä¸€ä¸ªæ–°çš„ä»»åŠ¡ï¼Œå¦‚æœæ’å…¥æˆåŠŸï¼ˆè¯¥ä»»åŠ¡ä¸åœ¨ map ä¸­ï¼‰ï¼Œåˆ™è¿”å› trueï¼›å¦åˆ™ï¼Œè¿”å› falseï¼ˆè¯¥ä»»åŠ¡åœ¨ map ä¸­ï¼‰
      * 
      */
 	//returns true if inserted
@@ -78,7 +78,7 @@ template <typename K, typename V> struct conmap2t_bucket
 	}
 
     /**
-     * ÔÚµ±Ç° bucket ÖĞÉ¾³ı key ÈÎÎñ£¬É¾³ı³É¹¦£¬·µ»Ø true£»·ñÔò£¬·µ»Ø false
+     * åœ¨å½“å‰ bucket ä¸­åˆ é™¤ key ä»»åŠ¡ï¼Œåˆ é™¤æˆåŠŸï¼Œè¿”å› trueï¼›å¦åˆ™ï¼Œè¿”å› false
      */
 	//returns whether deletion is successful
 	bool erase(K key)

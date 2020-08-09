@@ -15,7 +15,7 @@
 //########################################################################
 
 /**
- *  ÈÎÎñ£¬Ò»¸ö Comper »á´¦Àí¶à¸ö task 
+ *  ä»»åŠ¡ï¼Œä¸€ä¸ª Comper ä¼šå¤„ç†å¤šä¸ª task 
  */
 
 #ifndef TASK_H_
@@ -54,19 +54,19 @@ public:
 
 	//internally used:
     /**
-     * ÏÂÒ»ÂÖµü´úÖĞĞèÒªÀ­È¡µÄ¶¥µãµÄ id
+     * ä¸‹ä¸€è½®è¿­ä»£ä¸­éœ€è¦æ‹‰å–çš„é¡¶ç‚¹çš„ id
      */
-	vector<KeyT> to_pull; //vertices to be pulled for use in next round ÏÂÒ»ÂÖµü´úÖĞĞèÒªÀ­È¡µÄ¶¥µãµÄ id
+	vector<KeyT> to_pull; //vertices to be pulled for use in next round ä¸‹ä¸€è½®è¿­ä»£ä¸­éœ€è¦æ‹‰å–çš„é¡¶ç‚¹çš„ id
 	//- to_pull needs to be swapped to old_to_pull, before calling compute(.) that writes to_pull
 	//- unlock vertices in old_to_pull
 
     /**
-     * ´æ´¢À­È¡µ½µÄ¶¥µã£¬ÕâĞ©¶¥µãÔÚÏÂÂÖµü´úÖĞÊ¹ÓÃ¡£Èç¹ûÆäÖĞµÚ i ¸ö¶¥µãÊÇÔ¶³Ì¶¥µã£¬ĞèÒªÍ¨¹ı·¢ËÍÏûÏ¢À­È¡£¬ÔòÔÚ frontier_vertexes ÖĞµÚ i ¸öÎ»ÖÃÎª NULL
+     * å­˜å‚¨æ‹‰å–åˆ°çš„é¡¶ç‚¹ï¼Œè¿™äº›é¡¶ç‚¹åœ¨ä¸‹è½®è¿­ä»£ä¸­ä½¿ç”¨ã€‚å¦‚æœå…¶ä¸­ç¬¬ i ä¸ªé¡¶ç‚¹æ˜¯è¿œç¨‹é¡¶ç‚¹ï¼Œéœ€è¦é€šè¿‡å‘é€æ¶ˆæ¯æ‹‰å–ï¼Œåˆ™åœ¨ frontier_vertexes ä¸­ç¬¬ i ä¸ªä½ç½®ä¸º NULL
      */
 	vector<VertexT *> frontier_vertexes; //remote vertices are replaced with NULL
 
     /**
-     * ÒÑ¾­À­È¡µ½±¾µØµÄ¶¥µãÊıÁ¿£¨¼´ÔÚ´ıÀ­È¡µÄ¶¥µãÖĞ£¬ÓĞ met_counter ¸ö¶¥µãÒÑ¾­À­È¡µ½±¾µØ£©
+     * å·²ç»æ‹‰å–åˆ°æœ¬åœ°çš„é¡¶ç‚¹æ•°é‡ï¼ˆå³åœ¨å¾…æ‹‰å–çš„é¡¶ç‚¹ä¸­ï¼Œæœ‰ met_counter ä¸ªé¡¶ç‚¹å·²ç»æ‹‰å–åˆ°æœ¬åœ°ï¼‰
      */
 	atomic<int> met_counter; //how many requested vertices are at local, updated by comper/RespServer, not for use by users (system only)
 
@@ -97,113 +97,113 @@ public:
 	}
 
     /**
-     * À­È¡¶¥µã¡£
-     * Èç¹û¸ÃÈÎÎñĞèÒª´ÓÔ¶³Ì worker ÖĞÀ­È¡¶¥µã£¨»òÒÑ¾­´ÓÏìÓ¦ÖĞ»ñÈ¡µ½ÁË¶¥µãÊı¾İ£¬µ«ÊÇ¸ÃÈÎÎñµ±Ç°µü´ú²»ÄÜ¼ÌĞø´¦Àí£©£¬Ôò·µ»Ø false£»
-     * Èç¹û¸ÃÈÎÎñĞèÒªµÄ¶¥µãÒÑ¾­È«²¿À­È¡µ½±¾µØ£¬Ôò·µ»Ø true£¬¿ÉÒÔ¼ÌĞøÏÂÒ»ÂÖµü´ú¡£
+     * æ‹‰å–é¡¶ç‚¹ã€‚
+     * å¦‚æœè¯¥ä»»åŠ¡éœ€è¦ä»è¿œç¨‹ worker ä¸­æ‹‰å–é¡¶ç‚¹ï¼ˆæˆ–å·²ç»ä»å“åº”ä¸­è·å–åˆ°äº†é¡¶ç‚¹æ•°æ®ï¼Œä½†æ˜¯è¯¥ä»»åŠ¡å½“å‰è¿­ä»£ä¸èƒ½ç»§ç»­å¤„ç†ï¼‰ï¼Œåˆ™è¿”å› falseï¼›
+     * å¦‚æœè¯¥ä»»åŠ¡éœ€è¦çš„é¡¶ç‚¹å·²ç»å…¨éƒ¨æ‹‰å–åˆ°æœ¬åœ°ï¼Œåˆ™è¿”å› trueï¼Œå¯ä»¥ç»§ç»­ä¸‹ä¸€è½®è¿­ä»£ã€‚
      */
 	//after task.compute(.) returns, process "to_pull" to:
 	//set "frontier_vertexes"
 	bool pull_all(thread_counter & counter, TaskMapT & taskmap) //returns whether "no need to wait for remote-pulling"
 	{//called by Comper, giving its thread_counter and thread_id
 		long long task_id = taskmap.peek_next_taskID(); 
-		CTable & vcache = *(CTable *)global_vcache; // ±¾µØ»º´æ±í
-		VTable & ltable = *(VTable *)global_local_table; // ±¾µØ¶¥µã±í
+		CTable & vcache = *(CTable *)global_vcache; // æœ¬åœ°ç¼“å­˜è¡¨
+		VTable & ltable = *(VTable *)global_local_table; // æœ¬åœ°é¡¶ç‚¹è¡¨
 		met_counter = 0;
-		bool remote_detected = false; //two cases: whether add2map(.) has been called or not ±ê¼Ç task_id ÈÎÎñÊÇ·ñÒÑ¾­±»¹ÒÆğ£¬true ±íÊ¾¸ÃÈÎÎñÒÑ¾­¹ÒÆğ£¬false ±íÊ¾Î´¹ÒÆğ£¨Í¬Ê±Ò²¿ÉÒÔ±íÊ¾ÊÇ·ñĞèÒª·¢ËÍÔ¶³ÌÇëÇó£©
-        // Èç¹ûĞèÒª½« task_id ÈÎÎñ¹ÒÆğ£¬Ôò»áµ÷ÓÃ add2map£¬½«Æä·ÅÈë¹ÒÆğÈÎÎñ map ÖĞ£»Èç¹û task_id ÈÎÎñÔÚÖ®Ç°ÇëÇóÔ¶³Ì¶¥µãÊ±ÒÑ¾­±»¹ÒÆğ£¬Ôò²»ĞèÒªµ÷ÓÃ 
+		bool remote_detected = false; //two cases: whether add2map(.) has been called or not æ ‡è®° task_id ä»»åŠ¡æ˜¯å¦å·²ç»è¢«æŒ‚èµ·ï¼Œtrue è¡¨ç¤ºè¯¥ä»»åŠ¡å·²ç»æŒ‚èµ·ï¼Œfalse è¡¨ç¤ºæœªæŒ‚èµ·ï¼ˆåŒæ—¶ä¹Ÿå¯ä»¥è¡¨ç¤ºæ˜¯å¦éœ€è¦å‘é€è¿œç¨‹è¯·æ±‚ï¼‰
+        // å¦‚æœéœ€è¦å°† task_id ä»»åŠ¡æŒ‚èµ·ï¼Œåˆ™ä¼šè°ƒç”¨ add2mapï¼Œå°†å…¶æ”¾å…¥æŒ‚èµ·ä»»åŠ¡ map ä¸­ï¼›å¦‚æœ task_id ä»»åŠ¡åœ¨ä¹‹å‰è¯·æ±‚è¿œç¨‹é¡¶ç‚¹æ—¶å·²ç»è¢«æŒ‚èµ·ï¼Œåˆ™ä¸éœ€è¦è°ƒç”¨ 
 		int size = to_pull.size();
 		frontier_vertexes.resize(size);
 
-        // ÖğÒ»»ñÈ¡¶¥µã
+        // é€ä¸€è·å–é¡¶ç‚¹
 		for(int i=0; i<size; i++)
 		{
 			KeyT key= to_pull[i];
-			if(hash(key) == _my_rank) //in local-table ÔÚ±¾µØ¶¥µãÁĞ±íÖĞ
+			if(hash(key) == _my_rank) //in local-table åœ¨æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨ä¸­
 			{
 				frontier_vertexes[i] = ltable[key];
 				met_counter++;
 			}
-			else //remote Ô¶³Ì¶¥µã£¨ÓĞÁ½ÖÖÇé¿ö£ºÒ»ÖÖÊÇ£¬¸ÃÔ¶³Ì¶¥µãÒÑ¾­±»À­È¡¹ı£¬²¢·ÅÈëµ½»º´æ±íÖĞ£»ÁíÍâÒ»ÖÖÊÇ£¬¸ÃÔ¶³Ì¶¥µãÎ´±»À­È¡¹ı£¬ĞèÒª½øĞĞÔ¶³ÌÀ­È¡£©
+			else //remote è¿œç¨‹é¡¶ç‚¹ï¼ˆæœ‰ä¸¤ç§æƒ…å†µï¼šä¸€ç§æ˜¯ï¼Œè¯¥è¿œç¨‹é¡¶ç‚¹å·²ç»è¢«æ‹‰å–è¿‡ï¼Œå¹¶æ”¾å…¥åˆ°ç¼“å­˜è¡¨ä¸­ï¼›å¦å¤–ä¸€ç§æ˜¯ï¼Œè¯¥è¿œç¨‹é¡¶ç‚¹æœªè¢«æ‹‰å–è¿‡ï¼Œéœ€è¦è¿›è¡Œè¿œç¨‹æ‹‰å–ï¼‰
 			{
-                // À­È¡Ô¶³Ì¶¥µãÊ±£¬ÏÈÅĞ¶Ï¸ÃÈÎÎñÊÇ·ñĞèÒª¹ÒÆğ£¬Èç¹û¸ÃÈÎÎñÒÑ¾­¹ÒÆğ£¬Ôò²»ĞèÒªÔÙ½«Æä¹ÒÆğ
-				if(remote_detected) //no need to call add2map(.) again ²»ĞèÒªÔÙ´Îµ÷ÓÃ add2map£¨¼´²»ĞèÒªÔÙ´Î½« task_id ÈÎÎñ¹ÒÆğ£©
+                // æ‹‰å–è¿œç¨‹é¡¶ç‚¹æ—¶ï¼Œå…ˆåˆ¤æ–­è¯¥ä»»åŠ¡æ˜¯å¦éœ€è¦æŒ‚èµ·ï¼Œå¦‚æœè¯¥ä»»åŠ¡å·²ç»æŒ‚èµ·ï¼Œåˆ™ä¸éœ€è¦å†å°†å…¶æŒ‚èµ·
+				if(remote_detected) //no need to call add2map(.) again ä¸éœ€è¦å†æ¬¡è°ƒç”¨ add2mapï¼ˆå³ä¸éœ€è¦å†æ¬¡å°† task_id ä»»åŠ¡æŒ‚èµ·ï¼‰
 				{
-                    // task_id ÈÎÎñÒÑ¾­¹ÒÆğ
-					frontier_vertexes[i] = vcache.lock_and_get(key, counter, task_id); // ÕâÀïµÄ lock_and_get º¯ÊıÖĞ²»»áµ÷ÓÃ add2map 
-					if(frontier_vertexes[i] != NULL) met_counter++; // µÚ i ¸ö¶¥µãÒÑ¾­À­È¡µ½±¾µØ£¬Ôò met_counter ¼Ó 1
+                    // task_id ä»»åŠ¡å·²ç»æŒ‚èµ·
+					frontier_vertexes[i] = vcache.lock_and_get(key, counter, task_id); // è¿™é‡Œçš„ lock_and_get å‡½æ•°ä¸­ä¸ä¼šè°ƒç”¨ add2map 
+					if(frontier_vertexes[i] != NULL) met_counter++; // ç¬¬ i ä¸ªé¡¶ç‚¹å·²ç»æ‹‰å–åˆ°æœ¬åœ°ï¼Œåˆ™ met_counter åŠ  1
 				}
 				else
 				{
-                    // task_id ÈÎÎñÎ´±»¹ÒÆğ
+                    // task_id ä»»åŠ¡æœªè¢«æŒ‚èµ·
 					frontier_vertexes[i] = vcache.lock_and_get(key, counter, task_id,
-											taskmap, this); // Èç¹ûÔÚ»º´æÖĞÕÒµ½¶ÔÓ¦¶¥µã£¬ÔòÖ±½Ó·µ»Ø¶¥µã£»·ñÔò£¬ĞèÒªÏòÔ¶³Ì worker À­È¡¶¥µã£¬»áµ÷ÓÃ add2map
+											taskmap, this); // å¦‚æœåœ¨ç¼“å­˜ä¸­æ‰¾åˆ°å¯¹åº”é¡¶ç‚¹ï¼Œåˆ™ç›´æ¥è¿”å›é¡¶ç‚¹ï¼›å¦åˆ™ï¼Œéœ€è¦å‘è¿œç¨‹ worker æ‹‰å–é¡¶ç‚¹ï¼Œä¼šè°ƒç”¨ add2map
 					if(frontier_vertexes[i] != NULL) met_counter++;
 					else //add2map(.) is called
 					{
-                        // µ÷ÓÃÁË add2map()£¬½« task_id ÈÎÎñ¹ÒÆğ£¬ĞèÒª½« remote_detected ÉèÎª true£¬±ê¼Ç¸ÃÈÎÎñ±»¹ÒÆğ
-                        // ÕâÑùÔÚÏÂ´ÎÀ­È¡Ô¶³Ì¶¥µãÊ±£¬ÏÈÅĞ¶Ï¸ÃÈÎÎñÊÇ·ñÒÑ¾­±»¹ÒÆğ£¬Èç¹û¸ÃÈÎÎñÒÑ¾­´¦ÓÚ¹ÒÆğ×´Ì¬£¬Ôò²»ĞèÒªµ÷ÓÃ add2map 
+                        // è°ƒç”¨äº† add2map()ï¼Œå°† task_id ä»»åŠ¡æŒ‚èµ·ï¼Œéœ€è¦å°† remote_detected è®¾ä¸º trueï¼Œæ ‡è®°è¯¥ä»»åŠ¡è¢«æŒ‚èµ·
+                        // è¿™æ ·åœ¨ä¸‹æ¬¡æ‹‰å–è¿œç¨‹é¡¶ç‚¹æ—¶ï¼Œå…ˆåˆ¤æ–­è¯¥ä»»åŠ¡æ˜¯å¦å·²ç»è¢«æŒ‚èµ·ï¼Œå¦‚æœè¯¥ä»»åŠ¡å·²ç»å¤„äºæŒ‚èµ·çŠ¶æ€ï¼Œåˆ™ä¸éœ€è¦è°ƒç”¨ add2map 
 						remote_detected = true;
 					}
 				}
 			}
 		}
 
-        // ÅĞ¶ÏÊÇ·ñĞèÒªÔ¶³ÌÇëÇó£¬Èç¹ûĞèÒªÔ¶³ÌÇëÇó£¬Ôò»¹ĞèÒªÅĞ¶ÏÊÇ·ñĞèÒª¸üĞÂÈÎÎñµÄ×´Ì¬
+        // åˆ¤æ–­æ˜¯å¦éœ€è¦è¿œç¨‹è¯·æ±‚ï¼Œå¦‚æœéœ€è¦è¿œç¨‹è¯·æ±‚ï¼Œåˆ™è¿˜éœ€è¦åˆ¤æ–­æ˜¯å¦éœ€è¦æ›´æ–°ä»»åŠ¡çš„çŠ¶æ€
 		if(remote_detected)
 		{
-            // ĞèÒª·¢ËÍÔ¶³ÌÇëÇó»ñÈ¡Êı¾İ
+            // éœ€è¦å‘é€è¿œç¨‹è¯·æ±‚è·å–æ•°æ®
 			//so far, all pull reqs are processed, and pending resps could've arrived (not wakening the task)
 			//------
-            // ´Ó¹ÒÆğÈÎÎñ map ÖĞ»ñÈ¡ task_id ÈÎÎñ£¬ÅĞ¶ÏÊÇ·ñ³É¹¦»ñÈ¡µ½
-			conmap2t_bucket<long long, TaskT *> & bucket = taskmap.task_map.get_bucket(task_id); // ¹ÒÆğÈÎÎñ map
+            // ä»æŒ‚èµ·ä»»åŠ¡ map ä¸­è·å– task_id ä»»åŠ¡ï¼Œåˆ¤æ–­æ˜¯å¦æˆåŠŸè·å–åˆ°
+			conmap2t_bucket<long long, TaskT *> & bucket = taskmap.task_map.get_bucket(task_id); // æŒ‚èµ·ä»»åŠ¡ map
 			bucket.lock();
 			hash_map<long long, TaskT *> & kvmap = bucket.get_map();
 			auto it = kvmap.find(task_id);
 
 			if(it != kvmap.end())
 			{
-                // ¹ÒÆğÈÎÎñ map ÖĞ´æÔÚ task_id ÈÎÎñ£¬
-				if(met_counter == req_size())  // Èç¹ûËùÓĞ¶¥µã¶¼ÒÑ¾­À­È¡µ½£¬Ôò¸ÃÈÎÎñĞèÒª´Ó¹ÒÆğ×´Ì¬×ª»»³É¾ÍĞ÷×´Ì¬
+                // æŒ‚èµ·ä»»åŠ¡ map ä¸­å­˜åœ¨ task_id ä»»åŠ¡ï¼Œ
+				if(met_counter == req_size())  // å¦‚æœæ‰€æœ‰é¡¶ç‚¹éƒ½å·²ç»æ‹‰å–åˆ°ï¼Œåˆ™è¯¥ä»»åŠ¡éœ€è¦ä»æŒ‚èµ·çŠ¶æ€è½¬æ¢æˆå°±ç»ªçŠ¶æ€
 				{//ready for task move, delete
-					kvmap.erase(it); // ½« task ´Ó¹ÒÆğÈÎÎñÁĞ±íÖĞÉ¾³ı£¬²¢¼ÓÈëµ½¾ÍĞ÷ÈÎÎñ¶ÓÁĞÖĞ
+					kvmap.erase(it); // å°† task ä»æŒ‚èµ·ä»»åŠ¡åˆ—è¡¨ä¸­åˆ é™¤ï¼Œå¹¶åŠ å…¥åˆ°å°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸­
 					taskmap.task_buf.enqueue(this); 
 				}
-				//else, RespServer will do the move ËùĞèÒªµÄ¶¥µãÎ´À­È¡Íê£¬RespServer ¸ºÔğÕªÈ¡Ô¶³Ì¶¥µã
+				//else, RespServer will do the move æ‰€éœ€è¦çš„é¡¶ç‚¹æœªæ‹‰å–å®Œï¼ŒRespServer è´Ÿè´£æ‘˜å–è¿œç¨‹é¡¶ç‚¹
 			}
-			//else, RespServer has already did the move ÔÚ¹ÒÆğÈÎÎñ map ÖĞÎ´»ñÈ¡µ½ task_id ÈÎÎñ£¬ÔòÓĞ¿ÉÄÜ RespServer ÖĞÒÑ¾­½ÓÊÕÍê task_id ÈÎÎñËùĞèÒªµÄÔ¶³Ì¶¥µãÊı¾İ£¬È»ºó½«¸ÃÈÎÎñ´Ó¹ÒÆğÈÎÎñ map ÖĞÒÆµ½¾ÍĞ÷ÈÎÎñ¶ÓÁĞÖĞ£¨Òò´Ë£¬ÔÚ¹ÒÆğÈÎÎñ map ÖĞÎ´ÕÒµ½¸ÃÈÎÎñ£©
+			//else, RespServer has already did the move åœ¨æŒ‚èµ·ä»»åŠ¡ map ä¸­æœªè·å–åˆ° task_id ä»»åŠ¡ï¼Œåˆ™æœ‰å¯èƒ½ RespServer ä¸­å·²ç»æ¥æ”¶å®Œ task_id ä»»åŠ¡æ‰€éœ€è¦çš„è¿œç¨‹é¡¶ç‚¹æ•°æ®ï¼Œç„¶åå°†è¯¥ä»»åŠ¡ä»æŒ‚èµ·ä»»åŠ¡ map ä¸­ç§»åˆ°å°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸­ï¼ˆå› æ­¤ï¼Œåœ¨æŒ‚èµ·ä»»åŠ¡ map ä¸­æœªæ‰¾åˆ°è¯¥ä»»åŠ¡ï¼‰
 			bucket.unlock();
 			return false;//either has pending resps, or all resps are received but the task is now in task_buf (to be processed, but not this time) 
-            // Ô¶³ÌÇëÇóÎ´·µ»Ø »ò Ô¶³ÌÇëÇóÒÑ¾­·µ»Øµ«ÊÇµ±Ç°ÈÎÎñÔÚ¾ÍĞ÷ÈÎÎñ¶ÓÁĞÖĞ£¨²»ÄÜÁ¢ÂíÖ´ĞĞ£©
+            // è¿œç¨‹è¯·æ±‚æœªè¿”å› æˆ– è¿œç¨‹è¯·æ±‚å·²ç»è¿”å›ä½†æ˜¯å½“å‰ä»»åŠ¡åœ¨å°±ç»ªä»»åŠ¡é˜Ÿåˆ—ä¸­ï¼ˆä¸èƒ½ç«‹é©¬æ‰§è¡Œï¼‰
 		}
-		else return true; //all v-local, continue to run the task for another iteration ËùÓĞ¶¥µãÊı¾İÒÑÈ«²¿À­È¡±¾µØ£¬¿ÉÒÔ¼ÌĞøÏÂÒ»ÂÖµü´ú
+		else return true; //all v-local, continue to run the task for another iteration æ‰€æœ‰é¡¶ç‚¹æ•°æ®å·²å…¨éƒ¨æ‹‰å–æœ¬åœ°ï¼Œå¯ä»¥ç»§ç»­ä¸‹ä¸€è½®è¿­ä»£
 	}
 
     /**
-     * ÈÎÎñ½áÊøÊ±µ÷ÓÃ´Ëº¯Êı£¬½âËø±¾ÈÎÎñËùÊ¹ÓÃµÄÔ¶³Ì¶¥µã£¨¸üĞÂ»º´æ±íÖĞÕâĞ©¶¥µãµÄ×´Ì¬£©
+     * ä»»åŠ¡ç»“æŸæ—¶è°ƒç”¨æ­¤å‡½æ•°ï¼Œè§£é”æœ¬ä»»åŠ¡æ‰€ä½¿ç”¨çš„è¿œç¨‹é¡¶ç‚¹ï¼ˆæ›´æ–°ç¼“å­˜è¡¨ä¸­è¿™äº›é¡¶ç‚¹çš„çŠ¶æ€ï¼‰
      */
 	void unlock_all()
 	{
-        // »ñÈ¡µ±Ç° worker µÄ»º´æ±í£¬¸üĞÂ»º´æ±íÖĞµÄ¶¥µã×´Ì¬£¬Ö÷ÒªÊÇ¶¥µãµÄ¼ÆÊıÆ÷£¨¼´Ê¹ÓÃ¶¥µãµÄÈÎÎñÊıÁ¿£©
+        // è·å–å½“å‰ worker çš„ç¼“å­˜è¡¨ï¼Œæ›´æ–°ç¼“å­˜è¡¨ä¸­çš„é¡¶ç‚¹çŠ¶æ€ï¼Œä¸»è¦æ˜¯é¡¶ç‚¹çš„è®¡æ•°å™¨ï¼ˆå³ä½¿ç”¨é¡¶ç‚¹çš„ä»»åŠ¡æ•°é‡ï¼‰
 		CTable & vcache = *(CTable *)global_vcache;
 
-        // ±éÀúµ±Ç°ÈÎÎñËùÊ¹ÓÃµÄËùÓĞ¶¥µã£¬ÅĞ¶ÏÊÇ·ñÊÇÔ¶³Ì¶¥µã£¬Èç¹ûÊÇÔ¶³Ì¶¥µã£¬ÔòÔÚ»º´æ±íÖĞ¸üĞÂÆä×´Ì¬
+        // éå†å½“å‰ä»»åŠ¡æ‰€ä½¿ç”¨çš„æ‰€æœ‰é¡¶ç‚¹ï¼Œåˆ¤æ–­æ˜¯å¦æ˜¯è¿œç¨‹é¡¶ç‚¹ï¼Œå¦‚æœæ˜¯è¿œç¨‹é¡¶ç‚¹ï¼Œåˆ™åœ¨ç¼“å­˜è¡¨ä¸­æ›´æ–°å…¶çŠ¶æ€
 		for(int i=0; i<frontier_vertexes.size(); i++)
 		{
 			VertexT * v = frontier_vertexes[i];
-            // ÒòÎªÊÇ¸üĞÂ»º´æ±íÖĞ¶¥µãµÄ×´Ì¬£¬¶ø»º´æ±íÖĞÊÇ»º´æµÄÔ¶³Ì¶¥µã£¬Òò´ËĞèÒªÏÈÅĞ¶Ï¶¥µãÊÇ·ñÎªÔ¶³Ì¶¥µã
-            // ¼´ hash(v->id) != _my_rank Í¨¹ıÅĞ¶ÏÊÇ·ñÎªÔ¶³Ì¶¥µã
-			if(hash(v->id) != _my_rank) vcache.unlock(v->id); // Èç¹ûÊÇÔ¶³Ì¶¥µã£¬ÔòĞèÒªÔÚ»º´æ±íÖĞ¸üĞÂÏàÓ¦µÄ×´Ì¬£¬¼´£º½«Ê¹ÓÃ¸Ã¶¥µãµÄÈÎÎñÊıÁ¿¼õ 1£¬Èç¹û¼õµ½ 0£¬ÊÇ¸Ã¶¥µã»á´Ó ¦£-tables ÒÆµ½ Z-tables ÖĞ
+            // å› ä¸ºæ˜¯æ›´æ–°ç¼“å­˜è¡¨ä¸­é¡¶ç‚¹çš„çŠ¶æ€ï¼Œè€Œç¼“å­˜è¡¨ä¸­æ˜¯ç¼“å­˜çš„è¿œç¨‹é¡¶ç‚¹ï¼Œå› æ­¤éœ€è¦å…ˆåˆ¤æ–­é¡¶ç‚¹æ˜¯å¦ä¸ºè¿œç¨‹é¡¶ç‚¹
+            // å³ hash(v->id) != _my_rank é€šè¿‡åˆ¤æ–­æ˜¯å¦ä¸ºè¿œç¨‹é¡¶ç‚¹
+			if(hash(v->id) != _my_rank) vcache.unlock(v->id); // å¦‚æœæ˜¯è¿œç¨‹é¡¶ç‚¹ï¼Œåˆ™éœ€è¦åœ¨ç¼“å­˜è¡¨ä¸­æ›´æ–°ç›¸åº”çš„çŠ¶æ€ï¼Œå³ï¼šå°†ä½¿ç”¨è¯¥é¡¶ç‚¹çš„ä»»åŠ¡æ•°é‡å‡ 1ï¼Œå¦‚æœå‡åˆ° 0ï¼Œæ˜¯è¯¥é¡¶ç‚¹ä¼šä» Î“-tables ç§»åˆ° Z-tables ä¸­
 		}
 	}
 
     /**
-     * Ô¶³Ì¶¥µãÊı¾İ·µ»Øºó£¬½«Ô¶³Ì¶¥µãÉèÖÃµ½À­È¡¶¥µãÁĞ±í£¨frontier_vertexes£©ÖĞ
-     * ÔÚ Comper.push_task_from_taskmap() ÖĞµ÷ÓÃ
+     * è¿œç¨‹é¡¶ç‚¹æ•°æ®è¿”å›åï¼Œå°†è¿œç¨‹é¡¶ç‚¹è®¾ç½®åˆ°æ‹‰å–é¡¶ç‚¹åˆ—è¡¨ï¼ˆfrontier_vertexesï¼‰ä¸­
+     * åœ¨ Comper.push_task_from_taskmap() ä¸­è°ƒç”¨
      */
 	//task_map => task_buf => push_task_from_taskmap() (where it is called)
 	void set_pulled() //called after vertex-pull, to replace NULL's in "frontier_vertexes"
 	{
-        // ±éÀúÀ­È¡¶¥µãÁĞ±í£¨frontier_vertexes£©£¬Èç¹ûÊÇÔ¶³Ì¶¥µã£¬Ôò´Ó»º´æ±íÖĞÈ¡³ö¸ÃÔ¶³Ì¶¥µã£¬È»ºó·Å½øÀ­È¡¶¥µãÁĞ±í£¨frontier_vertexes£©ÖĞ
+        // éå†æ‹‰å–é¡¶ç‚¹åˆ—è¡¨ï¼ˆfrontier_vertexesï¼‰ï¼Œå¦‚æœæ˜¯è¿œç¨‹é¡¶ç‚¹ï¼Œåˆ™ä»ç¼“å­˜è¡¨ä¸­å–å‡ºè¯¥è¿œç¨‹é¡¶ç‚¹ï¼Œç„¶åæ”¾è¿›æ‹‰å–é¡¶ç‚¹åˆ—è¡¨ï¼ˆfrontier_vertexesï¼‰ä¸­
 		CTable & vcache = *(CTable *)global_vcache; 
 		for(int i=0; i<to_pull.size(); i++)
 		{

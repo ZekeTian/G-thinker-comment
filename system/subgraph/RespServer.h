@@ -15,7 +15,7 @@
 //########################################################################
 
 /**
- * ÏìÓ¦·şÎñÆ÷£¬¸ºÔğ½ÓÊÕÇëÇó´¦Àíºó·µ»ØµÄÏìÓ¦½á¹û£¨¼´¸ºÔğ½ÓÊÕÔ¶³Ì¶¥µãÊı¾İ£©£¬ÆäÂß¼­Óë ReqServer ÀàËÆ¡£
+ * å“åº”æœåŠ¡å™¨ï¼Œè´Ÿè´£æ¥æ”¶è¯·æ±‚å¤„ç†åè¿”å›çš„å“åº”ç»“æœï¼ˆå³è´Ÿè´£æ¥æ”¶è¿œç¨‹é¡¶ç‚¹æ•°æ®ï¼‰ï¼Œå…¶é€»è¾‘ä¸ ReqServer ç±»ä¼¼ã€‚
  */
 
 //this is the server of managing vcache
@@ -49,52 +49,52 @@ public:
 	typedef typename VertexT::KeyType KeyT;
 	typedef typename VertexT::ValueType ValueT;
 	typedef typename VertexT::HashType HashT;
-	typedef AdjCache<TaskT> CTable; // »º´æ±íÊı¾İÀàĞÍ
+	typedef AdjCache<TaskT> CTable; // ç¼“å­˜è¡¨æ•°æ®ç±»å‹
 
-	CTable & cache_table; // »º´æ±í£¬¶ÔÓ¦ÂÛÎÄÖĞµÄ ¦£-tables¡¢R-tables¡¢Z-table
+	CTable & cache_table; // ç¼“å­˜è¡¨ï¼Œå¯¹åº”è®ºæ–‡ä¸­çš„ Î“-tablesã€R-tablesã€Z-table
 	//thread_counter counter; //used for trim-to-vcache-limit
 	thread main_thread;
 
     /**
-     * ¶ÁÈ¡ÏìÓ¦½á¹û·µ»ØµÄÏûÏ¢Êı¾İ£¨¼´½ÓÊÕ·µ»ØµÄÔ¶³Ì¶¥µã£©£¬²¢½«ÏûÏ¢·´ĞòÁĞ»¯Îª¶ÔÏó
+     * è¯»å–å“åº”ç»“æœè¿”å›çš„æ¶ˆæ¯æ•°æ®ï¼ˆå³æ¥æ”¶è¿”å›çš„è¿œç¨‹é¡¶ç‚¹ï¼‰ï¼Œå¹¶å°†æ¶ˆæ¯ååºåˆ—åŒ–ä¸ºå¯¹è±¡
      */
 	void thread_func(char * buf, int size, int mpi_src)
 	{
 		//get Comper objects of all threads
-		TaskMapT ** taskmap_vec = (TaskMapT **)global_taskmap_vec; // È¡³öµ±Ç° worker ÖĞËùÓĞÏß³ÌµÄÈÎÎñÁĞ±í
+		TaskMapT ** taskmap_vec = (TaskMapT **)global_taskmap_vec; // å–å‡ºå½“å‰ worker ä¸­æ‰€æœ‰çº¿ç¨‹çš„ä»»åŠ¡åˆ—è¡¨
 		//insert received batch
 		obinstream m(buf, size);
 		VertexT* v;
 		while(m.end() == false)
 		{
-			m >> v; // ·´ĞòÁĞ»¯Îª¶¥µã
+			m >> v; // ååºåˆ—åŒ–ä¸ºé¡¶ç‚¹
 			//step 1: move vertex from pcache to vcache
 			vector<long long> tid_collector;
-			cache_table.insert(v->id, v, tid_collector); // ½« v ¶¥µãÇëÇó»º´æÁĞ±í pcache£¨R-table£©ÖĞÒÆµ½Ïß³ÌÕıÔÚÊ¹ÓÃµÄ¶¥µã map ÖĞ£¨¼´´úÂëÖĞµÄ vcache£¬ÂÛÎÄÖĞµÄ ¦£-table£©
-			// Í¬Ê±£¬»á½«ÇëÇó¹ı v ¶¥µãµÄÈÎÎñµÄ id ±£´æÔÚ tid_collector ÖĞ
+			cache_table.insert(v->id, v, tid_collector); // å°† v é¡¶ç‚¹è¯·æ±‚ç¼“å­˜åˆ—è¡¨ pcacheï¼ˆR-tableï¼‰ä¸­ç§»åˆ°çº¿ç¨‹æ­£åœ¨ä½¿ç”¨çš„é¡¶ç‚¹ map ä¸­ï¼ˆå³ä»£ç ä¸­çš„ vcacheï¼Œè®ºæ–‡ä¸­çš„ Î“-tableï¼‰
+			// åŒæ—¶ï¼Œä¼šå°†è¯·æ±‚è¿‡ v é¡¶ç‚¹çš„ä»»åŠ¡çš„ id ä¿å­˜åœ¨ tid_collector ä¸­
             //now "tid_collector" contains the ID of the tasks that requested for v
 			//why use tid_collector?
 			//>> pcache.erase(.) is called by vcache.insert(.), where AdjValue-constructor is called
 			//>> (1) need to insert to vcache first, and then notify; (2) vcache.insert(.) triggers pcache.erase(.), erase the thread-list before vertex-insertion
 			//>> Solution to above: let vcache.insert(.) return the thread list (vec.swap), and notify them in the current function
 			//------
-			//step 2: notify those tasks Í¨ÖªÖ®Ç°À­È¡¹ı¹ı v ¶¥µãµÄÈÎÎñ£¬¸üĞÂÕâĞ©ÈÎÎñµÄ¼ÆÊıÆ÷£¨»ò×´Ì¬£©
-            // ÒòÎªÒòÎªÒÑ¾­½ÓÊÕµ½Ô¶³Ì¶¥µãÊı¾İ£¬ËùÒÔ¶ÔÓ¦ÈÎÎñµÄ counter Ó¦¸Ã¼Ó 1£¨¼´ÒÑÀ­È¡µ½µÄ¶¥µãÊıÁ¿¼Ó 1£©
-            // ²¢ÇÒÈç¹û¸ÃÈÎÎñÒÑ¾­À­È¡µ½ËùÓĞĞèÒªµÄ¶¥µã£¬Ôò¸ÃÈÎÎñĞèÒª´Ó¹ÒÆğ×´Ì¬±ä³É¾ÍĞ÷×´Ì¬¡£ÒÔÉÏ¸üĞÂµÄ¹ı³Ì¾ùÔÚ tmap->update() º¯ÊıÖĞÍê³É
+			//step 2: notify those tasks é€šçŸ¥ä¹‹å‰æ‹‰å–è¿‡è¿‡ v é¡¶ç‚¹çš„ä»»åŠ¡ï¼Œæ›´æ–°è¿™äº›ä»»åŠ¡çš„è®¡æ•°å™¨ï¼ˆæˆ–çŠ¶æ€ï¼‰
+            // å› ä¸ºå› ä¸ºå·²ç»æ¥æ”¶åˆ°è¿œç¨‹é¡¶ç‚¹æ•°æ®ï¼Œæ‰€ä»¥å¯¹åº”ä»»åŠ¡çš„ counter åº”è¯¥åŠ  1ï¼ˆå³å·²æ‹‰å–åˆ°çš„é¡¶ç‚¹æ•°é‡åŠ  1ï¼‰
+            // å¹¶ä¸”å¦‚æœè¯¥ä»»åŠ¡å·²ç»æ‹‰å–åˆ°æ‰€æœ‰éœ€è¦çš„é¡¶ç‚¹ï¼Œåˆ™è¯¥ä»»åŠ¡éœ€è¦ä»æŒ‚èµ·çŠ¶æ€å˜æˆå°±ç»ªçŠ¶æ€ã€‚ä»¥ä¸Šæ›´æ–°çš„è¿‡ç¨‹å‡åœ¨ tmap->update() å‡½æ•°ä¸­å®Œæˆ
 			for(int i=0; i<tid_collector.size(); i++)
 			{
-                // ¸ù¾İÈÎÎñºÅ»ñÈ¡Ïß³ÌºÅ
+                // æ ¹æ®ä»»åŠ¡å·è·å–çº¿ç¨‹å·
 				long long task_id = tid_collector[i];
 				int thread_id = (task_id >> 48);
 
-                // ¸ù¾İÏß³ÌºÅ»ñÈ¡¸ÃÏß³ÌµÄÈÎÎñÁĞ±í£¬²¢ÔÚ´ËÈÎÎñÁĞ±íÖĞ¸üĞÂ¸ÃÈÎÎñ
+                // æ ¹æ®çº¿ç¨‹å·è·å–è¯¥çº¿ç¨‹çš„ä»»åŠ¡åˆ—è¡¨ï¼Œå¹¶åœ¨æ­¤ä»»åŠ¡åˆ—è¡¨ä¸­æ›´æ–°è¯¥ä»»åŠ¡
 				//get the thread's Comper object
 				TaskMapT* tmap = taskmap_vec[thread_id];
 				tmap->update(task_id); //add the task's counter, move to conque if ready (to be fetched by Comper)
 			}
-			req_counter[mpi_src]--; // Ò»¸ö¶¥µã¶ÔÓ¦Ò»´ÎÇëÇó£¬ÒòÎªÒÑ¾­½ÓÊÕµ½Ò»¸ö¶¥µã£¬Òò´ËÏò mpi_src ºÅ worker ·¢ËÍµÄÇëÇó´ÎÊı¼õ 1
+			req_counter[mpi_src]--; // ä¸€ä¸ªé¡¶ç‚¹å¯¹åº”ä¸€æ¬¡è¯·æ±‚ï¼Œå› ä¸ºå·²ç»æ¥æ”¶åˆ°ä¸€ä¸ªé¡¶ç‚¹ï¼Œå› æ­¤å‘ mpi_src å· worker å‘é€çš„è¯·æ±‚æ¬¡æ•°å‡ 1
 		}
-		/* we let GC do that now // GC ×ö»º´æÇåÀíµÄ¹¤×÷
+		/* we let GC do that now // GC åšç¼“å­˜æ¸…ç†çš„å·¥ä½œ
 		//try to trim to capacity-limit
 		size_t oversize = global_cache_size - VCACHE_LIMIT;
 		if(oversize > 0) cache_table.shrink(oversize, counter);
@@ -104,24 +104,24 @@ public:
     void run()
     {
     	bool first = true;
-    	thread t; // ÓÃÓÚ¶ÁÈ¡·µ»ØµÄÏìÓ¦½á¹û£¬ÏŞ½«ÏûÏ¢Êı¾İ·´ĞòÁĞ»¯Îª¶¥µã
+    	thread t; // ç”¨äºè¯»å–è¿”å›çš„å“åº”ç»“æœï¼Œé™å°†æ¶ˆæ¯æ•°æ®ååºåˆ—åŒ–ä¸ºé¡¶ç‚¹
     	//------
     	while(global_end_label == false) //otherwise, thread terminates
     	{
-            // ²»¶ÏµØÌ½²âÏûÏ¢£¬¼´²»¶ÏµØ¼ì²âÊÇ·ñÓĞÏìÓ¦½á¹û·µ»Ø¸øµ±Ç° worker
+            // ä¸æ–­åœ°æ¢æµ‹æ¶ˆæ¯ï¼Œå³ä¸æ–­åœ°æ£€æµ‹æ˜¯å¦æœ‰å“åº”ç»“æœè¿”å›ç»™å½“å‰ worker
     		int has_msg;
     		MPI_Status status;
     		MPI_Iprobe(MPI_ANY_SOURCE, RESP_CHANNEL, MPI_COMM_WORLD, &has_msg, &status);
     		if(!has_msg) usleep(WAIT_TIME_WHEN_IDLE);
     		else
     		{
-                // ÓĞÏìÓ¦½á¹û·µ»Ø¸øµ±Ç° worker£¬Ôò½ÓÊÕÏìÓ¦½á¹û
+                // æœ‰å“åº”ç»“æœè¿”å›ç»™å½“å‰ workerï¼Œåˆ™æ¥æ”¶å“åº”ç»“æœ
     			int size;
     			MPI_Get_count(&status, MPI_CHAR, &size); // get size of the msg-batch (# of bytes)
     			char * buf = new char[size]; //space for receiving this msg-batch, space will be released by obinstream in thread_func(.)
     			MPI_Recv(buf, size, MPI_CHAR, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     			if(!first) t.join(); //wait for previous CPU op to finish; t can be extended to a vector of threads later if necessary
-    			t = thread(&RespServerT::thread_func, this, buf, size, status.MPI_SOURCE); // ¶ÁÈ¡·µ»ØµÄÔ¶³Ì¶¥µãÊı¾İ
+    			t = thread(&RespServerT::thread_func, this, buf, size, status.MPI_SOURCE); // è¯»å–è¿”å›çš„è¿œç¨‹é¡¶ç‚¹æ•°æ®
     			first = false;
     		}
     	}

@@ -15,7 +15,7 @@
 //########################################################################
 
 /**
- * ²¢·¢µÄ map £¬Éè¼ÆË¼Â·Óë conmap Ò»Ñù£¬Æä·â×°µÄÊÇÂÛÎÄÖĞµÄ R-table£¬¼´¶¥µãÇëÇó»º´æÁĞ±í
+ * å¹¶å‘çš„ map ï¼Œè®¾è®¡æ€è·¯ä¸ conmap ä¸€æ ·ï¼Œå…¶å°è£…çš„æ˜¯è®ºæ–‡ä¸­çš„ R-tableï¼Œå³é¡¶ç‚¹è¯·æ±‚ç¼“å­˜åˆ—è¡¨
  */
 
 #ifndef CONMAP0_H
@@ -34,7 +34,7 @@ using namespace std;
 template <typename K, typename V> struct conmap0_bucket
 {
 	typedef hash_map<K, V> KVMap;
-	KVMap bucket; // R-table£¬´æ´¢¶¥µãÇëÇó»º´æÁĞ±í£¬Êı¾İÀàĞÍ£º<KeyType, TaskIDVec>£¬key Îª±»ÇëÇó¶¥µãµÄ id£¬value ÎªÇëÇó key ¶¥µãµÄÈÎÎñÁĞ±í
+	KVMap bucket; // R-tableï¼Œå­˜å‚¨é¡¶ç‚¹è¯·æ±‚ç¼“å­˜åˆ—è¡¨ï¼Œæ•°æ®ç±»å‹ï¼š<KeyType, TaskIDVec>ï¼Œkey ä¸ºè¢«è¯·æ±‚é¡¶ç‚¹çš„ idï¼Œvalue ä¸ºè¯·æ±‚ key é¡¶ç‚¹çš„ä»»åŠ¡åˆ—è¡¨
 
 	KVMap & get_map()
 	{

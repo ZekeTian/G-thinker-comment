@@ -15,7 +15,7 @@
 //########################################################################
 
 /**
- *  À¬»ø»ØÊÕÆ÷£¬¸ºÔð¶¥µã»º´æµÄÀ¬»ø»ØÊÕ
+ *  åžƒåœ¾å›žæ”¶å™¨ï¼Œè´Ÿè´£é¡¶ç‚¹ç¼“å­˜çš„åžƒåœ¾å›žæ”¶
  */
 
 //this is the garbage collector of vcache:
@@ -44,7 +44,7 @@ public:
     {
     	while(global_end_label == false) //otherwise, thread terminates
     	{
-            // ÅÐ¶Ï»º´æ±íµÄ´óÐ¡ÊÇ·ñ³¬¹ý»º´æÊýÁ¿µÄ×î´óÖµ£¬Èç¹û³¬¹ý£¬ÔòÐèÒª½øÐÐ»º´æÊý¾ÝµÄ»ØÊÕ
+            // åˆ¤æ–­ç¼“å­˜è¡¨çš„å¤§å°æ˜¯å¦è¶…è¿‡ç¼“å­˜æ•°é‡çš„æœ€å¤§å€¼ï¼Œå¦‚æžœè¶…è¿‡ï¼Œåˆ™éœ€è¦è¿›è¡Œç¼“å­˜æ•°æ®çš„å›žæ”¶
     		int oversize = global_cache_size - VCACHE_LIMIT;
     		if(oversize > 0) cache_table.shrink(oversize, counter);
     		usleep(WAIT_TIME_WHEN_IDLE); //polling frequency

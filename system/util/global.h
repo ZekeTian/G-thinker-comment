@@ -15,10 +15,10 @@
 //########################################################################
 
 /**
- * È«¾ÖÎÄ¼ş£¬±¾ÎÄ¼şÖ÷ÒªÓĞÈçÏÂµÄ¹¦ÄÜ£º
- *    £¨1£©´æ´¢Ò»Ğ©È«¾ÖÊ¹ÓÃµÄ±äÁ¿£¬Í¨³£ÊÇ worker ±äÁ¿µÄÈ«¾Ö»¯£¨¼´½« Worker ÀàÖĞµÄÊôĞÔ¶¨ÒåÓòÀ©´óµ½È«¾Ö£©£¬´Ó¶ø worker ÖĞÈÎºÎµØ·½¶¼¿ÉÒÔÊ¹ÓÃ
- *    £¨2£©¶¨ÒåÈ«¾ÖÊ¹ÓÃµÄº¯Êı
- *    £¨3£©ÉèÖÃÏµÍ³µÄÅäÖÃ²ÎÊı
+ * å…¨å±€æ–‡ä»¶ï¼Œæœ¬æ–‡ä»¶ä¸»è¦æœ‰å¦‚ä¸‹çš„åŠŸèƒ½ï¼š
+ *    ï¼ˆ1ï¼‰å­˜å‚¨ä¸€äº›å…¨å±€ä½¿ç”¨çš„å˜é‡ï¼Œé€šå¸¸æ˜¯ worker å˜é‡çš„å…¨å±€åŒ–ï¼ˆå³å°† Worker ç±»ä¸­çš„å±æ€§å®šä¹‰åŸŸæ‰©å¤§åˆ°å…¨å±€ï¼‰ï¼Œä»è€Œ worker ä¸­ä»»ä½•åœ°æ–¹éƒ½å¯ä»¥ä½¿ç”¨
+ *    ï¼ˆ2ï¼‰å®šä¹‰å…¨å±€ä½¿ç”¨çš„å‡½æ•°
+ *    ï¼ˆ3ï¼‰è®¾ç½®ç³»ç»Ÿçš„é…ç½®å‚æ•°
  */
 
 #ifndef GLOBAL_H
@@ -56,7 +56,7 @@ static clock_t polling_ticks; // = POLLING_TIME * CLOCKS_PER_SEC / 1000000;
 //if too small, communication is unbalanced and congestion happens
 //if too big, low bandwidth utilization
 
-#define MAX_BATCH_SIZE 1000 //number of bytes sent in a batch Ã¿´ÎÇëÇóµÄ×î´ó¶¥µãÊıÁ¿
+#define MAX_BATCH_SIZE 1000 //number of bytes sent in a batch æ¯æ¬¡è¯·æ±‚çš„æœ€å¤§é¡¶ç‚¹æ•°é‡
 
 #define WAIT_TIME_WHEN_IDLE 100 //unit: usec, user-configurable, used by recv-er
 
@@ -67,16 +67,16 @@ static clock_t polling_ticks; // = POLLING_TIME * CLOCKS_PER_SEC / 1000000;
 #define PROGRESS_SYNC_TIME_GAP 1000000 //unit: usec, used by Profiler main-thread
 
 #define TASK_BATCH_NUM 150 //minimal number of tasks processed as a unit
-#define TASKMAP_LIMIT 8 * TASK_BATCH_NUM //number of tasks allowed in a task map £¨task map ÖĞ´æ·ÅÈÎÎñÊıµÄÉÏÏŞ£©
+#define TASKMAP_LIMIT 8 * TASK_BATCH_NUM //number of tasks allowed in a task map ï¼ˆtask map ä¸­å­˜æ”¾ä»»åŠ¡æ•°çš„ä¸Šé™ï¼‰
 
 #define VCACHE_LIMIT 2000000 //how many vertices allowed in vcache (pull-cache + adj-cache)
 #define VCACHE_OVERSIZE_FACTOR 0.2
 #define VCACHE_OVERSIZE_LIMIT VCACHE_LIMIT * VCACHE_OVERSIZE_FACTOR
 
-#define MAX_STEAL_TASK_NUM 10*TASK_BATCH_NUM //how many tasks to steal at a time at most Ò»´Î×î¶à¿ÉÒÔÇÔÈ¡µÄÈÎÎñÊıÁ¿
-#define MIN_TASK_NUM_BEFORE_STEALING 10*TASK_BATCH_NUM //how many tasks should be remaining (or task stealing is triggered) ¸÷¸ö worker ÖĞÓ¦¸Ã±£ÁôµÄ×îĞ¡ÈÎÎñÊıÁ¿£¬Èç¹ûµÍÓÚÕâ¸öÖµ£¬Ôò¸Ã worker µÄ¸ºÔØ½ÏÇá£¬ÔòĞèÒª´Ó¸ºÔØ½ÏÖØµÄ worker ÖĞÇÔÈ¡ÈÎÎñÖ´ĞĞ
+#define MAX_STEAL_TASK_NUM 10*TASK_BATCH_NUM //how many tasks to steal at a time at most ä¸€æ¬¡æœ€å¤šå¯ä»¥çªƒå–çš„ä»»åŠ¡æ•°é‡
+#define MIN_TASK_NUM_BEFORE_STEALING 10*TASK_BATCH_NUM //how many tasks should be remaining (or task stealing is triggered) å„ä¸ª worker ä¸­åº”è¯¥ä¿ç•™çš„æœ€å°ä»»åŠ¡æ•°é‡ï¼Œå¦‚æœä½äºè¿™ä¸ªå€¼ï¼Œåˆ™è¯¥ worker çš„è´Ÿè½½è¾ƒè½»ï¼Œåˆ™éœ€è¦ä»è´Ÿè½½è¾ƒé‡çš„ worker ä¸­çªƒå–ä»»åŠ¡æ‰§è¡Œ
 
-#define MINI_BATCH_NUM 10 //used by spawning from local ´Ó±¾µØ¶¥µãÖĞÒ»´ÎÉú³ÉµÄ×îĞ¡ÈÎÎñÊıÁ¿
+#define MINI_BATCH_NUM 10 //used by spawning from local ä»æœ¬åœ°é¡¶ç‚¹ä¸­ä¸€æ¬¡ç”Ÿæˆçš„æœ€å°ä»»åŠ¡æ•°é‡
 #define REQUEST_BOUND 50000 //the maximal number of requests could be sent between each two workers //tuned on GigE
 
 #define GRAPH_LOAD_CHANNEL 200
@@ -87,17 +87,17 @@ static clock_t polling_ticks; // = POLLING_TIME * CLOCKS_PER_SEC / 1000000;
 #define PROGRESS_CHANNEL 205
 
 void* global_trimmer = NULL;
-void* global_taskmap_vec; //set by Worker using its compers, used by RespServer µ±Ç° worker ÖĞ¸÷¸ö Comper µÄÈÎÎñÁĞ±í£¨¶ÔÓ¦ worker ÖĞµÄ taskmap_vec£¬ÊÇÆäµÄÈ«¾Ö»¯±äÁ¿£©£¬Èôµ±Ç° worker ÓĞ n ¸öÏß³Ì£¬ÔòÓĞ n ¸öÈÎÎñÁĞ±í
+void* global_taskmap_vec; //set by Worker using its compers, used by RespServer å½“å‰ worker ä¸­å„ä¸ª Comper çš„ä»»åŠ¡åˆ—è¡¨ï¼ˆå¯¹åº” worker ä¸­çš„ taskmap_vecï¼Œæ˜¯å…¶çš„å…¨å±€åŒ–å˜é‡ï¼‰ï¼Œè‹¥å½“å‰ worker æœ‰ n ä¸ªçº¿ç¨‹ï¼Œåˆ™æœ‰ n ä¸ªä»»åŠ¡åˆ—è¡¨
 void* global_vcache;
-void* global_local_table; // worker ÖĞ´æ´¢±¾µØ¶¥µãµÄ map£¨¶ÔÓ¦ worker ÖĞ local_table£©
+void* global_local_table; // worker ä¸­å­˜å‚¨æœ¬åœ°é¡¶ç‚¹çš„ mapï¼ˆå¯¹åº” worker ä¸­ local_tableï¼‰
 
-atomic<int> global_num_idle(0); // µ±Ç° worker ÖĞ¿ÕÏĞ comper µÄÊıÁ¿
+atomic<int> global_num_idle(0); // å½“å‰ worker ä¸­ç©ºé—² comper çš„æ•°é‡
 
-conque<string> global_file_list; //tasks buffered on local disk; each element is a file name ´ÅÅÌÖĞ±£´æµÄ task ÎÄ¼şÃû
-atomic<int> global_file_num; //number of files in global_file_list ´ÅÅÌÖĞ±£´æµÄ task ÎÄ¼şÊıÁ¿
+conque<string> global_file_list; //tasks buffered on local disk; each element is a file name ç£ç›˜ä¸­ä¿å­˜çš„ task æ–‡ä»¶å
+atomic<int> global_file_num; //number of files in global_file_list ç£ç›˜ä¸­ä¿å­˜çš„ task æ–‡ä»¶æ•°é‡
 
-void* global_vertexes; // µ±Ç° worker ´æ´¢µÄ¶¥µãÁĞ±í£¨¶ÔÓ¦ worker µÄ vertexes£©£¬ÊÇÎªÁË½«¶¥µãÁĞ±íµÄ×÷ÓÃÓòÀ©´óµ½È«¾Ö£¬ÔÚ worker µÄ¹¹Ôì·½·¨ÖĞ³õÊ¼»¯£¬ÔÚ worker ºÍ  comper ÖĞ¾ùÓĞÊ¹ÓÃ¡£
-int global_vertex_pos; //next vertex position in global_vertexes to spawn a task ¶¥µãÁĞ±íÖĞÏÂÒ»¸öÓÃÀ´Éú³ÉÈÎÎñµÄ¶¥µãÎ»ÖÃ
+void* global_vertexes; // å½“å‰ worker å­˜å‚¨çš„é¡¶ç‚¹åˆ—è¡¨ï¼ˆå¯¹åº” worker çš„ vertexesï¼‰ï¼Œæ˜¯ä¸ºäº†å°†é¡¶ç‚¹åˆ—è¡¨çš„ä½œç”¨åŸŸæ‰©å¤§åˆ°å…¨å±€ï¼Œåœ¨ worker çš„æ„é€ æ–¹æ³•ä¸­åˆå§‹åŒ–ï¼Œåœ¨ worker å’Œ  comper ä¸­å‡æœ‰ä½¿ç”¨ã€‚
+int global_vertex_pos; //next vertex position in global_vertexes to spawn a task é¡¶ç‚¹åˆ—è¡¨ä¸­ä¸‹ä¸€ä¸ªç”¨æ¥ç”Ÿæˆä»»åŠ¡çš„é¡¶ç‚¹ä½ç½®
 mutex global_vertex_pos_lock; //lock for global_vertex_pos
 
 #define TASK_GET_NUM 1
@@ -111,7 +111,7 @@ mutex global_vertex_pos_lock; //lock for global_vertex_pos
 
 using namespace std;
 
-atomic<bool> global_end_label(false); // ±ê¼ÇËùÓĞ worker ÊÇ·ñ¶¼ÒÑ¾­´¦ÀíÍêÈÎÎñ£¬Èç¹ûÒÑ¾­´¦ÀíÍêËùÓĞÈÎÎñ£¬ÔòÎª true£¬½áÊøµü´ú¼ÆËã
+atomic<bool> global_end_label(false); // æ ‡è®°æ‰€æœ‰ worker æ˜¯å¦éƒ½å·²ç»å¤„ç†å®Œä»»åŠ¡ï¼Œå¦‚æœå·²ç»å¤„ç†å®Œæ‰€æœ‰ä»»åŠ¡ï¼Œåˆ™ä¸º trueï¼Œç»“æŸè¿­ä»£è®¡ç®—
 
 //============================
 ///worker info
@@ -131,7 +131,7 @@ inline int get_num_workers()
 void init_worker(int * argc, char*** argv)
 {
 	int provided;
-	MPI_Init_thread(argc, argv, MPI_THREAD_MULTIPLE, &provided); // ÔÚÒ»¸ö½ø³ÌÖĞ¿ªÆô¶à¸öÏß³Ì£¬½ø³ÌÖĞ¿ªÆôµÄËùÓĞÏß³Ì¶¼ÊÇ¿ÉÒÔ½øĞĞMPI Call
+	MPI_Init_thread(argc, argv, MPI_THREAD_MULTIPLE, &provided); // åœ¨ä¸€ä¸ªè¿›ç¨‹ä¸­å¼€å¯å¤šä¸ªçº¿ç¨‹ï¼Œè¿›ç¨‹ä¸­å¼€å¯çš„æ‰€æœ‰çº¿ç¨‹éƒ½æ˜¯å¯ä»¥è¿›è¡ŒMPI Call
 	if(provided != MPI_THREAD_MULTIPLE)
 	{
 	    printf("MPI do not Support Multiple thread\n");
@@ -172,7 +172,7 @@ struct WorkerParams {
 //general types
 typedef int VertexID;
 
-void* global_aggregator = NULL; // worker µÄ¾ÛºÏÆ÷
+void* global_aggregator = NULL; // worker çš„èšåˆå™¨
 
 void* global_agg = NULL; //for aggregator, FinalT of previous round
 rwlock agg_rwlock;
@@ -214,17 +214,17 @@ void _rmdir(string path){
     }
 }
 
-atomic<bool>* idle_set; //to indicate whether a comper has notified worker of its idleness µ±Ç° worker ÖĞËùÓĞ comper µÄ¹¤×÷×´Ì¬£¬ÔÚ comper ÖĞÉèÖÃÎª true£¬ÔÚ worker ÖĞÉèÖÃÎª false
-mutex mtx_go; // È«¾Ö»¥³âËø£¬ÔÚ Worker ºÍ Comper ÖĞÊ¹ÓÃ
-condition_variable cv_go; // È«¾ÖÌõ¼ş±äÁ¿£¬ÔÚ Worker ºÍ Comper ÖĞÊ¹ÓÃ
+atomic<bool>* idle_set; //to indicate whether a comper has notified worker of its idleness å½“å‰ worker ä¸­æ‰€æœ‰ comper çš„å·¥ä½œçŠ¶æ€ï¼Œåœ¨ comper ä¸­è®¾ç½®ä¸º trueï¼Œåœ¨ worker ä¸­è®¾ç½®ä¸º false
+mutex mtx_go; // å…¨å±€äº’æ–¥é”ï¼Œåœ¨ Worker å’Œ Comper ä¸­ä½¿ç”¨
+condition_variable cv_go; // å…¨å±€æ¡ä»¶å˜é‡ï¼Œåœ¨ Worker å’Œ Comper ä¸­ä½¿ç”¨
 
 //used by profiler
-atomic<size_t>* global_tasknum_vec; //set by Worker using its compers, updated by comper, read by profiler ¸÷¸ö Comper µÄÈÎÎñÊıÁ¿
-atomic<size_t> num_stolen(0); //number of tasks stolen by the current worker since previous profiling barrier µ±Ç° worker ÇÔÈ¡µ½ÈÎÎñ×ÜÊı
+atomic<size_t>* global_tasknum_vec; //set by Worker using its compers, updated by comper, read by profiler å„ä¸ª Comper çš„ä»»åŠ¡æ•°é‡
+atomic<size_t> num_stolen(0); //number of tasks stolen by the current worker since previous profiling barrier å½“å‰ worker çªƒå–åˆ°ä»»åŠ¡æ€»æ•°
 
-atomic<size_t>* req_counter; //to count how many requests were sent to each worker ÇëÇó´ÎÊıÁĞ±í£¬Í³¼Æµ±Ç° worker ÏòÆäËü worker ·¢ËÍµÄÇëÇó´ÎÊı¡£Èç£ºÆäÖĞµÚ 1 ¸öÖµ±íÊ¾µ±Ç° wroker ÏòµÚ 1 ºÅ worker ·¢ËÍµÄÇëÇó×Ü´ÎÊı
+atomic<size_t>* req_counter; //to count how many requests were sent to each worker è¯·æ±‚æ¬¡æ•°åˆ—è¡¨ï¼Œç»Ÿè®¡å½“å‰ worker å‘å…¶å®ƒ worker å‘é€çš„è¯·æ±‚æ¬¡æ•°ã€‚å¦‚ï¼šå…¶ä¸­ç¬¬ 1 ä¸ªå€¼è¡¨ç¤ºå½“å‰ wroker å‘ç¬¬ 1 å· worker å‘é€çš„è¯·æ±‚æ€»æ¬¡æ•°
 
-int num_compers; // Ò»¸ö worker ËùÓµÓĞµÄ comper ÊıÁ¿
+int num_compers; // ä¸€ä¸ª worker æ‰€æ‹¥æœ‰çš„ comper æ•°é‡
 
 //============= to allow long long to be ID =============
 namespace __gnu_cxx {

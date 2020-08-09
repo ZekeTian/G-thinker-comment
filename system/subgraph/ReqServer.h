@@ -15,8 +15,8 @@
 //########################################################################
 
 /**
- * ÇëÇó·şÎñÆ÷£¬½ÓÊÕÅúÁ¿ÇëÇó£¬ÔÚ±¾µØ¶¥µãÁĞ±í local_table ÖĞ²éÕÒĞèÒªÀ­È¡µÄ¶¥µã£¬²¢·µ»Ø½á¹û¡£
- * ¸ÃÀàÖĞµÄÏß³Ì»á²»¶ÏµØÖØ¸´ÔËĞĞ£¬Ö±µ½Ã»ÓĞĞÂµÄÅúÁ¿ÇëÇóÏûÏ¢¡£Èç¹ûÃ»ÓĞĞÂµÄÇëÇóÏûÏ¢£¬Ôò¸ÃÏß³Ì»áĞİÃß£¬µÈ´ıĞÂµÄÏûÏ¢¡£
+ * è¯·æ±‚æœåŠ¡å™¨ï¼Œæ¥æ”¶æ‰¹é‡è¯·æ±‚ï¼Œåœ¨æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨ local_table ä¸­æŸ¥æ‰¾éœ€è¦æ‹‰å–çš„é¡¶ç‚¹ï¼Œå¹¶è¿”å›ç»“æœã€‚
+ * è¯¥ç±»ä¸­çš„çº¿ç¨‹ä¼šä¸æ–­åœ°é‡å¤è¿è¡Œï¼Œç›´åˆ°æ²¡æœ‰æ–°çš„æ‰¹é‡è¯·æ±‚æ¶ˆæ¯ã€‚å¦‚æœæ²¡æœ‰æ–°çš„è¯·æ±‚æ¶ˆæ¯ï¼Œåˆ™è¯¥çº¿ç¨‹ä¼šä¼‘çœ ï¼Œç­‰å¾…æ–°çš„æ¶ˆæ¯ã€‚
  */
 
 //this is the server of key-value store
@@ -44,22 +44,22 @@ public:
 
 	VTable & local_table;
     /**
-     * ÏìÓ¦¶ÓÁĞ£¬¸ºÔğ´æ´¢ÇëÇó´¦ÀíºóµÄÏìÓ¦½á¹û¡£
-     * ¸Ã¶ÓÁĞ¶ÔÏóÖĞ·â×°ÁË num_workers ¸ö¶ÓÁĞ£¨Ã¿¸ö¶ÓÁĞ¶ÔÓ¦Ò»¸ö worker£©£¬Í¬Ê±»¹Î¬»¤Ò»¸öÏß³ÌÓÃÓÚ½«ÏìÓ¦Êı¾İ·µ»Ø¸øÇëÇóµÄ worker¡£
+     * å“åº”é˜Ÿåˆ—ï¼Œè´Ÿè´£å­˜å‚¨è¯·æ±‚å¤„ç†åçš„å“åº”ç»“æœã€‚
+     * è¯¥é˜Ÿåˆ—å¯¹è±¡ä¸­å°è£…äº† num_workers ä¸ªé˜Ÿåˆ—ï¼ˆæ¯ä¸ªé˜Ÿåˆ—å¯¹åº”ä¸€ä¸ª workerï¼‰ï¼ŒåŒæ—¶è¿˜ç»´æŠ¤ä¸€ä¸ªçº¿ç¨‹ç”¨äºå°†å“åº”æ•°æ®è¿”å›ç»™è¯·æ±‚çš„ workerã€‚
      */
 	RespQueue<VertexT> q_resp; //will create _num_workers responding threads
 
     /**
-     * ÇëÇó·şÎñÆ÷µÄÖ÷Ïß³Ì£¬ÓÃÓÚ½ÓÊÕÏûÏ¢¡£
+     * è¯·æ±‚æœåŠ¡å™¨çš„ä¸»çº¿ç¨‹ï¼Œç”¨äºæ¥æ”¶æ¶ˆæ¯ã€‚
      */
 	thread main_thread;
 
 
     /**
-     * ¶ÁÈ¡ÏûÏ¢ buf ÖĞµÄ¶¥µã id£¨¼´´ÓÁ÷ÖĞ·´ĞòÁĞ»¯µÃµ½¶¥µãµÄ id£©£¬»ñÈ¡ÏàÓ¦µÄ¶¥µã£¬²¢½«¶¥µã·Å½øÏìÓ¦¶ÓÁĞÖĞ
-     * @param buf   ÏûÏ¢Êı¾İ
-     * @param size  ÏûÏ¢´óĞ¡
-     * @param src   ÏûÏ¢Ô´£¨¼´ÇëÇóÔ´£¬Ïòµ±Ç° worker ·¢ËÍÇëÇóµÄ worker µÄ id£¬ src-wroker --·¢ËÍÇëÇó--> µ±Ç° worker£¬src-worker ÎªÇëÇóÔ´£¬src Îª src-worker µÄ id£©
+     * è¯»å–æ¶ˆæ¯ buf ä¸­çš„é¡¶ç‚¹ idï¼ˆå³ä»æµä¸­ååºåˆ—åŒ–å¾—åˆ°é¡¶ç‚¹çš„ idï¼‰ï¼Œè·å–ç›¸åº”çš„é¡¶ç‚¹ï¼Œå¹¶å°†é¡¶ç‚¹æ”¾è¿›å“åº”é˜Ÿåˆ—ä¸­
+     * @param buf   æ¶ˆæ¯æ•°æ®
+     * @param size  æ¶ˆæ¯å¤§å°
+     * @param src   æ¶ˆæ¯æºï¼ˆå³è¯·æ±‚æºï¼Œå‘å½“å‰ worker å‘é€è¯·æ±‚çš„ worker çš„ idï¼Œ src-wroker --å‘é€è¯·æ±‚--> å½“å‰ workerï¼Œsrc-worker ä¸ºè¯·æ±‚æºï¼Œsrc ä¸º src-worker çš„ idï¼‰
      */
 	//*//unsafe version, users need to guarantee that adj-list vertex-item must exist
 	//faster
@@ -69,9 +69,9 @@ public:
 		KeyT vid;
 		while(m.end() == false)
 		{
-			m >> vid; // ¶ÁÈ¡ÏûÏ¢ÖĞ¶¥µãµÄ id£¨¼´´ÓÁ÷ÖĞ·´ĞòÁĞ»¯µÃµ½¶¥µãµÄ id£© £¬´Ó¶øÔÚ¶¥µã map ÖĞÍ¨¹ı id »ñÈ¡¶ÔÓ¦µÄ¶¥µã
+			m >> vid; // è¯»å–æ¶ˆæ¯ä¸­é¡¶ç‚¹çš„ idï¼ˆå³ä»æµä¸­ååºåˆ—åŒ–å¾—åˆ°é¡¶ç‚¹çš„ idï¼‰ ï¼Œä»è€Œåœ¨é¡¶ç‚¹ map ä¸­é€šè¿‡ id è·å–å¯¹åº”çš„é¡¶ç‚¹
 			VertexT * v = local_table[vid];
-			q_resp.add(local_table[vid], src); // ½«¶ÔÓ¦¶¥µã¼ÓÈëµ½ RespQueue ÖĞµÄÇëÇó worker ÏìÓ¦¶ÓÁĞÖĞ£¬´Ó¶ø×îÖÕ·µ»Ø¸øÇëÇóµÄ worker
+			q_resp.add(local_table[vid], src); // å°†å¯¹åº”é¡¶ç‚¹åŠ å…¥åˆ° RespQueue ä¸­çš„è¯·æ±‚ worker å“åº”é˜Ÿåˆ—ä¸­ï¼Œä»è€Œæœ€ç»ˆè¿”å›ç»™è¯·æ±‚çš„ worker
 		}
 	}
 	//*/
@@ -96,32 +96,32 @@ public:
 	//*/
 
     /**
-     * ÔÚ¼ÓÔØÍêÊı¾İÍ¼²¢ÇÒÉèÖÃÁË worker µÄ±¾µØ¶¥µãÁĞ±íºó£¬»á´´½¨ ReqServer £¬´Ó¶ø»áÆô¶¯Ò»¸öÏß³ÌÖ´ĞĞ run º¯Êı
+     * åœ¨åŠ è½½å®Œæ•°æ®å›¾å¹¶ä¸”è®¾ç½®äº† worker çš„æœ¬åœ°é¡¶ç‚¹åˆ—è¡¨åï¼Œä¼šåˆ›å»º ReqServer ï¼Œä»è€Œä¼šå¯åŠ¨ä¸€ä¸ªçº¿ç¨‹æ‰§è¡Œ run å‡½æ•°
      */
     void run() //called after graph is loaded and local_table is set
     {
-    	bool first = true; // ±ê¼ÇÊÇ·ñÊÇµÚÒ»´Î½øÈë while Ñ­»·ÖĞ
+    	bool first = true; // æ ‡è®°æ˜¯å¦æ˜¯ç¬¬ä¸€æ¬¡è¿›å…¥ while å¾ªç¯ä¸­
     	thread t;
     	//------
-        // ²»¶ÏµØÌ½²âÏûÏ¢£¬¼´²»¶ÏµØ¼ì²âÊÇ·ñÓĞ·¢¸øµ±Ç° worker µÄÇëÇó£¬Èç¹ûÓĞÔòĞèÒª´¦ÀíÏàÓ¦µÄ worker
-    	while(global_end_label == false) //otherwise, thread terminates »¹ĞèÒª worker ¼ÌĞø´¦ÀíÈÎÎñ£¬Òò´ËĞèÒª¼ÌĞøÔËĞĞ
+        // ä¸æ–­åœ°æ¢æµ‹æ¶ˆæ¯ï¼Œå³ä¸æ–­åœ°æ£€æµ‹æ˜¯å¦æœ‰å‘ç»™å½“å‰ worker çš„è¯·æ±‚ï¼Œå¦‚æœæœ‰åˆ™éœ€è¦å¤„ç†ç›¸åº”çš„ worker
+    	while(global_end_label == false) //otherwise, thread terminates è¿˜éœ€è¦ worker ç»§ç»­å¤„ç†ä»»åŠ¡ï¼Œå› æ­¤éœ€è¦ç»§ç»­è¿è¡Œ
     	{
     		int has_msg;
     		MPI_Status status;
-    		MPI_Iprobe(MPI_ANY_SOURCE, REQ_CHANNEL, MPI_COMM_WORLD, &has_msg, &status); // Ì½²â½ÓÊÕµÄÏûÏ¢
-            // MPI_Iprobe ÊÇ·Ç×èÈûĞÍµÄ£¬ÎŞÂÛÊÇ·ñÌ½²âµ½ÏûÏ¢¶¼Á¢¼´·µ»Ø¡£Èç¹ûÌ½²âµ½ÏûÏ¢£¬Ôò has_msg Îª true£¬·ñÔòÎª false¡£
+    		MPI_Iprobe(MPI_ANY_SOURCE, REQ_CHANNEL, MPI_COMM_WORLD, &has_msg, &status); // æ¢æµ‹æ¥æ”¶çš„æ¶ˆæ¯
+            // MPI_Iprobe æ˜¯éé˜»å¡å‹çš„ï¼Œæ— è®ºæ˜¯å¦æ¢æµ‹åˆ°æ¶ˆæ¯éƒ½ç«‹å³è¿”å›ã€‚å¦‚æœæ¢æµ‹åˆ°æ¶ˆæ¯ï¼Œåˆ™ has_msg ä¸º trueï¼Œå¦åˆ™ä¸º falseã€‚
 
-    		if(!has_msg) usleep(WAIT_TIME_WHEN_IDLE); // Ã»ÓĞÏûÏ¢Ê±£¬¹ÒÆğÇëÇóÏß³Ì WAIT_TIME_WHEN_IDLE Î¢Ãë£¨Ä¬ÈÏ 100£©
+    		if(!has_msg) usleep(WAIT_TIME_WHEN_IDLE); // æ²¡æœ‰æ¶ˆæ¯æ—¶ï¼ŒæŒ‚èµ·è¯·æ±‚çº¿ç¨‹ WAIT_TIME_WHEN_IDLE å¾®ç§’ï¼ˆé»˜è®¤ 100ï¼‰
     		else
-    		{   // ÓĞÏûÏ¢£¨¼´ÓĞÆäËü worker µÄÇëÇó£©Ê±£¬Ôò´¦ÀíÇëÇó¡£¼´È¡³öÇëÇóµÄ¶¥µã£¬²¢½«ÕâĞ©¶¥µã·ÅÈëÏìÓ¦¶ÓÁĞ£¨RespQueue£©ÖĞ
+    		{   // æœ‰æ¶ˆæ¯ï¼ˆå³æœ‰å…¶å®ƒ worker çš„è¯·æ±‚ï¼‰æ—¶ï¼Œåˆ™å¤„ç†è¯·æ±‚ã€‚å³å–å‡ºè¯·æ±‚çš„é¡¶ç‚¹ï¼Œå¹¶å°†è¿™äº›é¡¶ç‚¹æ”¾å…¥å“åº”é˜Ÿåˆ—ï¼ˆRespQueueï¼‰ä¸­
     			int size;
-    			MPI_Get_count(&status, MPI_CHAR, &size); // get size of the msg-batch (# of bytes) »ñÈ¡½ÓÊÕµ½µÄÏûÏ¢´óĞ¡
-    			char * buf = new char[size]; //space for receiving this msg-batch, space will be released by obinstream in thread_func(.) ÓÃÓÚ´æ´¢½ÓÊÕµ½µÄÏûÏ¢
-    			MPI_Recv(buf, size, MPI_CHAR, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE); // ½ÓÊÕÏûÏ¢
-    			// ÅĞ¶ÏÊÇ·ñÊÇµÚÒ»´Î½øÈëÑ­»·£¬Èç¹ûÊÇµÚÒ»´Î½øÈëÑ­»·£¬ÔòÏß³Ì t Î´´´½¨£¬²»ĞèÒª join£»·ñÔò £¬ĞèÒª join Ïß³Ì
+    			MPI_Get_count(&status, MPI_CHAR, &size); // get size of the msg-batch (# of bytes) è·å–æ¥æ”¶åˆ°çš„æ¶ˆæ¯å¤§å°
+    			char * buf = new char[size]; //space for receiving this msg-batch, space will be released by obinstream in thread_func(.) ç”¨äºå­˜å‚¨æ¥æ”¶åˆ°çš„æ¶ˆæ¯
+    			MPI_Recv(buf, size, MPI_CHAR, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE); // æ¥æ”¶æ¶ˆæ¯
+    			// åˆ¤æ–­æ˜¯å¦æ˜¯ç¬¬ä¸€æ¬¡è¿›å…¥å¾ªç¯ï¼Œå¦‚æœæ˜¯ç¬¬ä¸€æ¬¡è¿›å…¥å¾ªç¯ï¼Œåˆ™çº¿ç¨‹ t æœªåˆ›å»ºï¼Œä¸éœ€è¦ joinï¼›å¦åˆ™ ï¼Œéœ€è¦ join çº¿ç¨‹
                 if(!first) t.join(); //wait for previous CPU op to finish; t can be extended to a vector of threads later if necessary
 
-                // ´´½¨Ò»¸öĞÂµÄÏß³Ì£¬¸ºÔğ¶ÁÈ¡ÏûÏ¢ buf ÖĞµÄ¶¥µã id£¬È»ºó»ñÈ¡ÏàÓ¦¶¥µã£¬²¢½«¶¥µã¼ÓÈëµ½ÏìÓ¦¶ÓÁĞÖĞ
+                // åˆ›å»ºä¸€ä¸ªæ–°çš„çº¿ç¨‹ï¼Œè´Ÿè´£è¯»å–æ¶ˆæ¯ buf ä¸­çš„é¡¶ç‚¹ idï¼Œç„¶åè·å–ç›¸åº”é¡¶ç‚¹ï¼Œå¹¶å°†é¡¶ç‚¹åŠ å…¥åˆ°å“åº”é˜Ÿåˆ—ä¸­
     			t = thread(&ReqServer<VertexT>::thread_func, this, buf, size, status.MPI_SOURCE); //insert to q_resp[status.MPI_SOURCE]
     			first = false;
     		}
@@ -130,9 +130,9 @@ public:
     }
 
     /**
-     * ³õÊ¼»¯ local_table £¬´´½¨²¢Æô¶¯Ò»¸öÏß³Ì
+     * åˆå§‹åŒ– local_table ï¼Œåˆ›å»ºå¹¶å¯åŠ¨ä¸€ä¸ªçº¿ç¨‹
      */
-    ReqServer(VTable & loc_table) : local_table(loc_table) //get local_table from Worker Ã°ºÅºóÃæµÄ ¡°local_table(loc_table)¡± ÊÇ¶Ô³ÉÔ±±äÁ¿ local_table µÄ³õÊ¼»¯
+    ReqServer(VTable & loc_table) : local_table(loc_table) //get local_table from Worker å†’å·åé¢çš„ â€œlocal_table(loc_table)â€ æ˜¯å¯¹æˆå‘˜å˜é‡ local_table çš„åˆå§‹åŒ–
     {
     	main_thread = thread(&ReqServer<VertexT>::run, this);
     }
