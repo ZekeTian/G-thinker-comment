@@ -16,9 +16,9 @@
 
 /**
  *   聚合器，需要指定三个模板参数：<ValueT>, <PartialT> and <FinalT
- *      <ValueT>：聚合到本地聚合器的数据类型
- *      <PartialT>：本地聚合器的数据类型
- *      <FinalT>：最终的数据类型（全局数据类型）
+ *      <ValueT>：本地聚合器（各个 worker 的聚合器）的待聚合数据类型（即 task 中聚合前原始的数据类型）
+ * 		<PartialT>：本地聚合器的数据类型（即各个 task 聚合后的数据类型）
+ * 		<FinalT>：最终的数据类型（即各个 worker 聚合后的数据类型）
  */
 
 #ifndef AGGREGATOR_H_

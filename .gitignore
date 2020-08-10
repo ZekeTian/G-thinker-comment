@@ -1,2 +1,6 @@
 /.project
 /.DS_Store
+/cmake-build-debug/
+/.cproject
+/app_gmatch/report/
+/app_gmatch/run

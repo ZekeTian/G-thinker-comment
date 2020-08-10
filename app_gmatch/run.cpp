@@ -213,6 +213,12 @@ class GMatchTrimmer:public Trimmer<GMatchVertex>
     }
 };
 
+void print_vec(vector<VertexID> & vertices){
+	for(int i = 0; i < vertices.size(); i++)
+		cout << vertices[i] << "  ";
+	cout << endl;
+}
+
 size_t graph_matching(GMatchSubgraph & g)
 {
 	size_t count = 0;
@@ -276,7 +282,7 @@ size_t graph_matching(GMatchSubgraph & g)
 								{
 									GMatchQ.push_back(vec_d[cur]);
 									print_vec(GMatchQ);
-									count++;
+//									count++;
 									GMatchQ.pop_back();//d
 								}
 								
