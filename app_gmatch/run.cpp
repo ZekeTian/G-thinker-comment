@@ -90,6 +90,17 @@ ifbinstream & operator<<(ifbinstream & m, const GMatchValue & Val)
     m << Val.adj;
     return m;
 }
+
+// 输出列表结果
+void print_vec(vector<VertexID> vec)
+{
+	for (int i = 0; i < vec.size(); ++i)
+	{
+		cout << vec[i] << " ";
+	}
+	cout << endl;
+}
+
 //-------------------
 // add a node to graph: only id and label of v, not its edges
 // must make sure g.hasVertex(v.id) == true !!!!!!
@@ -153,47 +164,110 @@ void addEdge_safe(GMatchSubgraph & g, VertexID id1, VertexID id2) //avoid redund
 /**
  * 聚合器，用于聚合结果。
  * 聚合器需要指定三个泛型参数，分别为：<ValueT>, <PartialT> and <FinalT>，其含义如下：
- * <ValueT>：聚合到本地聚合器的数据类型
- * <PartialT>：本地聚合器的数据类型
- * <FinalT>：最终的数据类型（全局数据类型）
+ * <ValueT>：本地聚合器（各个 worker 的聚合器）的待聚合数据类型（即 task 中聚合前原始的数据类型）
+ * <PartialT>：本地聚合器的数据类型（即各个 task 聚合后的数据类型）
+ * <FinalT>：最终的数据类型（即各个 worker 聚合后的数据类型）
  */
-class GMatchAgg:public Aggregator<size_t, size_t, size_t>  //all args are counts
+class GMatchAgg:public Aggregator<vector<vector<VertexID>>, vector<vector<VertexID>>, vector<vector<VertexID>>>  //all args are counts
 {
 private:
-	size_t count;
-	size_t sum;
+	vector<vector<VertexID>> part_result; // 各个 worker 的内部聚合的结果（即各个 worker 的匹配结果）
+	vector<vector<VertexID>> final_result; // 所有 worker 最终聚合的数据（即最终的匹配结果），只有 master 才会使用（其它 worker 只使用 part_result）
 
 public:
 
+	/**
+	 * 初始化聚合器对象
+	 */
     virtual void init()
     {
-    	sum = count = 0;
+//    	part_result;
+//    	cout << "init";
+//    	sum = count = 0;
     }
 
-    virtual void init_udf(size_t & prev) {
-    	sum = 0;
-    }
-
-    virtual void aggregate_udf(size_t & task_count)
+    /**
+     * 设置各个 worker 聚合器的初始值
+     */
+    virtual void init_udf(vector<vector<VertexID>> & prev)
     {
-    	count += task_count;
+//    	part_result;
+//    	cout << "init_udf";
+//    	sum = 0;
     }
 
-    virtual void stepFinal_udf(size_t & partial_count)
+    /**
+     * 各个 worker 聚合各自任务的数据
+     *
+     * @param task_result 任务执行结束后的最终结果
+     */
+    virtual void aggregate_udf(vector<vector<VertexID>> & task_result)
     {
-    	sum += partial_count; //add all other machines' counts (not master's)
+    	for (int i = 0; i < task_result.size(); ++i)
+    	{
+    		part_result.push_back(task_result[i]);
+    	}
+//    	count += task_count;
     }
 
-    virtual void finishPartial_udf(size_t & collector)
+    /**
+     * master 聚合其它 worker 的结果（此时 master 不会聚合 master 本身的数据）。
+     * 具体过程为：将其它 worker 的内部聚合结果聚合到 master 的 final_result 中
+     *
+     * @param part	其它 worker 聚合的结果
+     */
+    virtual void stepFinal_udf(vector<vector<VertexID>> & part)
     {
-    	collector = count;
+    	for (int i = 0; i < part.size(); ++i)
+    	{
+    		final_result.push_back(part[i]); // 只聚合其它 worker 的聚合结果，master 自己的聚合结果不在这里聚合
+    	}
+//    	sum += partial_count; //add all other machines' counts (not master's)
     }
 
-    virtual void finishFinal_udf(size_t & collector)
+    /**
+     * 返回各个 worker 内部聚合后的数据
+     *
+     * @param collector 输出数据类型，将当前 worker 内部聚合的结果放进 collector 中，从而返回结果
+     */
+    virtual void finishPartial_udf(vector<vector<VertexID>> & collector)
     {
-    	sum += count; //add master itself's count
-    	if(_my_rank == MASTER_RANK) cout<<"the # of matched graph = "<<sum<<endl;
-    	collector = sum;
+    	collector = part_result;
+//    	collector = count;
+    }
+
+    /**
+     * master worker 将自己的数据与其它 worker 聚合后的数据（即经过 stepFinal_udf 聚合后的数据，final_result）一起进行最后的一次聚合
+     *
+     * @param collector 输出参数类型，即将最终所有 worker 聚合的结果放进 collector 中，从而返回结果
+     */
+    virtual void finishFinal_udf(vector<vector<VertexID>> & collector)
+    {
+//    	sum += count; //add master itself's count
+    	// 将 master 自己内部的聚合结果聚合到最终结果 final_result 中
+    	for (int i = 0; i < part_result.size(); ++i)
+    	{
+    		final_result.push_back(part_result[i]);
+    	}
+
+    	if(_my_rank == MASTER_RANK)
+    	{
+//    		cout<<"the # of matched graph = "<<sum<<endl;
+    		cout << "the # of matched graph = " << final_result.size() << endl;
+    		cout << "具体的匹配结果如下：" << endl;
+
+    		for (int i = 0; i < final_result.size(); ++i)
+    		{
+    			cout << "第 " << i << " 个子图匹配结果：";
+    			// 输出每一个匹配到的子图结果
+    			for (int j = 0; j < final_result[i].size(); ++j) {
+    				cout << final_result[i][j] << " ";
+    			}
+    			cout << endl;
+    		}
+    	}
+//    	collector = sum;
+    	collector = final_result;
     }
 };
 
@@ -213,14 +287,10 @@ class GMatchTrimmer:public Trimmer<GMatchVertex>
     }
 };
 
-void print_vec(vector<VertexID> & vertices){
-	for(int i = 0; i < vertices.size(); i++)
-		cout << vertices[i] << "  ";
-	cout << endl;
-}
-
-size_t graph_matching(GMatchSubgraph & g)
+vector<vector<VertexID>> graph_matching(GMatchSubgraph & g)
 {
+	vector<vector<VertexID>> final_match_result; // 最终的匹配结果
+
 	size_t count = 0;
 	GMatchVertex & v_a = g.vertexes[0];
 	vector<AdjItem> & a_adj = v_a.value.adj;
@@ -276,13 +346,18 @@ size_t graph_matching(GMatchSubgraph & g)
 							{
 								GMatchQ.push_back(b_nodes[n]);//push vertex (4) into GMatchQ
 								vector<VertexID> & vec_d = b_d[n]; // 匹配到的顶点 d 集合
-								count += vec_d.size();
+//								count += vec_d.size();
 								//version that outputs the actual match
 								for(int cur = 0; cur < vec_d.size(); cur++)
 								{
 									GMatchQ.push_back(vec_d[cur]);
-									print_vec(GMatchQ);
-//									count++;
+
+									final_match_result.push_back(GMatchQ);
+//									cout << "匹配结果" << endl;
+//									// 输出最终的匹配结果
+//									print_vec(GMatchQ);
+
+									count++;
 									GMatchQ.pop_back();//d
 								}
 								
@@ -297,7 +372,7 @@ size_t graph_matching(GMatchSubgraph & g)
 		}
 	}
 	GMatchQ.pop_back();//a
-	return count;
+	return final_match_result;
 }
 
 class GMatchComper:public Comper<GMatchTask, GMatchAgg>
@@ -458,9 +533,10 @@ public:
     			}
     		}
     		//run single-threaded mining code
-			size_t count = graph_matching(g);
+    		vector<vector<VertexID>> match_result = graph_matching(g);
 			GMatchAgg* agg = get_aggregator();
-			agg->aggregate(count);
+//			agg->aggregate(count);
+			agg->aggregate(match_result);
 			//cout<<rootID<<": step 2 done"<<endl;//@@@@@@@@@@@@@
 			return false;
     	}
