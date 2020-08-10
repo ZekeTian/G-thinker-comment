@@ -87,6 +87,13 @@ public:
      */
     //UDF1
     virtual void task_spawn(VertexT * v) = 0; //call add_task() inside, will flush tasks to disk if queue overflows 在内部要调用 add_task()，从而将生成的任务加入到任务队列 q_task 中
+    
+    /**
+     * 执行任务
+     * @param g         当前任务在数据图上能关联到的子图
+     * @param context   执行任务时，额外的信息
+     * @param frontier  执行任务需要的顶点
+     */
     //UDF2
     virtual bool compute(SubgraphT & g, ContextT & context, vector<VertexT *> & frontier) = 0;
 

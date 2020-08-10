@@ -221,25 +221,29 @@ size_t graph_matching(GMatchSubgraph & g)
 	vector<VertexID> GMatchQ; //record matched vertex instances
 	//------
 	GMatchQ.push_back(v_a.id);
-	for(int j = 0; j < a_adj.size(); j++)
+	for(int j = 0; j < a_adj.size(); j++) // 顶点 a
 	{
-		if(a_adj[j].l == 'c')
+		if(a_adj[j].l == 'c') // 顶点 c
 		{
 			GMatchVertex * v_c = g.getVertex(a_adj[j].id);
 			GMatchQ.push_back(v_c->id);
 			vector<AdjItem> & c_adj = v_c->value.adj;
-			//find b
+			
+            // 在 c 的邻接表中寻找顶点 b 
+            //find b
 			vector<VertexID> b_nodes;
 			for(int k = 0; k < c_adj.size(); k++)
 			{
 				if(c_adj[k].l == 'b')
 					b_nodes.push_back(c_adj[k].id);
 			}
-			if(b_nodes.size() > 1)
+			if(b_nodes.size() > 1) // 在匹配图中，顶点 c 的邻居顶点集中至少应该有 2 个顶点 b
 			{
-				vector<bool> b_a(b_nodes.size(), false);//b_a[i] = whether b_nodes[i] links to v_a
-				vector<vector<VertexID> > b_d;//b_d[i] = all b-d edges (d's IDs) of b_nodes[i]
-				for(int m = 0; m < b_nodes.size(); m++)
+				vector<bool> b_a(b_nodes.size(), false);//b_a[i] = whether b_nodes[i] links to v_a 标记顶点 b 是否为顶点 a 的邻居点。若 b_a[i] 为 true，则表示 b_nodes[i] 与 a、c 相邻。
+				vector<vector<VertexID> > b_d;//b_d[i] = all b-d edges (d's IDs) of b_nodes[i] 匹配图中，b 顶点所有的 b-d 边
+
+                // 遍历顶点 b 集合，将 b 区分成两类，一类是：与顶点 a、c 相邻，另一类是：与顶点 c、d 相邻（类别可以根据 b_a 中的值得到）
+				for(int m = 0; m < b_nodes.size(); m++) // 遍历顶点 b
 				{
 					GMatchVertex * v_b = g.getVertex(b_nodes[m]);
 					vector<AdjItem> & b_adj = v_b->value.adj;
@@ -247,25 +251,27 @@ size_t graph_matching(GMatchSubgraph & g)
 					for(int n = 0; n < b_adj.size(); n++)
 					{
 						if(b_adj[n].id == v_a.id)
-							b_a[m] = true;
+							b_a[m] = true; // b_adj[n] 为顶点 a
 						if(b_adj[n].l == 'd')
-							vec_d.push_back(b_adj[n].id);
+							vec_d.push_back(b_adj[n].id); // // b_adj[n] 为顶点 d
 					}
-					b_d.push_back(vec_d);
+					b_d.push_back(vec_d); // 保存顶点 d 集合
 				}
 				for(int m = 0; m < b_nodes.size(); m++)
 				{
-					if(b_a[m])
+					if(b_a[m]) // 顶点 b 与顶点 a 相邻
 					{
-						GMatchQ.push_back(b_nodes[m]);//push vertex (3) into GMatchQ
+						GMatchQ.push_back(b_nodes[m]);//push vertex (3) into GMatchQ 确定 3 号顶点 b（该顶点与 a、c 均相邻）
+
+                        // 遍历 b-d 边集合（实际上也是在遍历顶点 b 集合，b_d 与 b_nodes 长度是一样的），确定 b、d
 						for(int n = 0; n < b_d.size(); n++)
 						{
-							if(m != n) //two b's cannot be the same node
+							if(m != n) //two b's cannot be the same node 两个顶点 b 不能相同（即顶点 3、4 要是不同的顶点）
 							{
 								GMatchQ.push_back(b_nodes[n]);//push vertex (4) into GMatchQ
-								vector<VertexID> & vec_d = b_d[n];
+								vector<VertexID> & vec_d = b_d[n]; // 匹配到的顶点 d 集合
 								count += vec_d.size();
-								/* //version that outputs the actual match
+								//version that outputs the actual match
 								for(int cur = 0; cur < vec_d.size(); cur++)
 								{
 									GMatchQ.push_back(vec_d[cur]);
@@ -273,7 +279,7 @@ size_t graph_matching(GMatchSubgraph & g)
 									count++;
 									GMatchQ.pop_back();//d
 								}
-								*/
+								
 								GMatchQ.pop_back();//b
 							}
 						}
@@ -293,6 +299,7 @@ class GMatchComper:public Comper<GMatchTask, GMatchAgg>
 public:
     virtual void task_spawn(VertexT * v)
     {
+        // 匹配顶点 a 
     	if(v->value.l == 'a')
     	{
     		GMatchTask * t = new GMatchTask;
@@ -322,12 +329,13 @@ public:
      */
     virtual bool compute(SubgraphT & g, ContextT & context, vector<VertexT *> & frontier)
     {
-    	//match c
+    	//match c 匹配顶点 c
     	if(context == 1) //context is step number
     	{
-    		VertexID rootID = g.vertexes[0].id; //root = a-matched vertex
+            // 确定顶点 b(出现在边 a-b, b-c)、顶点 c(出现在边 a-c, c-b)
+    		VertexID rootID = g.vertexes[0].id; //root = a-matched vertex 顶点 a
 			//cout<<rootID<<": in compute"<<endl;//@@@@@@@@@@@@@
-    		// 从当前 task 的顶点集中取出所有的顶点 b、c
+    		// 将当前 task 拉取到的顶点集分成顶点 b 集合、顶点 c 集合
 			hash_set<VertexID> label_b; //Vb (set of IDs) 当前 task 顶点 b 的集合（这些顶点 b 与顶点 a 是邻居）
 			vector<VertexT *> label_c; //Vc 当前 task 顶点 c 的集合（这些顶点 c 与顶点 a 是邻居）
 			for(int i = 0; i < frontier.size(); i++) {//set Vb and Vc from frontier
@@ -336,14 +344,16 @@ public:
 				else if(frontier[i]->value.l == 'c')
 					label_c.push_back(frontier[i]);
 			}
+
 			//------
 			hash_set<VertexID> bList; //vertices to pull 待拉取的 b 顶点
-			// 遍历顶点 c 集合中的所有顶点的邻接表，
+			// 遍历顶点 c 集合中的所有顶点的邻接表，确定符合条件的顶点 c
 			for(int i = 0 ; i < label_c.size(); i++)
 			{
 				VertexT * node_c = label_c[i]; //get v_c
 				vector<AdjItem> & c_nbs = node_c->value.adj; //get v_c's adj-list
-				// U1 中存储既出现在 c 邻接表中又出现在顶点 b 集合中 （label_b）的顶点 b ，即 U1 中的顶点既是 c 的邻居同时又是 a 的邻居。U2 中存储出现在 c 邻接表但是不出现在 label_b 中的顶点 b，即 U2 中的顶点只是 c 的邻居但不是 a 的邻居
+				// U1 中存储的顶点 b ，既是 c 的邻居同时又是 a 的邻居
+                // U2 中存储出顶点 b，只是 c 的邻居但不是 a 的邻居
 				vector<VertexID> U1, U2;
 				// 遍历当前顶点 c 的邻接表
 				for(int j = 0; j < c_nbs.size(); j++) //set U1 & U2
@@ -353,9 +363,9 @@ public:
 					{
 						VertexID b_id = nb_c.id;
 						if(label_b.find(b_id) != label_b.end())
-							U1.push_back(b_id); // 当前顶点 c 的邻接表中含有顶点 b 集合（label_b） 中的顶点
+							U1.push_back(b_id); // 顶点 b 既是 c 的邻居同时又是 a 的邻居
 						else
-							U2.push_back(b_id);
+							U2.push_back(b_id); // 顶点 b 只是 c 的邻居但不是 a 的邻居
 					}
 				}
 				//------
@@ -369,23 +379,23 @@ public:
 				}
 				else
 				{
-					bList.insert(U1.begin(), U1.end());
+					bList.insert(U1.begin(), U1.end()); // 为什么 U1 集合中的顶点 b 也要拉取
 					bList.insert(U2.begin(), U2.end());
 				}
 				//------
 				// 当前顶点 c 满足条件，则将当前顶点加入到图中
 				//add v_c and edges (v_a, v_c)
-				addNode(g, *node_c);
-				addEdge(g, rootID, node_c->id);
+				addNode(g, *node_c); // 添加顶点 c
+				addEdge(g, rootID, node_c->id); // 添加边 a-c
 				//------
 				for(int j = 0; j < U1.size(); j++)
 				{
 					if(!g.hasVertex(U1[j]))
 					{
 						addNode(g, U1[j], 'b'); //add v_b
-						addEdge(g, rootID, U1[j]); //add (v_a, v_b)
+						addEdge(g, rootID, U1[j]); //add (v_a, v_b) 添加边 a-b
 					}
-					addEdge(g, node_c->id, U1[j]); //add (v_c, v_b) //this is forgotten to mention in CoRR's version
+					addEdge(g, node_c->id, U1[j]); //add (v_c, v_b) //this is forgotten to mention in CoRR's version 添加 c-b
 				}
 			}
 			//pull bList
@@ -397,7 +407,8 @@ public:
     	}
     	else //step == 2
     	{
-    		hash_set<VertexID> Vc;
+            // 确定顶点 b(出现在边 c-b、b-d)、d(出现在 b-d)
+    		hash_set<VertexID> Vc; // 存储当前任务子图中的顶点 c
     		//get Vc from g
     		for(int i=0; i<g.vertexes.size(); i++)
     		{
@@ -405,15 +416,15 @@ public:
     			if(v.value.l == 'c') Vc.insert(v.id);
     		}
     		//------
-    		for(int i=0; i<frontier.size(); i++)
+    		for(int i=0; i<frontier.size(); i++) // 遍历拉取到的顶点 b
     		{
-    			VertexT* v_b = frontier[i];
+    			VertexT* v_b = frontier[i]; // 存储顶点 b
     			vector<AdjItem> & adj_b = v_b->value.adj; // 顶点 b 的邻接表
     			//construct Vd
     			vector<VertexID> Vd;
     			for(int j=0; j<adj_b.size(); j++)
     			{
-    				if(adj_b[j].l == 'd') Vd.push_back(adj_b[j].id);
+    				if(adj_b[j].l == 'd') Vd.push_back(adj_b[j].id); // 顶点 d
     			}
     			//------
     			if(!Vd.empty())
@@ -424,12 +435,14 @@ public:
 					for(int j=0; j<adj_b.size(); j++)
 					{
 						VertexID b_id = adj_b[j].id; //v_c
-						if(Vc.find(b_id) != Vc.end())
+						if(Vc.find(b_id) != Vc.end()) // 判断顶点 v_c 是否在当前任务的子图中
 						{
 							//add edge v_b, v_c
-							addEdge_safe(g, b_id, v_b->id); // 边 b-c 为什么在这里加
+							addEdge_safe(g, b_id, v_b->id); // 添加边 b-c
 						}
 					}
+
+                    // 加入顶点 d 和边 b-d
     				//add v_d and (v_b, v_d)
     				for(int j=0; j<Vd.size(); j++)
     				{
