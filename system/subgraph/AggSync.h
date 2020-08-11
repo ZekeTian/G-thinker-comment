@@ -31,22 +31,30 @@ public:
 
 	thread main_thread;
 
+    /**
+     * 结束标志同步。只要有一个 worker 的 endTag 为 true，则返回 true
+     */
 	bool endTag_sync() //returns true if any worker has endTag = true
 	{
 		bool endTag = global_end_label;
 		if(_my_rank != MASTER_RANK)
 		{
-			send_data(endTag, MASTER_RANK, AGG_CHANNEL);
-			bool ret = recv_data<bool>(MASTER_RANK, AGG_CHANNEL);
+            // 非 master 的 worker 
+			send_data(endTag, MASTER_RANK, AGG_CHANNEL); // 向 master 发自己的结束标志
+			bool ret = recv_data<bool>(MASTER_RANK, AGG_CHANNEL); // 接收 master 发过来的结束标志
 			return ret;
 		}
 		else
 		{
+            // master worker
 			bool all_end = endTag;
+            // 接收其它 worker 发过来的结束标志，对这些结束标志作 “或” 操作（即有一个 worker 结束标志为 true，则最终 all_end 也为 true，返回结果也为 true）
 			for(int i=0; i<_num_workers; i++)
 			{
 				if(i != MASTER_RANK) all_end = (recv_data<bool>(i, AGG_CHANNEL) || all_end);
 			}
+
+            // 向其它 worker 发送最终的结束标志
 			for(int i=0; i<_num_workers; i++)
 			{
 				if(i != MASTER_RANK) send_data(all_end, i, AGG_CHANNEL);
@@ -62,30 +70,37 @@ public:
 		{
 			if (_my_rank != MASTER_RANK)
 			{ 	//send partialT to aggregator
+                // 非 master worker ，获取自己内部各个 comper 聚合后的数据（放在 part 中），然后将该结果发给 master
 				PartialT part;
-				agg->finishPartial(part);
-				send_data(part, MASTER_RANK, AGG_CHANNEL);
+				agg->finishPartial(part); // 获取内部聚合后的数据
+				send_data(part, MASTER_RANK, AGG_CHANNEL); // 发给 master
 				//scattering FinalT
 				agg_rwlock.wrlock();
-				*((FinalT*)global_agg) = recv_data<FinalT>(MASTER_RANK, AGG_CHANNEL);
+				*((FinalT*)global_agg) = recv_data<FinalT>(MASTER_RANK, AGG_CHANNEL); // 接收 master 发过来的最终聚合的数据
 				agg_rwlock.unlock();
 			}
 			else
 			{
+                // master worker
+                // 接收其它 worker 发过来的局部聚合数据，并将它们聚合在一起
 				for (int i = 0; i < _num_workers; i++)
 				{
 					if(i != MASTER_RANK)
 					{
-						PartialT part = recv_data<PartialT>(i, AGG_CHANNEL);
-						agg->stepFinal(part);
+						PartialT part = recv_data<PartialT>(i, AGG_CHANNEL); // 接收其它 worker 发过来的局部数据
+						agg->stepFinal(part); // 将接收的数据进行聚合
 					}
 				}
-				FinalT final;
-				agg->finishFinal(final);
+
+                // 将 master 内部的聚合数据与最终的数据进行进行聚合
+				FinalT final; // 最终的聚合结果
+				agg->finishFinal(final); // 进行聚合
 				//cannot set "global_agg=final" since MASTER_RANK works as a slave, and agg->finishFinal() may change
 				agg_rwlock.wrlock();
 				*((FinalT*)global_agg) = final; //deep copy
 				agg_rwlock.unlock();
+
+                // 将最终的聚合结果发给其它 worker
 				for(int i=0; i<_num_workers; i++)
 				{
 					if(i != MASTER_RANK)
@@ -95,7 +110,7 @@ public:
 		}
 		//------ call agg UDF: init(prev)
 		agg_rwlock.rdlock();
-		agg->init_aggSync(*((FinalT*)global_agg));
+		agg->init_aggSync(*((FinalT*)global_agg)); // 下一轮聚合前，对聚合器进行再一次的初始化
 		agg_rwlock.unlock();
 	}
 
@@ -106,12 +121,14 @@ public:
     		bool any_end = endTag_sync();
     		if(any_end)
     		{
+                // 至少有一个 worker 的结束标志为 true 时（即至少有一个 worker 工作结束），不再调用  agg_sync 进行聚合，而是阻塞等待所有 worker 执行完任务。
     			while(global_end_label == false); //block till main_thread sets global_end_label = true
     			return;
     		}
     		else{
+                // 所有 worker 都处于工作状态，则进行同步
     			agg_sync();
-    			usleep(AGG_SYNC_TIME_GAP); //polling frequency
+    			usleep(AGG_SYNC_TIME_GAP); //polling frequency 聚合一次后，空闲一段时间，再进行下一次聚合
     		}
     	}
     }
@@ -124,7 +141,7 @@ public:
     ~AggSync()
     {
     	main_thread.join();
-    	agg_sync(); //to make sure results of all tasks are aggregated
+    	agg_sync(); //to make sure results of all tasks are aggregated 在销毁聚合器时再进行最后一次聚合，确保所有结果都已经聚合在一起
     }
 };
 

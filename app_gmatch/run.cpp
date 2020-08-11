@@ -187,7 +187,9 @@ public:
     }
 
     /**
-     * 设置各个 worker 聚合器的初始值
+     * 下一轮聚合之前，对聚合器进行再一次初始化（可用于更新本地 worker 的聚合器数据）。
+     * 
+     * @param prev  上一轮聚合后的结果
      */
     virtual void init_udf(vector<vector<VertexID>> & prev)
     {
@@ -197,9 +199,9 @@ public:
     }
 
     /**
-     * 各个 worker 聚合各自任务的数据
+     * 各个 worker 聚合各自 comper 任务执行完后的数据（即 worker 内部的数据聚合），在 Comper 的 compute 执行结束后调用该函数
      *
-     * @param task_result 任务执行结束后的最终结果
+     * @param task_result Comper 执行完任务后的最终结果
      */
     virtual void aggregate_udf(vector<vector<VertexID>> & task_result)
     {
@@ -212,9 +214,9 @@ public:
 
     /**
      * master 聚合其它 worker 的结果（此时 master 不会聚合 master 本身的数据）。
-     * 具体过程为：将其它 worker 的内部聚合结果聚合到 master 的 final_result 中
+     * 该过程即为：将其它 worker 的内部聚合结果聚合到 master 的 final_result（全局最终聚合结果） 中
      *
-     * @param part	其它 worker 聚合的结果
+     * @param part	其它 worker 内部聚合的结果
      */
     virtual void stepFinal_udf(vector<vector<VertexID>> & part)
     {
@@ -226,7 +228,7 @@ public:
     }
 
     /**
-     * 返回各个 worker 内部聚合后的数据
+     * 返回各个 worker 内部聚合后的数据（即 aggregate_udf 聚合后的数据）
      *
      * @param collector 输出数据类型，将当前 worker 内部聚合的结果放进 collector 中，从而返回结果
      */
@@ -237,7 +239,7 @@ public:
     }
 
     /**
-     * master worker 将自己的数据与其它 worker 聚合后的数据（即经过 stepFinal_udf 聚合后的数据，final_result）一起进行最后的一次聚合
+     * master worker 将自己的数据与其它 worker 聚合后的数据（即经过 stepFinal_udf 聚合后的数据，final_result）进行最后的一次聚合，获得最终的聚合结果
      *
      * @param collector 输出参数类型，即将最终所有 worker 聚合的结果放进 collector 中，从而返回结果
      */
