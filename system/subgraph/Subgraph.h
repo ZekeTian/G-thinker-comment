@@ -31,7 +31,12 @@ public:
 	typedef typename VertexT::ValueType ValueT;
 
 	typedef hash_map<KeyT, int> VertexMap;
-	VertexMap vmap; //vmap[vid] = index of the vertex in "vertexes" defined below
+	
+    /**
+     * 用于存储顶点在 vertexes 的下标，即 vmap[id] 的值为 id 顶点在 vertexes 中的下标。
+     * 借助该 map 可以快速地根据顶点 id 获取到顶点的值。
+     */
+    VertexMap vmap; //vmap[vid] = index of the vertex in "vertexes" defined below 
 	vector<VertexT> vertexes; //store the nodes of this subgraph
 
 	void addVertex(VertexT & vertex){
