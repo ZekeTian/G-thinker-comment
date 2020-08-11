@@ -48,8 +48,16 @@ public:
 	typedef TaskMap<TaskT> TaskMapT;
 
 
+    /**
+     * 任务关联的子图
+     */
 	SubgraphT subG;
+
+    /**
+     * 可用于保存任务需要的一些额外信息
+     */
 	ContextT context;
+
 	HashT hash;
 
 	//internally used:
