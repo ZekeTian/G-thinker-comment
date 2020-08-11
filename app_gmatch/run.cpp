@@ -462,7 +462,7 @@ public:
 				}
 				else
 				{
-					bList.insert(U1.begin(), U1.end()); // 为什么 U1 集合中的顶点 b 也要拉取
+					bList.insert(U1.begin(), U1.end()); // U1 集合中的顶点 b 应该不用拉取
 					bList.insert(U2.begin(), U2.end());
 				}
 				//------
